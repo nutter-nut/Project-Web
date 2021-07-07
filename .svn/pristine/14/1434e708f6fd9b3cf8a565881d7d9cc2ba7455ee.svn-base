@@ -1,0 +1,60 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container">
+        <div class="col-sm-12">
+            <ul class="breadcrumb">
+                <li><a href="{{ route('Index') }}">Home </a></li>
+                <li>> Mil-Spec</li>
+            </ul>
+
+            <h1>Mil-spec Categories</h1>
+            <div class="category_extra_description hidden-xs">
+            </div>
+            <h3><span>Select a Category Below</span></h3>
+
+            <section class="category_list">
+                <ul>
+                    <li>
+                        <a href="{{ route('detallmilSpec', [ 'code' => 1 ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}" alt="สกรูบานพับ/วิงโบลท์">
+                            </span>
+                            <h2>สกรูบานพับ/วิงโบลท์</h2>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('detallmilSpec', [ 'code' => 1 ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สลักเกลียวรีมเมอร์หัวจมหกเหลี่ยม.jpg') }}" alt="สลักเกลียวรีมเมอร์หัวจมหกเหลี่ยม">
+                            </span>
+                            <h2>สลักเกลียวรีมเมอร์หัวจมหกเหลี่ยม</h2>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('detallmilSpec', [ 'code' => 1 ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรู แบบขั้นบันได - ฟิลลิปส์.jpg') }}" alt="Drywall Screws">
+                            </span>
+                            <h2>สกรู แบบขั้นบันได - ฟิลลิปส์</h2>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('detallmilSpec', [ 'code' => 1 ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรูหัวจม สเตนเลส.jpg') }}" alt="Lag Screws">
+                            </span>
+                            <h2>สกรูหัวจม/สเตนเลส</h2>
+                        </a>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+</section>
+
+@endsection
+

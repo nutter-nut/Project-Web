@@ -1,0 +1,159 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use App\UserActivity;
+use Auth;
+
+class LogActivityController extends Controller
+{
+    public function store($user_data, $type, $page, $icon, $description)
+    {
+        $newActivityArray = [
+            'id' => UserActivity::database()->collection("user_activities")->getModifySequence('id'),
+            'user_id' => $user_data['id'],
+            'type' => $type,
+            'page' => $page,
+            'icon' => $icon,
+            'description' => $description,
+            'created_at' => \Carbon\Carbon::now()->toDateTimeString()
+        ];
+
+        $save = UserActivity::database()->collection("user_activities")->insertGetId($newActivityArray, 'id');
+
+        return $save;
+        // return response($save, 201);
+    }
+
+    public function eventNotification($user_data, $type, $page, $description)
+    {
+        $user_status = self::getStatus($user_data);
+        
+        $icon = self::getIcon($page);
+
+        $type2 = self::getType($type);
+
+        $id = self::store($user_data, $type2, $page, $icon, $description);
+
+        $options = [
+            'cluster' => 'ap1',
+            'useTLS' => false
+        ];
+
+        $array['id'] = $id[2];
+        $array['user_id'] = $user_data['id'];
+        $array['user_name'] = $user_status . ': ' . $user_data['name'];
+        $array['type'] = $type;
+        $array['page'] = $page;
+        $array['icon'] = $icon;
+        $array['description'] = $description;
+        $array['now'] = \Carbon\Carbon::now()->toDateTimeString();;
+
+        $pusher = new \Pusher('590568f01b3f8bbebe8e', '4346a037f29f8f910b42', '1191731', $options);
+
+        $pusher->trigger('log-activity', 'LogActivity', $array);
+    }
+
+    public function getType($type)
+    {
+        switch ($type) {
+            case 'success':
+                $type = 'success';
+                break;
+            case 'info':
+                $type = 'info';
+                break;
+            case 'warning':
+                $type = 'warning';
+                break;
+            case 'error':
+                $type = 'danger';
+                break;
+            default:
+                $type = 'primary';
+        }
+
+        return $type;
+    }
+
+    public function getStatus($user_data)
+    {
+        if($user_data['admin'] != 1){
+            if($user_data['employee'] == '0'){
+                $user_status = 'User';
+            }else $user_status = 'Employee';
+        }else $user_status = 'Admin';
+
+        return $user_status;
+    }
+
+    public function getIcon($page)
+    {
+        switch ($page) {
+            case 'product brand':
+                $icon = 'fa fa-th';
+                break;
+            case 'product':
+                $icon = 'fa fa-shopping-bag';
+                break;
+            case 'product group':
+                $icon = 'fa fa-cube';
+                break;
+            case 'product model':
+                $icon = 'fa fa-th-list';
+                break;
+            case 'product type':
+                $icon = 'fa fa-cubes';
+                break;
+            case 'product unitofmeasure':
+                $icon = 'fa fa-filter';
+                break;
+            case 'treasury':
+                $icon = 'fa fa-stop';
+                break;
+            case 'product stock':
+                $icon = 'fa fa-download';
+                break;
+            case 'order status':
+                $icon = 'fa fa-shopping-bag';
+                break;
+            case 'update password':
+                $icon = 'fa fa-key';
+                break;
+            case 'update image profile':
+                $icon = 'fa fa-picture-o';
+                break;
+            case 'promotion group':
+                $icon = 'fa fa-cube';
+                break;
+            case 'promotion':
+                $icon = 'fa fa-tag';
+                break;
+            case 'blog':
+                $icon = 'fa fa-bullhorn';
+                break;
+            case 'user':
+                $icon = 'fa fa fa-address-card-o';
+                break;
+            case 'setting':
+                $icon = 'fa fa-gear';
+                break;
+            case 'checkout':
+                $icon = 'fa fa-shopping-cart';
+                break;
+            case 'product image':
+                $icon = 'fa fa-picture-o';
+                break;
+            case 'user ban':
+                $icon = 'fa fa-window-close-o';
+                break;
+            default:
+                $icon = 'fa fa-bell-o';
+        }
+
+        return $icon;
+    }
+}

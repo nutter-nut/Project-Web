@@ -1,0 +1,354 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div id="cart">
+
+            <ol class="breadcrumb breadcrumb-arrow mb-5">
+                <li><a href="{{ route('Index') }}">{{ __('index.checkout.breadcrumb_home') }}</a></li>
+                <li class="active"><span>{{ __('index.checkout.breadcrumb_cart') }}</span></li>
+            </ol>
+
+            <div class="container">
+                @include('alert')
+            </div>
+
+            <div class="col-sm-12">
+                <section class="shopping_cart">
+                    <h1 style="text-align: left!important;">{{ __('index.checkout.shopping_cart') }}</h1>
+                    <span class="cart" id="flash-message">{{ __('index.checkout.part_added') }}</span>
+                    <span class="cart" id="flash-message-ajax"></span>
+
+                    <form action="{{ route('addProductToCartArray') }}" method="POST" enctype="multipart/form-data">
+                    {{csrf_field()}}
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">{{ __('index.checkout.product_description') }}</th>
+                                        <th scope="col">{{ __('index.cart.quantity') }}</th>
+                                        <th scope="col">{{ __('index.cart.price') }}</th>
+                                        <th scope="col">{{ __('index.cart.subtotal') }}</th>
+                                        <th scope="col" style="width: 10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $i = 0; @endphp
+                                    @foreach($data['cart']->items as $key_cart => $item)
+                                    @php $key2 = trim($key_cart); @endphp
+                                        <tr>
+                                            <th>
+                                                <div class="row">
+                                                    <div class="col-4">
+                                                        <div class="img-mil-spe">
+                                                            <a href="#"><img class="review-profile" style="width:100px;" alt="" src="{{ asset('storage') }}/product_images/{{ $item['data']['prodCode'] }}/{{ $item['image'] }}"></a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <h4><a href="{{ route('productDetal', [ 'prodCode' => $item['data']['prodCode'], 'uomCode' => $item['data']['uomCode'], 'name' => $item['data']['prodTName'] ]) }}">{{ $item['data']['prodTName'] }}</a></h4>
+                                                        <p><strong>{{__('index.cart.part_number')}} :</strong> {{ $item['data']['prodCode'] }}</p>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <td>
+                                                <div class="row pt-3">
+                                                    <div class="col-6">
+                                                        <input id="qty[{{$key_cart}}]" name="id_qty[]" class="form-control" type="number" value="{{ $item['quantity'] }}" 
+                                                            @if($data['data'][$key_cart]['stock_now']['ProdAllowMinus'] != 'Y') min="0" max="{{ number_format($data['data'][$key_cart]['stock_now']['endQty']) }}" @else min="1" max="999" @endif
+                                                            onkeyup="calProdUnitRatio(this.value, {{ $item['data']['price'] }}, '{{ $key2 }}', '{{ $item['data']['prodIsVat'] }}', '{{ $data['data'][$key_cart]['stock_now']['ProdAllowMinus'] }}', '{{ $data['data'][$key_cart]['stock_now']['endQty'] }}', {{ $item['ratio'] }})" 
+                                                            onchange="calProdUnitRatio(this.value, {{ $item['data']['price'] }}, '{{ $key2 }}', '{{ $item['data']['prodIsVat'] }}', '{{ $data['data'][$key_cart]['stock_now']['ProdAllowMinus'] }}', '{{ $data['data'][$key_cart]['stock_now']['endQty'] }}', {{ $item['ratio'] }})" 
+                                                            onkeydown="return event.key != 'Enter';"
+                                                        >
+                                                        <input id="add_more_item[{{$key2}}]" name="add_more_item[]" type="hidden" value="{{ $key2 }}">
+                                                        <input id="data[{{ $i }}]" name="data" type="hidden" value="{{ $item['data']['price'] }}, '{{ $key2 }}', '{{ $item['data']['prodIsVat'] }}', '{{ $data['data'][$key_cart]['stock_now']['ProdAllowMinus'] }}', '{{ $data['data'][$key_cart]['stock_now']['endQty'] }}', {{ $item['ratio'] }}, {{ $item['quantity'] }}">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="input-group">
+                                                            <select id="uomCode[{{$key_cart}}]" name="uomCode[]" class="form-control" onchange="calProdUnitRatio_Uom(this.value,'{{ $key_cart }}');">
+                                                                @foreach($item['get_all_uom'] as $key => $list_uom)
+                                                                    <option value="{{ $list_uom['uomCode'] }},{{ $list_uom['prodUnitRatio'] }},{{ $list_uom['price'] }},{{ $list_uom['prodIsVat'] }},{{ $data['data'][$key_cart]['arr_price'][$key]['data_product'] }},{{ $list_uom['prodCode'] }},{{ $data['data'][$key_cart]['stock_now']['ProdAllowMinus'] }},{{ $data['data'][$key_cart]['stock_limit'] }}" @if($list_uom['uomCode'] == $item['uom_code']) selected @endif>{{ $list_uom['uomName'] }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div> 
+                                            </td> 
+                                            <td><h4 class="text-right pt-3" id="total_uom_price[{{ $key2 }}]">{{ $item['data']['price'] }}</h4></td>
+                                            <td><h4 class="text-right pt-3" id="total_price[{{ $key2 }}]">{{ number_format($item['totalSinglePrice'], 2) }}</h4></td>
+                                            <td class="text-right">
+                                                <a href="{{ route('DeleteItemFromCart', [ 'prodCode' => $item['data']['prodCode'], 'uomCode' => $item['data']['uomCode'] ] ) }}"><button class="btn btn-outline btn-danger" name="delProductInCart" value="{{ $item['data']['prodCode'] }},{{ $item['data']['uomCode'] }}" onclick="return confirm('Are you sure?')" style="padding: 10px;"><i class="fa fa-minus-square"></i></button></a>
+                                            </td>
+                                            <input type="hidden" id="total_price2[{{ $key2 }}]" name="totalSinglePrice" value="{{ $item['totalSinglePrice'] }}"> 
+                                            <input type="hidden" id="arr_qty_mian[]" name="arr_qty_mian[]" value="{{ $data['data'][$key_cart]['arr_qty_mian'] }}">
+                                        </tr>
+                                    @php $i++; @endphp
+                                    @endforeach
+                                    <input type="hidden" id="loop_i" value="{{ $i }}">
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- <div>
+                            <p style="display:none;"><span class="ship_alert">!</span> This product is special order and has a lead time.</p>
+                            <p><span class="ship_alert">*</span> Orders received after 4:30 CST may ship the following business day.</p>
+                        </div> -->
+                        <div class="shopping_total_box" style="margin-top: 11px;">
+                                <div class="row">
+                                <hr>
+                                    <div class="col-sm-10 col-md-10 col-lg-9 col-xl-8" style="display: inline-flex;">
+                                        <span class="cart_btn">
+                                            <a href="{{ route('Index') }}">{{ __('index.cart.continue_shopping') }} <img src="{{ asset('assets/tp-fastener/images/cart_icon.png') }}" alt="" style="display:inline;"></a>
+                                        </span>
+                                        <span id="add_more" style="display:none;">
+                                            <button class="checkout-btn" type="submit" name="addtocart" value="on" style="margin-top: 1rem;">{{__('index.cart.save_tocart')}}</button>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-12 col-md-12 col-lg-3 col-xl-4" style="background-color: lightgrey;padding-left: 1rem;padding-right: 1rem;">
+                                        <div style="margin:20px 0 20px 0;">
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-6 col-sm-6 col-md-6"><strong style="font-size: 20px;font-weight: 900;">Total</strong></div>
+                                                    <div class="col-6 col-sm-6 col-md-6">
+                                                        <div class="pull-right">
+                                                            <span id="total_price3" style="font-size: 20px;font-weight: 900;">{{ number_format($data['cart']->totalPrice, 2) }}</span>&nbsp;{{ __('index.cart.baht') }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        </div>
+                    </form>
+
+                    <form name="FormAddress" class="row contact_form" action="{{ route('sendOrder') }}" method="POST" novalidate="novalidate">
+                    {{ csrf_field() }}
+                        <div class="related_product bg-sendorder px-3">
+                            <div class="col-md-4">
+                                <div class="col-5 float-right" >
+                                    <div class="input-group">
+                                        <select name="address_selete" id="address_selete" onchange="addressSelete(this.value)" class="form-control form-control-sm">
+                                            <option value="selete">{{ __('index.checkout.select_address') }}</option>
+                                            @foreach ($data['address'] as $item)
+                                                <option value="{{ $item['id'] }}">{{ $item['place_name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>   
+                                <h4>{{ __('index.checkout.delivery_address') }}</h4> 
+                                <hr>
+                                <div class="pr-3 pl-3">
+                                    <div class="form-group p_star">
+                                        <div class="row">
+                                            <label for="password" class="col-3 col-form-label text-right m-auto">* {{ __('index.checkout.first_name') }}</label>
+                                            <div class="col-9">
+                                                <input type="text" class="form-control" id="first" name="first_name" placeholder="" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group p_star">
+                                        <div class="row">
+                                            <label for="password" class="col-3 col-form-label text-right m-auto">*{{ __('index.checkout.last_name') }}</label>
+                                            <div class="col-9">
+                                                <input type="text" class="form-control" id="last" name="last_name" placeholder="" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group p_star">
+                                        <div class="row">
+                                            <label for="password" class="col-3 col-form-label text-right m-auto">* {{ __('index.checkout.phone_number') }}</label>
+                                            <div class="col-9">
+                                                <input type="text" class="form-control" id="phone" name="phone" placeholder="" onkeyup="autoTab2(this,2)" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group p_star">
+                                        <div class="row">
+                                            <label for="password" class="col-3 col-form-label text-right">* {{ __('index.checkout.address') }}</label>
+                                            <div class="col-9">
+                                                <textarea class="form-control" id="address" name="address" placeholder="" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group p_star" id="message_store_form">
+                                        <div class="row">
+                                            <label for="message_store" class="col-3 col-form-label text-right">{{ __('index.checkout.message_store') }}</label>
+                                            <div class="col-9">
+                                                <textarea class="form-control" id="message_store" name="message_store" placeholder="" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="installment_form" style="display:none;">
+                                        <div class="col-md-12 form-group p_star" id="bankcode_form">
+                                            <div class="row">
+                                                <label for="bankcode" class="col-3 col-form-label text-right">{{ __('index.checkout.choose_a_card') }}</label>
+                                                <div class="col-9">
+                                                    <div class="input-group">
+                                                        <select class="form-control rounded" name="bankcode" id="bankcode">
+                                                            <option value="KTC">KTC กรุงไทย</option>
+                                                            <option value="BAY">BAY กรุวศรี</option>
+                                                            <option value="FCY">Fiest Choice Card</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="col-md-12 form-group p_star" id="bankcode_form">
+                                            <div class="row">
+                                                <label for="bankcode" class="col-3 col-form-label text-right">{{ __('index.checkout.choose_a_installmen_plan') }}</label>
+                                                <div class="col-9">
+                                                    <div class="row">
+                                                        <div class="col input-group">
+                                                            <select class="form-control rounded" name="min" id="min" style="width: 160%;">
+                                                                <option value="3" selected>3 รอบ</option>
+                                                                <option value="4">4 รอบ</option>
+                                                                <option value="5">5 รอบ</option>
+                                                                <option value="6">6 รอบ</option>
+                                                                <option value="7">7 รอบ</option>
+                                                                <option value="8">8 รอบ</option>
+                                                                <option value="9">9 รอบ</option>
+                                                                <option value="10">10 รอบ</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col text-center m-auto">{{ __('index.checkout.to') }}</div>
+                                                        <div class="col input-group">
+                                                            <select class="form-control rounded" name="max" id="max" style="right: 65%;width: 160%;">
+                                                                <option value="3">3 รอบ</option>
+                                                                <option value="4">4 รอบ</option>
+                                                                <option value="6">6 รอบ</option>
+                                                                <option value="9">9 รอบ</option>
+                                                                <option value="10">10 รอบ</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+        
+                            <div class="col-md-4">
+                                <h4>{{ __('index.checkout.payment_channel') }}</h4>
+                                <hr>
+                                <div class="order_box pr-3 pl-3">
+                                    <div class="payment_item">
+                                        <div class="radion_btn row">
+                                            <div class="col-auto mr-auto">
+                                                <input type='radio' id="moneyspace" name='payment' value='moneyspace' onclick="handleClick(this);" checked />
+                                                <label for="moneyspace">Credit Card</label>
+                                            </div>
+                                            <div class="col-auto">
+                                                <img src="{{asset('assets/img/gallery/card.jpg')}}" alt="">
+                                            </div>
+                                        </div>
+                                        <div id="collapse_moneyspace" class="panel-collapse collapse show">
+                                            <div class="panel-body">
+                                                <p> {{ __('index.checkout.moneyspace_detail') }} </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="payment_item">
+                                        <div class="radion_btn">
+                                            <input type='radio' id="qrcode" name='payment' value='qrcode' onclick="handleClick(this);" />
+                                            <label for="qrcode">QR Code</label>
+                                        </div>
+                                        <div id="collapse_qrcode" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <p> {{ __('index.checkout.qrcode_detail') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="payment_item">
+                                        <div class="radion_btn">
+                                            <input type="radio" id="installment" name="payment" value="installment" onclick="handleClick(this);">
+                                            <label for="installment">Installment</label>
+                                            <div class="check"></div>
+                                        </div>
+                                        <div id="collapse_installment" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <p> {{ __('index.checkout.installment_detail') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="payment_item">
+                                        <div class="radion_btn">
+                                            <input type="radio" id="paypal" name="payment" value="paypal" onclick="handleClick(this);">
+                                            <label for="paypal">Paypal</label>
+                                            <div class="check"></div>
+                                        </div>
+                                        <div id="collapse_paypal" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <p> {{ __('index.checkout.paypal_detail') }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <h4>{{ __('index.checkout.your_order') }}</h4>
+                                <hr>
+                                <div class="order_box pr-3 pl-3">
+                                    <ul class="list">
+                                    <li class="li-cart">
+                                        <a>{{ __('index.checkout.product') }}<span>{{ __('index.checkout.total') }}</span></a>
+                                    </li>
+                                    <table class="table table-borderless -bottom-40table-sm text-muted">
+                                        <tbody>
+                                        @php $i = 1; @endphp
+                                        @foreach($data['cart']->items as $key_cart => $item)
+                                        @php $key2 = trim($key_cart); @endphp                                                                            
+                                            <tr>
+                                                <th scope="row">{{ $i }}</th>
+                                                <td><a href="{{ route('productDetal', [ 'prodCode' => $item['data']['prodCode'], 'uomCode' => $item['data']['uomCode'], 'name' => $item['data']['prodTName'] ]) }}">{{ $item['data']['prodTName'] }}</a></td>
+                                                <td style="text-align: right;">{{ $item['data']['price'] }} x {{ $item['quantity'] }} {{ $list_uom['uomName'] }}</td>
+                                                <td style="text-align: right;">{{ number_format($item['totalSinglePrice'], 2) }}</td>
+                                            </tr>
+                                            @php $i++; @endphp
+                                        @endforeach                        
+                                        </tbody>
+                                        </table>
+                                    </ul>
+                                    <ul class="list list_2">
+                                        <li class="li-cart">
+                                            <a>{{ __('index.checkout.shipping') }}
+                                                <span>{{ __('index.checkout.free') }}</span>
+                                            </a>
+                                        </li>
+                                        <li class="li-cart">
+                                            <a>{{ __('index.cart.total') }}
+                                                <span id="totalPrice">{{ number_format($data['cart']->totalPrice, 2) }} {{ __('index.checkout.baht') }}</span>
+                                                <input type="hidden" id="input_totalPrice" value="100.00">
+                                            </a>
+                                        </li>
+                                    </ul>
+                                    <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                                    <div class="shopping_total_box d-flex justify-content-center" style="padding-top: 1rem;">
+                                        <button id="btnSubmit" type="submit" class="checkout-btn">{{ __('index.checkout.btn_pay') }}</button>
+                                        <div class="justify-content-center" id="paypal-button" style="display: none;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- <div class="col-xs-12">
+                        <span class="shipping_options">**Additional shipping options available at checkout</span>
+                    </div> -->
+
+                    @include('layouts.products_more')
+                    
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://www.paypalobjects.com/api/checkout.js"></script>
+
+<script src="{{asset('assets/js/view/checkout.js')}}"></script>
+<script src="{{asset('assets/js/view/cart.js')}}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/view/autoTab.js') }}"></script>
+
+@endsection

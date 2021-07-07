@@ -1,0 +1,390 @@
+@extends('layouts.index.index')
+
+@section('center')
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">{{ __('index.product.title') }}</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">{{ __('index.product.breadcrumb_home') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('Categories', ['select_sort' => 'create', 'categories_choice' => $text_page ]) }}">{{ $get_data_product['prodGroupCode'] }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('productDetails', [ 'prodCode' => $get_data->prodCode, 'uomCode' => $get_data->uomCode ]) }}">{{ $get_data->prodTName }}</a>
+                                        </li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+
+    <br>
+    <div class="container">
+        @include('alert')
+    </div>
+    <br>
+
+    <!--? Single Product Area Start-->
+    <div class="product_image_area">
+        <div class="container">
+            <div class="row s_product_inner">
+                <div class="col-lg-6">
+                    <div class="product_slider_img pb-5">
+                        <div id="vertical" style="height: 500px;">
+                        @if($get_image != null)
+                            @foreach($get_image as $key => $item)
+                                <div class="product-preview" data-thumb="{{ asset('storage') }}/product_images/{{ $get_data->prodCode }}/{{ $item }}" >
+                                    <div class="img-magnifier-container">
+                                        <img id="myimage[{{ $key }}]" onmouseover="magnify('myimage[{{ $key }}]', 2)" src="{{ asset('storage') }}/product_images/{{ $get_data->prodCode }}/{{ $item }}" class="w-100 img-fluid product_border" />
+                                    </div>
+                                </div>
+                            @endforeach                       
+                        @else
+                            <div class="product-preview" data-thumb="{{ asset('storage') }}/product_images/product_default.png">
+                                <div class="img-magnifier-container">
+                                    <img id="myimage" onmouseover="magnify('myimage', 2)" src="{{ asset('storage') }}/product_images/product_default.png" class="w-100 img-fluid product_border">
+                                </div>
+                            </div>                            
+                        @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="s_product_text">
+                        <div class="row"><h3>{{ $get_data->prodTName }} @if($best_seller == 1) {{ __('index.product_details.best_seller') }} @endif</h3></div>
+                        <div class="row">
+                            <h2 id="prodUnitPrice">{{ number_format($price, 2) }}</h2><h2>&nbsp; {{ __('index.product_details.baht') }} / </h2></h2><h2 id="prodUnitRatio">{{ number_format($get_data->prodUnitRatio) }}</h2><h2> &nbsp; {{__('index.product_details.piece')}}</h2>
+                        </div>
+                        @if($get_data->ProdAllowMinus != 'Y')<div class="row"><h5>@if(\Session::get('locale') != 'th') Products are limited. @else สินค้ามีจำนวนจำกัด @endif</h5></div>@endif
+                        <div class="row"><h5 id="promotion">{{ $promotion }}</h5></div>
+                        <hr>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <ul class="list">
+                                        <li>
+                                            <a class="active" ><span>{{ __('index.product.product_group') }}</span> : {{ $get_data_product['prodGroupCode'] }}</a><br>
+                                            @if($get_data_product['ProdTypeCode'] != null)<a class="active" ><span>{{ __('index.product.product_type') }}</span> : {{ $get_data_product['ProdTypeCode'] }}</a><br>@endif
+                                            @if($get_data_product['ProdBrandCode'] != null)<a class="active" ><span>{{ __('index.product.product_brand') }}</span> : {{ $get_data_product['ProdBrandCode'] }}</a><br>@endif
+                                            @if($get_data_product['ProdModelCode'] != null)<a class="active" ><span>{{ __('index.product.product_model') }}</span> : {{ $get_data_product['ProdModelCode'] }}</a><br>@endif
+                                        </li>
+                                        @if($get_data->ProdAllowMinus != 'Y')
+                                            @foreach ($get_stock as $item)
+                                            <li>
+                                                <p>{{ $item->whTName }} : @if($item->endQty > 0) {{ number_format($item->endQty, 2) }} {{__('index.product_details.piece')}} @else @if(\Session::get('locale') != 'th') Out of stock. @else สินค้าหมด @endif @endif</p>
+                                            </li>
+                                            @endforeach
+                                        @endif
+                                    </ul>
+                                </div>
+                                <div class="col">
+                                    <form action="{{ route('AddToCartProduct', [ 'prodCode' => $get_data->prodCode ]) }}" method="GET">
+                                        <div class="row">
+                                            <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                                            <input class="form-control" style="width:50%" name="qunatity" id="qunatity" type="number" 
+                                                @if($stock_now['ProdAllowMinus'] != 'Y') value="0" min="0" max="{{ number_format($stock_limit) }}" @else value="1" min="1" max="999" @endif 
+                                                onkeyup="calProdUnitRatio2(this.value, '{{ $stock_now['ProdAllowMinus'] }}', {{ $stock_limit }})"
+                                                onchange="calProdUnitRatio2(this.value, '{{ $stock_now['ProdAllowMinus'] }}', {{ $stock_limit }})"
+                                                onkeydown="return event.key != 'Enter';"
+                                            >
+                                            <select name="uomCode" class="form-control" id="uomCode" onchange="calProdUnitRatio(this.value);">
+                                                @foreach ($get_uomname as $key => $item)
+                                                    <option 
+                                                        value="
+                                                            {{ $item['uomCode'] }},
+                                                            {{ $item['prodUnitRatio'] }},
+                                                            {{ $item['price'] }},
+                                                            {{ $item['prodIsVat'] }},
+                                                            {{ $arr_price[$key]['data_product'] }},
+                                                            {{ $item['prodCode'] }},
+                                                            {{ $stock_now['ProdAllowMinus'] }},
+                                                            {{ $stock_limit }}"
+                                                        @if($uomCode == $item['uomCode']) selected @endif
+                                                        >{{ $item['uomName'] }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="add_to_cart">
+                                                <button id="btn_add_to_cart" class="btn btn-block" type="submit" @if($stock_now['ProdAllowMinus'] != 'Y') style="display:none;" @endif>{{ __('index.product.add_to_cart') }}</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="w-100"></div>
+                                <div class="col"></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+
+                        <div class="row justify-content-md-center card_area">
+                            <div class="social_icon">
+                                <a href="#" class="fb"><i class="ti-facebook"></i></a>
+                                <a href="#" class="tw"><i class="ti-twitter-alt"></i></a>
+                                <a href="#" class="li"><i class="ti-linkedin"></i></a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Single Product Area End-->
+    <br>
+    <!--? Product Description Area Start-->
+    <section-page class="product_description_area">
+        <div class="container">
+            <ul class="nav nav-tabs" id="myTab" role="tablist" style="text-align: center;">
+                @if($get_data->ProdDetail != null)
+                <li class="nav-item">
+                    <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">{{ __('index.product.description') }}</a>
+                </li>
+                @endif
+                <li class="nav-item">
+                    <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">{{ __('index.product.detail') }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review" aria-selected="false">{{ __('index.product.review') }}</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <div class="col-lg-10" style="float:none;margin:auto;">
+                        {!! $get_data->ProdDetail !!}
+                    </div>
+                </div>
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="col-lg-6" style="float:none;margin:auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">{{__('index.product_details.data')}}</th>
+                                    <th scope="col">{{__('index.product_details.material')}}</th>
+                                </tr>                            
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{__('index.product_details.product_name')}}</td>
+                                    <td>{{$get_data->prodTName}}/{{$get_data->prodEName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{__('index.product_details.price')}}</td>
+                                    <td>{{$price}} {{__('index.product_details.baht')}}/{{$get_data->uomName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{__('index.product_details.product_group')}}</td>
+                                    <td>{{$get_data->prodGroupName}}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{__('index.product_details.unit')}}</td>
+                                    <td>{{$get_data->uomName}}</td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    @if($details != null)
+                    <br>
+                    <br>
+                    <div class="col-lg-10" style="float:none;margin:auto;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                            @foreach ($details[0] as $key => $items)
+                                                <th scope="col">{{ $key }}</th>
+                                            @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach ($details as $key => $items)
+                                            <tr>
+                                            @foreach ($items as $index => $item)
+                                                <td>{{$item}}</td>
+                                            @endforeach 
+                                            </tr>
+                                        @endforeach                         
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                <div class="tab-pane fade" id="review" role="tabpanel" aria-labelledby="review-tab">
+                    <div class="row">
+                        <div class="@if(Auth::check()) col-lg-6 @else col-lg-12 @endif">
+                            <div class="row total_rate">
+                                <div class="col-6">
+                                    <div class="box_total">
+                                        <h5>{{ __('index.product.overall') }}</h5>
+                                        <h4>{{ number_format($ratting_product ?? 0, 2) }}</h4>
+                                        <h6>({{ $review_count }} {{ __('index.product.review_comment') }})</h6>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="rating_list">
+                                        <h3>{{ __('index.product.based_on_start') }} {{ $review_count }} {{ __('index.product.based_on_end') }}</h3>
+                                        <ul class="list">
+                                            <li>
+                                                <a>
+                                                    5 {{ __('index.product.star') }}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    {{ $review_count_star[4][0] ?? 0 }} ( {{ $review_count_star[4][1] ?? 0 }}% )
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a>
+                                                    4 {{ __('index.product.star') }}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    {{ $review_count_star[3][0] ?? 0 }} ( {{ $review_count_star[3][1] ?? 0 }}% )
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a>
+                                                    3 {{ __('index.product.star') }}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    {{ $review_count_star[2][0] ?? 0 }} ( {{ $review_count_star[2][1] ?? 0 }}% )
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a>
+                                                    2 {{ __('index.product.star') }}
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    {{ $review_count_star[1][0] ?? 0 }} ( {{ $review_count_star[1][1] ?? 0 }}% )
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a>
+                                                    1 {{ __('index.product.star') }}
+                                                    <i class="fa fa-star"></i>
+                                                    {{ $review_count_star[0][0] ?? 0 }} ( {{ $review_count_star[0][1] ?? 0 }}% )
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review_list">
+                                @foreach($reviews->items as $item)
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="{{ asset('storage') }}/user_images/{{ $item['user_image'] }}" alt="" width="60" height="60" style="border-radius:50%;" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>{{$item['user_name']}}</h4>
+                                            @for ($i = 0; $i < $item['ratting']; $i++)
+                                            <i class="fa fa-star"></i>
+                                            @endfor
+                                            @php $star_empty = 5 - $item['ratting'] @endphp
+                                            @for ($i = 0; $i < $star_empty; $i++)
+                                            <i class="fa fa-star-o empty"></i>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    <p>{{$item['review']}}</p>
+                                </div>
+                                @endforeach
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-center">
+                                        @foreach ($reviews->links as $key => $values)
+                                        <li class="{{$values['stly_classes']}}">
+                                            <a class="page-link" href="?page={{$values['page']}}" tabindex="-1">{{$values['icon']}}</a>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        @if(Auth::check())
+                        <div class="col-lg-6">
+                            <div class="review_box">
+                                <h4>{{ __('index.product.add_a_review') }}</h4>
+                                <form action="{{ route('reviewProduct', [ 'prodCode' => $get_data->prodCode, 'uomCode' => $get_data->uomCode ]) }}" method="post"novalidate="novalidate">
+                                    {{csrf_field()}}
+                                    <!-- <p>Your Rating:</p> -->
+                                    <div class="rate">
+                                        <input type="radio" id="star5" name="rating" value="5" hidden />
+                                        <label for="star5" title="5 star"></label>
+                                        <input type="radio" id="star4" name="rating" value="4" hidden />
+                                        <label for="star4" title="4 star"></label>
+                                        <input type="radio" id="star3" name="rating" value="3" hidden />
+                                        <label for="star3" title="3 star"></label>
+                                        <input type="radio" id="star2" name="rating" value="2" hidden />
+                                        <label for="star2" title="2 star"></label>
+                                        <input type="radio" id="star1" name="rating" value="1" hidden />
+                                        <label for="star1" title="1 star"></label>
+                                    </div>
+                                    <!-- <p>Outstanding</p> -->
+                                    <p></p>
+                                    <hr>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="name" value="{{Auth::user()->name}}" disabled />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" name="email" value="{{Auth::user()->email}}" disabled />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="text_review" rows="1" placeholder="{{ __('index.product.review') }}"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-right">
+                                        <button type="submit" value="submit" class="btn">{{ __('index.product.submit_now') }}</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section-page>
+    <!-- Product Description Area End-->
+
+</main>
+
+<script type="text/javascript" src="{{ asset('assets/js/view/product_detail.js') }}"></script>
+
+<style>
+.form-control {
+  height: 49px;
+}
+.product_border{
+    border: 1px solid #dee2e6!important;
+    height: 500px;
+}
+</style>
+
+@endsection

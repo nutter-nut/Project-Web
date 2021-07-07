@@ -1,0 +1,95 @@
+
+
+<?php $__env->startSection('center'); ?>
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly1 slider-height d-flex align-items-center slider-bg1">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">THE BEST SOURCE OF </h1>
+                                <h2 data-animation="fadeInUp" data-delay=".4s">ALL YOUR SCREWS AND HANDTOOLS </h2>
+                                <p data-animation="fadeInUp" data-delay=".6s">น๊อตยิ้ม ABP องค์ประกอบเพื่อความสมบูรณ์
+                                </p>
+                                <!-- Hero-btn -->
+                                <div class="hero__btn" data-animation="fadeInUp" data-delay=".7s">
+                                    <a href="<?php echo e(route('Categories')); ?>" class="btn hero-btn">Discover More</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    
+    <!--? Properties Start -->
+    <section class="properties new-arrival fix">
+        <div class="container">
+            <!-- Section tittle -->
+            <div class="row justify-content-center">
+                <div class="col-xl-7 col-lg-8 col-md-10">
+                    <div class="section-tittle mb-60 text-center wow fadeInUp" data-wow-duration="1s"
+                        data-wow-delay=".2s">
+                        <h2>Popular products</h2>
+                        <P>Suspendisse varius enim in eros elementum tristique. Duis cursus, mi quis viverra ornare,
+                            eros dolor interdum nulla.</P>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="properties__button text-center">
+                        <nav>
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <?php $__currentLoopData = $group_categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>                                
+                                    <a class="nav-item nav-link <?php if($key=='1'): ?> active <?php endif; ?>" id="nav-<?php echo e($items['categories_id']); ?>-tab" data-toggle="tab" href="#nav-<?php echo e($items['categories_id']); ?>" role="tab" aria-controls="nav-<?php echo e($items['categories_id']); ?>" aria-selected="true"><?php echo e($items['categories_name']); ?></a>                                                           
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>                            
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="tab-content" id="nav-tabContent">
+                    <?php $__currentLoopData = $group_categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="tab-pane fade show <?php if($key=='1'): ?> active <?php endif; ?>" id="nav-<?php echo e($items['categories_id']); ?>" role="tabpanel" aria-labelledby="nav-<?php echo e($items['categories_id']); ?>-tab">
+                        <div class="row justify-content-center">
+                            <?php $__currentLoopData = $items['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="single-new-arrival mb-50 text-center">
+                                    <div class="popular-img">
+                                        <?php $__currentLoopData = array_slice($item['products_image'],0,1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image_array): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> 
+                                            <img src="<?php echo e(asset('storage')); ?>/product_images/<?php echo e($item['products_id']); ?>/<?php echo e($image_array); ?>" alt="" style="width: 338px;height: 220px;">
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> 
+                                    </div>
+                                    <div class="popular-caption">
+                                        <h3><a href="<?php echo e(route('productDetails', ['id' => $item['products_id']])); ?>"><?php echo e($item['products_name']); ?></a></h3>
+                                        <span>$<?php echo e($item['products_price']); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>                            
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="room-btn">
+                    <a href="<?php echo e(route('Categories')); ?>" class="border-btn">Discover More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+</main>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.index.index', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\anan\Desktop\template-poom\new_template01_abpon\resources\views/index.blade.php ENDPATH**/ ?>

@@ -1,0 +1,197 @@
+@extends('layouts.login.index')
+
+@section('center')
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row page-titles">
+            <div class="col-md-5 align-self-center">
+                <h3 class="text-themecolor">{{ __('login.page.menu_group.display.set_products') }}</h3>
+            </div>
+        </div>
+        
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('login.page.product.breadcrumb_home') }}</a></li>
+                <li class="breadcrumb-item">{{ __('login.page.menu_group.display.set_products') }}</li>
+                <li class="breadcrumb-item active"><a href="{{ route('adminProductMenuGroup') }}">{{ __('login.page.menu_group.display.menu_group') }}</a></li>
+                @if($data['get_data_edit'] != null)
+                <li class="breadcrumb-item active"><a href="{{ route('productMenuGroupEdit', [ 'id' => $data['get_data_edit']->PMenuId ]) }}">{{ $data['get_data_edit']->PMenuId }}</a></li>
+                @endif
+            </ol>
+        </nav>
+
+        <div class="container col-12">
+            @include('../alert')
+        </div>
+
+        <!-- Add product end -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="table_id" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">รหัสกลุ่มเมนูขาย</th>
+                                        <th scope="col">รหัส</th>
+                                        <th scope="col">ชื่อ</th>
+                                        <th scope="col">ประเภท</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($data['get_menugroup'] as $key => $item)
+                                        <tr>
+                                            <td>{{ $item->PMenuId }}</td>
+                                            <td>{{ $item->PMenuGroupCode }}</td>
+                                            <td>{{ $item->PMenuGroupName }}</td>
+                                            <td>{{ $item->type }}</td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+                                                    <a href="{{ route('productMenuGroupEdit', [ 'id' => $item->PMenuId ]) }}" class="btn btn-sm btn-outline-warning"> <i class="fa fa-edit"></i> {{ __('login.page.menu_group.display.edit') }}</a>
+                                                    <a href="" onclick="@if(\Session::get('locale') != 'th') return confirm('Are you sure?') @else return confirm('คุณแน่ใจที่จะลบ') @endif" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i> {{ __('login.page.menu_group.display.delete') }}</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body">
+                        @if($data['get_data_edit'] != null)
+                            <form action="" method="POST" enctype="multipart/form-data" autocomplete="on" class="needs-validation" novalidate>
+                                {{csrf_field()}}
+                                <div class="form-group">
+                                    <label for="prodMenuGroupName">* ชื่อเมนูขาย</label>
+                                    <input type="text" class="form-control" name="prodMenuGroupName" id="prodMenuGroupName" placeholder="" value="{{ $data['get_data_edit']->PMenuGroupName }}" required>
+                                    <small class="text-danger">
+                                        {{ __('login.index.form.text_pattern') }}
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <input type="checkbox" class="form-check-input" name="new_categorie" id="new_categorie" onclick="checkBox()">
+                                    <label class="form-check-label" for="new_categorie">เพิ่มหมวดหมู่ใหม่</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupType">* ประเภทของเมนู</label>
+                                    <select name="prodMenuGroupType" class="form-control" id="prodMenuGroupType">
+                                        @foreach($data['get_filter'] as $item)
+                                            <option value="{{ $item->PMenuGroupCode }}" class="form-control" @if($data['get_data_edit']->PMenuGroupParent == $item->PMenuGroupCode) selected @endif>{{ $item->PMenuGroupCode }}-{{ $item->PMenuGroupName }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupImage">* รูป</label>
+                                    <div class="pb-5">
+                                        <center>
+                                            <img id="blah" src="{{ $data['get_data_edit']->image['url'] }}" class="img-circle img-fluid" style="width:150px;height:150px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
+                                        </center>
+                                    </div>
+                                    <input 
+                                        id="image_file" 
+                                        name="image" 
+                                        type="file" 
+                                        class="form-control form-control-line"
+                                        onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])"
+                                        accept="image/x-png,image/gif,image/jpeg" 
+                                        required
+                                    />
+                                    <small class="text-danger">
+                                        {{ __('login.index.form.image_pattern') }}
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupDescription">รายละเอียด</label>
+                                    <textarea class="form-control" name="prodMenuGroupDescription" id="prodMenuGroupDescription" rows="3"></textarea>
+                                </div>
+                                <hr>
+                                <div class="float-left">
+                                    <button type="submit" name="submit" class="btn btn-outline-info">{{ __('login.page.menu_group.display.save') }}</button>
+                                </div>
+                            </form>
+                        @else
+                            <form action="{{ route('productMenuGroupInsert') }}" method="POST" enctype="multipart/form-data" autocomplete="on" class="needs-validation" novalidate>
+                                {{csrf_field()}}
+                                <div class="form-group">
+                                    <label for="prodMenuGroupName">* ชื่อเมนูขาย</label>
+                                    <input type="text" class="form-control" name="prodMenuGroupName" id="prodMenuGroupName" placeholder="" required>
+                                    <small class="text-danger">
+                                        {{ __('login.index.form.text_pattern') }}
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <input type="checkbox" class="form-check-input" name="new_categorie" id="new_categorie" onclick="checkBox()">
+                                    <label class="form-check-label" for="new_categorie">เพิ่มกลุ่มเมนูขายใหม่</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupType">* ประเภทของเมนู</label>
+                                    <select name="prodMenuGroupType" class="form-control" id="prodMenuGroupType">
+                                        @foreach($data['get_filter'] as $item)
+                                            <option value="{{ $item->PMenuGroupCode }}" class="form-control">{{ $item->PMenuGroupCode }}-{{ $item->PMenuGroupName }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupImage">* รูป</label>
+                                    <div class="pb-5">
+                                        <center>
+                                            <img id="blah" src="{{ asset('storage') }}/product_images/product_default.png" class="img-circle img-fluid" style="width:150px;height:150px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);" />
+                                        </center>
+                                    </div>
+                                    <input 
+                                        id="image_file" 
+                                        name="image" 
+                                        type="file" 
+                                        class="form-control form-control-line"
+                                        onchange="document.getElementById('blah').src = window.URL.createObjectURL(this.files[0])"
+                                        accept="image/x-png,image/gif,image/jpeg" 
+                                        required
+                                    />
+                                    <small class="text-danger">
+                                        {{ __('login.index.form.image_pattern') }}
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="prodMenuGroupDescription">รายละเอียด</label>
+                                    <textarea class="form-control" name="prodMenuGroupDescription" id="prodMenuGroupDescription" rows="3"></textarea>
+                                </div>
+                                <hr>
+                                <div class="float-left">
+                                    <button type="submit" name="submit" class="btn btn-outline-info">{{ __('login.page.menu_group.display.save') }}</button>
+                                </div>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="text/javascript" src="{{ asset('assets/js/view/login/admin/posone/displayProductMenuGroup.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('assets/js/view/input_pattern.js') }}"></script>
+
+    <script>
+    function checkBox(){
+        var checkbox = document.querySelector('#new_categorie:checked');
+        var prodMenuGroupType = document.getElementById("prodMenuGroupType");
+
+        if(checkbox){
+            prodMenuGroupType.setAttribute("disabled", "");
+        }else{
+            prodMenuGroupType.removeAttribute("disabled", "");
+        }
+    }
+    </script>
+
+    @endsection

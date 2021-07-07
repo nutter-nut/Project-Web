@@ -1,0 +1,182 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<main class="login-bg">
+<section class="main_container">
+    <div class="container">
+        <div class="col-12">
+                    </div>
+        <div class="col-sm-12">
+            <section class="checkout_inner_page">
+                <h1 style="text-align: left!important;">Reset Password</h1>
+                <p>The link will be sent to the email. To reset your password.</p>
+                <div class="checkout_inner_details">
+
+                    <div class="common_box hidden-sm hidden-md hidden-lg">
+                        <h3><strong>{{ __('login.index.reset_password.title') }}</strong></h3>
+                        <div class="common_details">
+                            <form class="new_user" id="login_user" method="POST" action="{{ url('/reset_password_without_token') }}">
+                            <input type="hidden" name="_token" value="zcxrFv2myM3DjvkfY9BpHgBcwyq1gX6OpAvaCCd1">                                <div class="common_col">
+                                    <label for="email">{{ __('login.index.reset_password.email') }}</label>
+                                    <input id="email" type="email" class="input " name="email" value="" placeholder="" autocomplete="email" autofocus="" required="">
+                                    @if (session('status'))
+                                        <div class="alert alert-success" role="alert">
+                                            {{ session('status') }}
+                                        </div>                                                
+                                        @endif
+                                        @error('email')
+                                        <div class="alert alert-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                        @enderror  
+                                </div>
+                                <div class="single-input-fields login-check">
+                                    <label class="form-check-label" for="remember">มีบัญชีอยู่แล้ว?</label>
+                                    <a href="http://127.0.0.1:8000/password/reset" class="f-right">เข้าสู่ระบบ</a>
+                                    <label class="form-check-label" for="remember">ที่นี่</label>
+                                </div>
+                                <div class="common_col">
+                                <input type="submit" name="commit" value="{{ __('login.index.reset_password.btn_submit') }}" class="btn" data-disable-with="{{ __('login.index.reset_password.btn_submit') }}">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="common_box login hidden-xs"><strong>Benefits of Registration</strong>
+                        <div class="common_details">
+                            <p>Becoming a registered user at Fastener SuperStore provides many benefits, particularly to customers who may find themselves shopping here in the future:</p>
+                            <ul style="padding:0 0 0 10px;">
+                                <li>
+                                    <p>Quick &amp; Easy Checkout Process</p>
+                                </li>
+                                <li>
+                                    <p>Saved &amp; Multiple Shipping Addresses</p>
+                                </li>
+                                <li>
+                                    <p>Access to Order / Invoice History</p>
+                                </li>
+                                <li>
+                                    <p>Access to Parts Previously Ordered</p>
+                                </li>
+                                <li>
+                                    <p>Optional Newsletter With Discount Offers</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-1 or check none hidden-xs"> <span>!!</span> </div>
+
+                    <div class="common_box hidden-xs">
+                        <h3><strong>{{ __('login.index.reset_password.title') }}</strong></h3>
+                        <div class="common_details">
+                            <form class="new_user" id="login_user" method="POST" action="{{ url('/reset_password_without_token') }}">
+                            <input type="hidden" name="_token" value="zcxrFv2myM3DjvkfY9BpHgBcwyq1gX6OpAvaCCd1">                                <div class="common_col">
+                                    <label for="email">{{ __('login.index.reset_password.email') }}</label>
+                                    <input id="email" type="email" class="input " name="email" value="" placeholder="" autocomplete="email" autofocus="" required="">
+                                    @if (session('status'))
+                                        <div class="alert alert-success" role="alert">
+                                            {{ session('status') }}
+                                        </div>                                                
+                                        @endif
+                                        @error('email')
+                                        <div class="alert alert-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                        @enderror  
+                                </div>
+                                <div class="single-input-fields login-check">
+                                    <label class="form-check-label" for="remember">มีบัญชีอยู่แล้ว?</label>
+                                    <a href="/login" class="f-right">เข้าสู่ระบบ</a>
+                                    <label class="form-check-label" for="remember">ที่นี่</label>
+                                </div>
+                                <div class="common_col">
+                                    <input type="submit" name="commit" value="{{ __('login.index.reset_password.btn_submit') }}" class="btn" data-disable-with="{{ __('login.index.reset_password.btn_submit') }}">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="common_box login hidden-sm hidden-md hidden-lg"> <strong>Benefits of Registration</strong>
+                        <div class="common_details">
+                            <p>Becoming a registered user at Fastener SuperStore provides many benefits, particularly to customers who may find themselves shopping here in the future:</p>
+                            <ul style="padding:0 0 0 10px;">
+                                <li>
+                                    <p>Quick &amp; Easy Checkout Process</p>
+                                </li>
+                                <li>
+                                    <p>Saved &amp; Multiple Shipping Addresses</p>
+                                </li>
+                                <li>
+                                    <p>Access to Order / Invoice History</p>
+                                </li>
+                                <li>
+                                    <p>Access to Parts Previously Ordered</p>
+                                </li>
+                                <li>
+                                    <p>Optional Newsletter With Discount Offers</p>
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+    <!-- <section>
+        <div class='air air1'></div>
+        <div class='air air2'></div>
+        <div class='air air3'></div>
+        <div class='air air4'></div>
+
+        <div class="register-form-area background-reset">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-xl-6 col-lg-8 reset-n">
+                        <div class="register-form text-center">
+                            <form method="POST" action="{{ url('/reset_password_without_token') }}">
+                                @csrf
+ 
+                                <div class="register-heading">
+                                    <span>{{ __('login.index.reset_password.title') }}</span>
+                                    <p>{{ __('login.index.reset_password.sub_title') }}</p>
+                                </div>
+
+                                <div class="input-box">
+                                    <div class="single-input-fields">
+                                        <label>{{ __('login.index.reset_password.email') }}</label>
+                                        <input id="email" type="email"
+                                            class="form-control @error('email') is-invalid @enderror" name="email"
+                                            value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                        @if (session('status'))
+                                        <div class="alert alert-success" role="alert">
+                                            {{ session('status') }}
+                                        </div>                                                
+                                        @endif
+                                        @error('email')
+                                        <div class="alert alert-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                        @enderror  
+                                    </div>
+                                </div>
+
+                                <div class="register-footer">
+                                    <p> {{ __('login.register.haveAccount') }} <a href="/login">{{ __('login.register.login') }}</a> {{ __('login.register.here') }}</p>
+                                    <button type="submit" class="submit-btn3">{{ __('login.index.reset_password.btn_submit') }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section> -->
+</main>
+
+@endsection

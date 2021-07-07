@@ -1,0 +1,109 @@
+<div class="related_product">
+    <h4>{{ __('index.cart.related_products') }}</h4>
+    <div class="col-md-4">
+        <div class="left_box">
+            <div class="mil-spec">
+                <div class="item border shadow p-3 mb-5 bg-white rounded">
+                    <a href="../mil-spec/Concretmil-spec.html">
+                        <span class="notify-badge">-20%</span>
+                        <img src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}" alt="">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="right_box">
+            <small>#283298</small>
+            <strong>
+                <a href="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}"> 1/4" x 1 1/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</a>
+            </strong>
+            <div class="review-block-rate mb-0">
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+            </div>
+            <strong style="font-size: 25px;">$11.25</strong>
+            <sub class="pl-3">
+                <del style="font-size: 15px;" class="text-muted">$15.25</del>
+            </sub>        
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="left_box border shadow p-3 mb-5 bg-white rounded">
+            <a href="../mil-spec/">
+                <div class="mil-spec">
+                    <img src="{{ asset('assets/tp-fastener/style/image/สกรูหัวจม สเตนเลส.jpg') }}"
+                        alt="">
+                </div>
+            </a>
+        </div>
+        <div class="right_box">
+            <small>#282996</small>
+            <strong>
+                <a href="{{ asset('assets/tp-fastener/style/image/สกรูหัวจม สเตนเลส.jpg') }}"> 3/16" x 1 1/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+            </strong>
+            <div class="review-block-rate mb-0">
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+            </div>
+            <strong style="font-size: 15px;">$11.25</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="left_box border shadow p-3 mb-5 bg-white rounded">
+            <a href="../mil-spec/">
+                <div class="mil-spec">
+                    <img src="{{ asset('assets/tp-fastener/style/image/สกรู แบบขั้นบันได - ฟิลลิปส์.jpg') }}" alt="">
+                </div>
+            </a>
+        </div>
+        <div class="right_box">
+            <small>#283308</small>
+            <strong>
+                <a href="../mil-spec/"> 1/4" x 1 1/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+            </strong>
+            <div class="review-block-rate mb-0">
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                    <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                </button>
+            </div>
+            <strong style="font-size: 15px;">$11.25</strong>
+        </div>
+    </div>
+</div>

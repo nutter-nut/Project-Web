@@ -1,0 +1,361 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+
+use App\Product;
+use App\Cart;
+
+class CartController extends Controller
+{
+    public function index(Request $request)
+    {
+        $cart = self::getCart($request);
+
+        $arr_qty = [];
+        $get_data = [];
+        $get_stock = [];
+        $get_stock_now = [];
+
+        $i = 0;
+        foreach ($cart->items as $item) {
+
+            $get_data[$i] = app('App\Http\Controllers\ProductsController')->getProductQury($item['data']['prodCode'], $item['data']['uomCode']);
+            $get_stock[$i] = app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($item['data']['prodCode'], $item['data']['uomCode']);
+            $get_stock_now[$i] = app('App\Http\Controllers\ProductsController')->getStockNow($get_data[$i], $get_stock[$i], $item['data']['prodCode'], $item['data']['uomCode'], 'product_details');
+            // $get_stock_now[$i] = app('App\Http\Controllers\ProductsController')->getStockNow($get_data[$i], $get_stock[$i], $item['data']['prodCode'], $item['data']['uomCode'], 'cart');
+
+            $arr_qty[$i] = $item['quantity'];
+            $i++;
+        }
+
+        $arr_qty = join(',', $arr_qty);
+
+        return view('cart', [
+            'cart' => $cart->items,
+            'totalQuantity' => $cart->totalQuantity,
+            'totalPrice' => $cart->totalPrice,
+            'arr_qty_mian' => $arr_qty,
+            'get_stock_now' => $get_stock_now
+        ]);
+    }
+
+    public function addProductToCart(Request $request, $prodCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $uomCode = $request->input('uomCode');
+        $uomCode2 = explode(",", $uomCode);
+        $uomCode3 = $uomCode2[0];
+
+        $prevCart = $request->session()->get('cart');
+
+        $cart = new Cart($prevCart);
+
+        // $product = self::getProduct($prodCode, $uomCode3);
+        // $product = Product::collection("products")->where("prodCode", "=", $prodCode)->andWhere("uomCode", "=", $uomCode3)->first();
+        $product = app('App\Http\Controllers\ProductsController')->getProduct($prodCode, $uomCode3);
+
+        $get_image = app('App\Http\Controllers\ProductsController')->getImage($prodCode);
+
+        $image = ($get_image != null) ? $get_image[0]->ProdPicName : null;
+
+        $qunatity = $request->input('qunatity');
+
+        $get_data = app('App\Http\Controllers\ProductsController')->getProductQury($prodCode, $uomCode3);
+
+        $get_stock = app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($prodCode, $uomCode3);
+
+        $stock_now = app('App\Http\Controllers\ProductsController')->getStockNow($get_data, $get_stock, $prodCode, $uomCode3, 'cart');
+
+        $get_all_uom = app('App\Http\Controllers\ProductsController')->getUomName($prodCode);
+
+        if ($qunatity) {
+
+            $cart->addItem($prodCode, $uomCode3, $product, $image, $qunatity, $stock_now, $get_all_uom);
+
+            $cart->updatePriceAndQunatity();
+
+            $request->session()->put('cart', $cart);
+
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully added product to cart.' : 'เพิ่มสินค้าในตะกร้าสำเร็จ');
+        } else {
+
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'Failed to add item to cart.' : 'เพิ่มสินค้าในตะกร้า ไม่สำเร็จ');
+        }
+    }
+
+    public function addProductToCartArray(Request $request)
+    {
+        if ($request->input("addtocart") == "on") {
+            //เพิ่มสินค้าลงในตะกร้าสินค้าแบบมากกว่า1ชิ้น
+            \Config::set('database.default', 'posone_mysql');
+
+            Session::forget('cart');
+
+            $qty = $request->input("id_qty");
+
+            $item_product = $request->input("add_more_item");
+
+            $cart = [];
+
+            foreach ($item_product as $key => $item) {
+
+                $fm_item_product = explode(",", $item);
+
+                $cart[$key]['prodCode'] = $fm_item_product[0];
+
+                $cart[$key]['uomCode'] = $fm_item_product[1];
+
+                $cart[$key]['qty'] = $qty[$key];
+            }
+
+            foreach ($cart as $item) {
+
+                $prevCart = $request->session()->get('cart');
+
+                $add_cart = new Cart($prevCart);
+
+                $product = app('App\Http\Controllers\ProductsController')->getProduct($item['prodCode'], $item['uomCode']);
+
+                $get_image = app('App\Http\Controllers\ProductsController')->getImage($item['prodCode']);
+
+                $image = ($get_image != null) ? $get_image[0]->ProdPicName : null;
+
+                $get_data = app('App\Http\Controllers\ProductsController')->getProductQury($item['prodCode'], $item['uomCode']);
+
+                $get_stock = app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($item['prodCode'], $item['uomCode']);
+
+                $stock_now = app('App\Http\Controllers\ProductsController')->getStockNow($get_data, $get_stock, $item['prodCode'], $item['uomCode'], 'cart');
+
+                $get_all_uom = app('App\Http\Controllers\ProductsController')->getUomName($item['prodCode']);
+
+                $add_cart->addItem($item['prodCode'], $item['uomCode'], $product, $image, $item['qty'], $stock_now, $get_all_uom);
+
+                $add_cart->updatePriceAndQunatity();
+
+                $request->session()->put('cart', $add_cart);
+            }
+
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully edited items in the cart.' : 'แกไขสินค้าในตะกร้า สำเร็จ');
+        } else if ($request->input("delProductInCart") != null) {
+
+            // ลบสินค้าในตะกร้าสินค้า
+            $data_product = $request->input("delProductInCart");
+
+            $data_product2 = explode(",", $data_product);
+
+            $prodCode = $data_product2[0];
+
+            $uomCode = $data_product2[1];
+
+            return self::deleteItemFromCart($request, $prodCode, $uomCode);
+        } else {
+            return back();
+        }
+    }
+
+    public function getProduct($prodCode, $uomCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+        pm.prodCode,
+        pm.prodTName,
+        pm.prodEName,
+        pm.prodShortName,
+        pm.prodStatus,
+        pm.prodIsComplementary,
+        pm.prodIsVat,
+        pm.CompanyCode,
+        pm.prodGroupCode,
+        pg.prodGroupName,
+        pm.referProdCode,
+        pm.productCalcType,ProdAllowMinus ,WarrantyPeriod,ExpirePeriod,ProdInsID,SUPPCode,ProdDetail,
+        pu.prodUnitRatio,
+        pu.prodUnitBarcode,
+        pu.prodUnitPrice,
+        pu.prodUnitDiscount,
+        pu.prodUnit1UOMCode,
+        pu.productPOSCode,
+        pu.isProdBaseUnit,
+        pu.prodUnitPrice1,
+        pu.prodUnitPrice2,
+        pu.prodUnitPrice3,
+        pu.prodUnitPrice4,
+        pu.prodUnitPrice5,
+        pu.prodUnitPrice6,
+        pu.prodUnitPrice7,
+        pu.prodUnitPrice8,
+        pu.prodUnitPrice9,
+        u.uomCode,
+        u.uomName,
+        u.uomDescription,
+        u.uomNameEn,
+        plo.PlaceOrder,
+        psm.IsMenuSet
+        from productshopmasterpos pm
+        inner join productunitpos pu on  pm.prodCode=pu.productposCode
+        inner join unitofmeasurepos u  on  u.uomCode=pu.prodUnit1UOMCode 
+        left outer join productplaceorder plo on plo.prodcode=pm.prodCode
+        left outer join productsetmenu psm on psm.prodcode=pm.prodCode
+        LEFT OUTER JOIN productgrouppos pg ON pm.prodGroupCode = pg.prodGroupCode
+        Where pm.prodcode='" . $prodCode . "' and u.uomCode='" . $uomCode . "'
+        and pm.companyCode='SINGLE' and prodstatus='N'";
+
+        $product = DB::select(DB::raw($qury));
+
+        return $product[0];
+    }
+
+    public static function getCart($request)
+    {
+        $prevCart = $request->session()->get('cart');
+
+        $cart = new Cart($prevCart);
+
+        $cart->updatePriceAndQunatity();
+
+        return $cart;
+    }
+
+    // public function increaseSingleProduct(Request $request, $prodCode, $uomCode)
+    // {
+    //     $cart = self::getCart($request);
+
+    //     $cart->addItem($prodCode, $uomCode, $cart->items[$prodCode.",".$uomCode]['data'], 1);
+
+    //     $cart->updatePriceAndQunatity();
+
+    //     $request->session()->put('cart', $cart);
+
+    //     return back()->withsuccess("เพิ่มสินค้าในตะกร้า สำเร็จแล้ว");
+    // }
+
+    // public function decreaseSingleProduct(Request $request, $prodCode, $uomCode)
+    // {
+    //     $cart = self::getCart($request);
+
+    //     if ($cart->items[$prodCode.",".$uomCode]['quantity'] > 1) {
+
+    //         $cart->items[$prodCode.",".$uomCode]['quantity'] = $cart->items[$prodCode.",".$uomCode]['quantity'] - 1;
+    //         $cart->items[$prodCode.",".$uomCode]['totalSinglePrice'] = $cart->items[$prodCode.",".$uomCode]['quantity'] * $cart->items[$prodCode.",".$uomCode]['data']->prodUnitPrice;
+
+    //         $cart->updatePriceAndQunatity();
+
+    //         $request->session()->put('cart', $cart);
+    //     }
+
+    //     return back()->withsuccess("ลบสินค้าในตะกร้า สำเร็จแล้ว");
+    // }
+
+    public function deleteItemFromCart(Request $request, $prodCode, $uomCode)
+    {
+        $cart = $request->session()->get("cart");
+
+        if (array_key_exists($prodCode . "," . $uomCode, $cart->items)) {
+            unset($cart->items[$prodCode . "," . $uomCode]);
+        }
+
+        $prevCart = $request->session()->get("cart");
+        $updateCart = new Cart($prevCart);
+        $updateCart->updatePriceAndQunatity();
+        $request->session()->put("cart", $updateCart);
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'The product was deleted successfully.' : 'ลบสินค้าสำเร็จ');
+    }
+
+    public function taxDeduction($prodIsVat, $price)
+    {
+        if ($prodIsVat == 'Y') {
+            $price_tax = $price + ($price * 0.07);
+
+            $whole = floor($price_tax);
+
+            $decimal = $price_tax - $whole;
+
+            if ($decimal < 0.88) {
+                if ($decimal < 0.63) {
+                    if ($decimal < 0.38) {
+                        if ($decimal < 0.13) {
+                            $num = 0.00;
+                        } else $num = 0.25;
+                    } else $num = 0.50;
+                } else $num = 0.75;
+            } else $num = 1.00;
+
+            $result = $whole + $num;
+
+            return $result;
+        } elseif ($prodIsVat == 'I') {
+            $whole = floor($price);
+
+            $decimal = $price - $whole;
+
+            if ($decimal < 0.88) {
+                if ($decimal < 0.63) {
+                    if ($decimal < 0.38) {
+                        if ($decimal < 0.13) {
+                            $num = 0.00;
+                        } else $num = 0.25;
+                    } else $num = 0.50;
+                } else $num = 0.75;
+            } else $num = 1.00;
+
+            $result = $whole + $num;
+
+            return $result;
+        } else {
+            return $price * 1.00;
+        }
+    }
+
+    public function taxDeduction2($prodIsVat, $price)
+    {
+        if ($prodIsVat == 'Y') {
+            $whole = floor($price);
+
+            $decimal = $price - $whole;
+
+            if ($decimal < 0.88) {
+                if ($decimal < 0.63) {
+                    if ($decimal < 0.38) {
+                        if ($decimal < 0.13) {
+                            $num = 0.00;
+                        } else $num = 0.25;
+                    } else $num = 0.50;
+                } else $num = 0.75;
+            } else $num = 1.00;
+
+            $result = $whole + $num;
+
+            return $result;
+        } else {
+            return $price * 1.00;
+        }
+    }
+
+    public function searchForId($id, $array)
+    {
+        foreach ($array as $key => $val) {
+            if ($val->whCode === $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+
+    public function searchForRatio($id, $array)
+    {
+        foreach ($array as $key => $val) {
+            if ($val->prodUnitRatio === $id) {
+                return $key;
+            }
+        }
+        return null;
+    }
+}

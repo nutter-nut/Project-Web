@@ -1,0 +1,152 @@
+
+
+<?php $__env->startSection('center'); ?>
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">Checkout</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('Cart')); ?>">Cart</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('Checkout')); ?>">checkout</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+
+    <!--? Checkout Area Start-->
+    <section class="checkout_area section-padding40">
+        <div class="container">
+            <?php if(!Auth::check()): ?>
+            <div class="returning_customer">
+                <div class="check_title">
+                    <h2>
+                        Returning Customer?
+
+                        <a href="/login">Click here to login</a>
+                    </h2>
+                </div>
+                <p>
+                    If you have shopped with us before, please enter your details in the
+                    boxes below. If you are a new customer, please proceed to the
+                    Billing & Shipping section.
+                </p>
+                <form class="row contact_form" action="<?php echo e(route('login')); ?>" method="POST" novalidate="novalidate">
+                <?php echo csrf_field(); ?>
+                    <div class="col-md-6 form-group p_star">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email" autocomplete="email" autofocus />
+                    </div>
+                    <div class="col-md-6 form-group p_star">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" autocomplete="current-password" />
+                    </div>
+                    <div class="col-md-12 form-group d-flex flex-wrap">
+                        <button type="submit" class="btn">log in</button>
+                    </div>
+                </form>
+            </div>
+            <?php endif; ?>
+            <hr>
+            <div class="billing_details">                
+                <div class="row">
+                    <form class="row contact_form" action="<?php echo e(route('sendOrder')); ?>" method="POST" novalidate="novalidate">
+                    <?php echo e(csrf_field()); ?>
+
+                        <div class="col-lg-7">
+                            <h3>Billing Details</h3>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="first" name="first_name" placeholder="First name" required />
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="last" name="last_name" placeholder="Last name" required />
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="number" name="phone" placeholder="Phone number" required />
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <input type="text" class="form-control" id="email" name="email" placeholder="Email Address" required />
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <textarea class="form-control" name="address" placeholder="Address" required></textarea>
+                            </div>                        
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="order_box">
+                                <h2>Your Order</h2>
+                                <ul class="list">
+                                    <li>
+                                        <a>Product<span>Total</span></a>
+                                    </li>
+                                    <?php $__currentLoopData = $cart; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li>
+                                        <a href="<?php echo e(route('productDetails', ['id' => $item['data'][0]['id'] ])); ?>"><?php echo e($item['data'][0]['name']); ?>
+
+                                            <span class="middle">x <?php echo e($item['quantity']); ?></span>
+                                            <span class="last">$<?php echo e($item['totalSinglePrice']); ?></span>
+                                        </a>
+                                    </li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>                                
+                                </ul>
+                                <ul class="list list_2">
+                                    <li>
+                                        <a href="#">Shipping
+                                            <span>Free</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">Total<span>$<?php echo e($totalPrice); ?></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="f-option5" name="selector" value="credit_card" required />
+                                        <label for="f-option5">Check payments</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <p> Please send a check to Store Name, Store Street, Store Town, Store State / County,
+                                        Store Postcode. </p>
+                                </div>
+                                <div class="payment_item active">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="f-option6" name="selector" value="paypal" required />
+                                        <label for="f-option6">Paypal </label>
+                                        <img src="assets/img/gallery/card.jpg" alt="" />
+                                        <div class="check"></div>
+                                    </div>
+                                    <p> Please send a check to Store Name, Store Street, Store Town, Store State / County,
+                                        Store Postcode. </p>
+                                </div>
+                                <div class="creat_account checkout-cap">
+                                    <input type="checkbox" id="f-option8" name="selector" />
+                                    <label for="f-option8">I’ve read and accept the <a href="#">terms & conditions*</a>
+                                    </label>
+                                </div>
+                                <button id="btnSubmit" class="btn w-100" type="submit" >Proceed to Paypal</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--End Checkout Area -->
+
+</main>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.index.index', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\new_template01_abpon\resources\views/checkout.blade.php ENDPATH**/ ?>

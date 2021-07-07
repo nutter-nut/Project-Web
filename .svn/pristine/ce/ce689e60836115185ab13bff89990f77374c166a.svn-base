@@ -1,0 +1,415 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+
+use Auth;
+use Redirect;
+
+use App\Product;
+use App\Cart;
+use App\Review;
+
+class IndexController extends Controller
+{
+    public function index(Request $request)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1); //list categorie
+
+        $data['menugroup'] = $new_data;
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = $this->topProducts();
+
+        return view('index', [ 'data' => $data ]);
+    }
+
+    public function categoriesIndex(Request $request)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1);
+
+        $get_cate = $this->getFilter($data, 2, $request->id); //list categorie data
+
+        $data['menugroup'] = $new_data;
+
+        $data['breadcrumb'] = [
+            'category_id' => $request->id,
+            'category_name' => $request->name
+        ];
+
+        $data['cate_data'] = $get_cate;
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = $this->topProducts();
+
+        return view('categories', [ 'data' => $data ]);
+    }
+
+    public function detalCategories(Request $request, $name)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $get_data = $this->getCateDetal($request->id);
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1);
+
+        $get_cate_de = $this->getFilter($data, 3, $request->id); //list categorie detail data
+
+        $data['menugroup'] = $new_data;
+
+        $data['breadcrumb'] = [
+            'category_id' => $request->category['category_id'],
+            'category_name' => $request->category['category_name'],
+            'category_detail' => $name,
+            'category_detail_id' => $request->id,
+        ];
+
+        $data['cate_detail'] = $get_data[0];
+        $data['cate_detail_filter'] = $get_cate_de;
+
+        $data['image'] = $this->getImage($get_data[0]->PMenuGroupPicThumnail);
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = $this->topProducts();
+
+        return view('categories_detail', [ 'data' => $data ]);
+    }
+
+    public function getProducts(Request $request, $name)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $get_data = $this->getCateDetal($request->category['category_detail_id']);
+
+        $data = $this->getData();
+        
+        $get_cate_de = $this->getFilter($data, 3, $request->category['category_detail_id']); //list categorie detail data
+        
+        $data['breadcrumb'] = [
+            'category_id' => $request->category['category_id'],
+            'category_name' => $request->category['category_name'],
+            'category_detail' => $request->category['category_detail'],
+            'category_detail_id' => $request->category['category_detail_id'],
+            'name' => $name,
+            'id' => $request->id,
+        ];
+
+        $arr_cate_de = [];
+        foreach($get_cate_de as $key => $item){
+            $arr_cate_de[$key]['data'] = $item;
+            $arr_cate_de[$key]['filter'] = $this->getFilter($data, 4, $item->PMenuGroupCode);
+        }
+
+        $data['cate_detail'] = $get_data[0];
+        $data['cate_detail_filter'] = $arr_cate_de;
+
+        $data['image'] = $this->getImage($get_data[0]->PMenuGroupPicThumnail);
+
+        $new_data = $this->getFilter($data, 1, null);
+
+        $data['menugroup'] = $new_data;
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = $this->topProducts();
+
+        return view('products', [ 'data' => $data ]);
+    }
+
+    public function productDetal(Request $request, $prodCode, $uomCode)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $get_data = app('App\Http\Controllers\ProductsController')->getProductQury($prodCode, $uomCode);
+
+        if($get_data == null) return back()->with('fail', (\Session::get('locale') != "th") ? 'No data found' : 'ไม่พบข้อมูล');
+
+        $get_stock = app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($get_data[0]->prodCode, $get_data[0]->prodUnit1UOMCode);
+
+        $product = Product::collection("products")->select('*')->where('prodCode', '=', $prodCode)->andwhere('uomCode', '=', $uomCode)->first();
+
+        $reviews = Review::collection('reviews')
+            ->select('users.name as user_name', 'users.image as user_image', 'reviews.created_at as date', 'reviews.text as review', 'reviews.ratting as ratting', 'reviews.id')
+            ->leftjoin('users', 'reviews.user_id', 'users.id')
+            ->groupby('$selected')
+            ->orderby('reviews.id', 'desc')
+            ->where('reviews.prodCode', '=', $prodCode)
+            ->get();
+
+        $get_uomname = app('App\Http\Controllers\ProductsController')->getUomName($prodCode);
+
+        $get_image = DB::connection('mongodb')->collection("products")->where('prodCode', '=', $prodCode)->first()['image'];
+
+        $price = $product[0]['price'];
+
+        $arr_price = [];
+        foreach ($get_uomname as $key => $item) {
+            $arr_price[$key]['item'] = $item;
+            $arr_price[$key]['price'] = $item['price'];
+            $arr_price[$key]['data_product'] = app('App\Http\Controllers\ProductsController')->getPromotionText($prodCode, $item['uomCode']);
+        }
+
+        $stock_now = app('App\Http\Controllers\ProductsController')->getStockNow($get_data, $get_stock, $prodCode, $uomCode, 'product_details');
+
+        $qty_all = 0;
+        foreach ($cart->items as $key => $item) {
+            $produCode_cart = $item['data']['prodCode'];
+            if($prodCode == $produCode_cart){
+                $qty_all += $item['quantity'] * $item['ratio'];
+            }
+        }
+
+        $qury2 = "select * from productshopmasterpos where prodCode='".$prodCode."'";
+        $get_data2 = DB::select(DB::raw($qury2));
+        $get_data_product = [
+            'prodGroupCode' => app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroupByCode($get_data2[0]->prodGroupCode)[0]->prodGroupName,
+            'ProdTypeCode' => app('App\Http\Controllers\Admin\Product\ProductTypeController')->getProductTypeByCode($get_data2[0]->ProdTypeCode),
+            'ProdBrandCode' => app('App\Http\Controllers\Admin\Product\ProductBrandController')->getProductBrandByCode($get_data2[0]->ProdBrandCode),
+            'ProdModelCode' => app('App\Http\Controllers\Admin\Product\ProductModelController')->getProductModelByCode($get_data2[0]->ProdModelCode),
+        ];
+
+        $get_type_from_grodcode = app('App\Http\Controllers\Admin\Product\ProductTypeController')->getProductTypeByGroupCode($get_data2[0]->prodGroupCode);
+        $text_page = [];
+        foreach($get_type_from_grodcode as $item){
+            array_push($text_page, $item->ProdTypeCode);
+        }
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1);
+
+        $data['menugroup'] = $new_data;
+        $data['get_data'] = $get_data[0];
+        $data['totalQuantity'] = $cart->totalQuantity;
+        $data['get_stock'] = $get_stock;
+        $data['review_count'] = isset($product[0]['review_count']) ? $product[0]['review_count'] : null;
+        $data['review_count_star'] = isset($product[0]['review_count_star']) ? $product[0]['review_count_star'] : null;
+        $data['ratting_product'] = isset($product[0]['ratting_product']) ? $product[0]['ratting_product'] : null;
+        $data['reviews'] = $reviews;
+        $data['get_uomname'] = $get_uomname;
+        $data['uomCode'] = $uomCode;
+        $data['get_image'] = $get_image;
+        $data['price'] = $price;
+        $data['arr_price'] = $arr_price;
+        $data['promotion'] = app('App\Http\Controllers\ProductsController')->getPromotionText($prodCode, $uomCode);
+        $data['details'] = $product[0]['details'];
+        $data['stock_now'] = $stock_now;
+        $data['stock_limit'] = $stock_now['endQty'] - $qty_all;
+        $data['cart'] = $cart->items;
+        $data['get_data_product'] = $get_data_product;
+        $data['best_seller'] = $product[0]['best_seller'];
+        $data['text_page'] = $text_page;
+        $data['cart'] = $cart;
+        $data['top_products'] = $this->topProducts();
+// dd($data);
+        return view('product_detail', [ 'data' => $data ]);
+    }
+
+    public function cartIndex(Request $request)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1); //list categorie
+
+        $data['data'] = [];
+        foreach($cart->items as $key => $item){
+            $get_uomname = app('App\Http\Controllers\ProductsController')->getUomName($item['data']['prodCode']);
+            foreach ($get_uomname as $key2 => $item2) {
+                $arr_price[$key2]['item'] = $item2;
+                $arr_price[$key2]['price'] = $item2['price'];
+                $arr_price[$key2]['data_product'] = app('App\Http\Controllers\ProductsController')->getPromotionText($item2['prodCode'], $item2['uomCode']);
+            }
+            $data['data'][$key]['arr_price'] = $arr_price;
+
+            $get_data = app('App\Http\Controllers\ProductsController')->getProductQury($item['data']['prodCode'], $item['data']['uomCode']);
+            $get_stock = app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($get_data[0]->prodCode, $get_data[0]->prodUnit1UOMCode);
+            $data['data'][$key]['stock_now'] = app('App\Http\Controllers\ProductsController')->getStockNow($get_data, $get_stock, $item['data']['prodCode'], $item['data']['uomCode'], 'product_details');
+
+            $qty_all = 0;
+            foreach ($cart->items as $key3 => $item3) {
+                $produCode_cart = $item3['data']['prodCode'];
+                if($item['data']['prodCode'] == $produCode_cart){
+                    $qty_all += $item3['quantity'] * $item3['ratio'];
+                }
+            }
+
+            $data['data'][$key]['stock_limit'] =  $data['data'][$key]['stock_now']['endQty'] - $qty_all;
+            $data['data'][$key]['arr_qty_mian'] = $item['quantity'] . "-" . $item['data']['uomCode'];
+        }
+
+        (Auth::check()) ? $address = app('App\Http\Controllers\ProfileController')->getAddress(Auth::user()->id) : $address = [];
+
+        $data['menugroup'] = $new_data;
+
+        $data['cart'] = $cart;
+
+        $data['address'] = $address;
+
+        $data['top_products'] = $this->topProducts();
+// dd($data);
+        return view('cart', [ 'data' => $data ]);
+    }
+
+    public function getCateDetal($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT * from productmenugroup where PMenuGroupCode = '".$id."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function topProducts()
+    {
+        $top_products = app('App\Http\Controllers\Admin\DashboardsController')->getTopProducts(date("Y"));
+
+        foreach($top_products as $key => $item){
+            $data_top_products[$key]['data'] = $item;
+            $data_top_products[$key]['detal'] = app('App\Http\Controllers\ProductsController')->getProduct($item['product_id'], $item['product_uom']);
+        }
+
+        return $data_top_products;
+    }
+
+    public function getFilter($data, $num_in, $cate = null)
+    {
+        $new_data = [];
+
+        foreach($data['menugroup'] as $key => $item){
+            $arr_item = explode("_", $item->PMenuGroupCode);
+            $num = count($arr_item);
+
+            $if_cate = $cate != null && $num_in != 3 && $num_in != 4 ? $arr_item[0] == $cate : true;
+
+            if($num == $num_in && $if_cate){
+                if($num_in == 3){
+                    $text = $arr_item[0].'_'.$arr_item[1];
+                    if($text == $cate) $new_data[] = $item;
+                }else if($num_in == 4){
+                    $text = $arr_item[0].'_'.$arr_item[1].'_'.$arr_item[2];
+                    if($text == $cate) $new_data[] = $item;
+                }else{
+                    $new_data[] = $item;
+                }
+            }
+        }
+        
+        return $new_data;
+    }
+
+    public function findProducts($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        
+        $filter = json_decode($id);
+
+        $category_detail_id = explode("_", $filter[0]);
+
+        $text_filter = "";
+
+        foreach($filter[1] as $key => $item){
+            $arr_id = explode(",", $item);
+            $text_filter .= "prodMenuGroupCode='".$arr_id[1]."' or ";  
+        }
+        
+        $qury = "select * from producttmenudetail where ".$text_filter."";
+
+        $words = explode(' ',$qury);
+        $noofwords = count($words); 
+        unset($words[$noofwords-2]);
+        $qury2 = implode(' ',$words); 
+
+        ($filter[1] != null) ? $text_like = "or" : $text_like = "where";
+
+        $qury3 = $qury2 . " " . $text_like . " prodMenuGroupCode like '%".$category_detail_id[0]."' or prodMenuGroupCode like '%".$category_detail_id[0].'_'.$category_detail_id[1]."'";
+
+        $get_data = DB::select(DB::raw($qury3));
+
+        $get_products = $this->getProductsAfterFindFilter($get_data);
+
+        $new_prodoucts = [];
+        foreach($get_products as $key => $item){
+            $new_prodoucts[$key]['posone'] = $item;
+            $new_prodoucts[$key]['web'] = app('App\Http\Controllers\ProductsController')->getProduct($item[0]->prodCode, $item[0]->uomCode);
+        }
+
+        return $new_prodoucts;
+    }
+
+    public function getProductsAfterFindFilter($data)
+    {
+        $products = [];
+        foreach($data as $item){
+            $qury = "
+                select pm.productPOSId, pm.prodCode, pm.prodEName, pm.prodIsVat, pu.prodUnitPrice , pu.prodUnitRatio, u.uomCode, u.uomName
+                from productshopmasterpos pm 
+                inner join productunitpos pu on pm.prodCode = pu.productposCode
+                inner join unitofmeasurepos u on u.uomCode = pu.prodUnit1UOMCode
+                where pm.prodCode='".$item->ProdCode."'
+                order by pu.prodUnitPrice asc
+            ";
+            $get_data = DB::select(DB::raw($qury));
+            $products[] = $get_data;
+        }
+
+        return $products;
+    }
+
+    public function getData()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productmenugroup";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        foreach ($get_data as $key => $item) {
+            $get_data[$key]->{'image'} = $this->getImage($item->PMenuGroupPicThumnail);
+        }
+
+        $data = [
+            'menugroup' => $get_data
+        ];
+
+        return $data;
+    }
+
+    public function getImage($file)
+    {
+        if (\File::exists('posone_images/SINGLE/MenuGroup/' . $file) && $file != null) {
+            $data = [
+                'exists' => true,
+                'url' => url("posone_images/SINGLE/MenuGroup/{$file}"),
+            ];
+
+        } else {
+            $data = [
+                'exists' => false,
+                'url' => url("storage/product_images/product_default.png"),
+            ];
+        } 
+        return $data;
+    }
+
+}

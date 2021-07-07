@@ -1,0 +1,480 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+
+class PromotionController extends Controller
+{
+    public function index()
+    {
+        $get_promotion = self::getPromotion();
+
+        $get_last_promotion = self::getLastPromotion();
+
+        $get_last_pmCode = self::getLastPMCode($get_last_promotion[0]->PMCode);
+
+        $get_promotion_group = app('App\Http\Controllers\Admin\PromotionGroupController')->getPromotionGroup();
+
+        return view('login.admin.posone.displayPromotion', [
+            'promotion' => $get_promotion,
+            'promotion_group' => $get_promotion_group,
+            'last_pmCode' => $get_last_pmCode
+        ]);
+    }
+
+    public function getPromotion()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $date = date('Y-m-d');
+
+        $qury = "select * from promotionmaster left outer join copromotion co 
+        on co.coCode=promotionmaster.coPromotionCode  where   ( pmStatus !='D' and  PMEndDate >= '".$date."') order by PMId desc";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        $arr_promotion = [];
+        foreach($get_data as $key => $item){
+            $arr_promotion[$key]['data'] = $item;
+            $arr_promotion[$key]['discAllRate'] = app('App\Http\Controllers\PromotionController')->getpromotionDiscAllRate($item->PMId);
+            $arr_promotion[$key]['discAllAmt'] = app('App\Http\Controllers\PromotionController')->getpromotionDiscAllAmt($item->PMId);
+        }
+
+        return $arr_promotion;
+    }
+
+    public function getLastPMCode($pmCode)
+    {
+        $date = date('ym');
+
+        $arr_pmCode = explode("-",$pmCode);
+
+        $pmCode_date = substr($arr_pmCode[0], 2);
+
+        if($date == $pmCode_date){
+            $num = $arr_pmCode[1] + 1;
+            $num2 = substr(str_repeat(0, 4).$num, - 4);
+
+        }else{
+            $num2 = "0001";
+        }
+
+        $new_pmCode = "PM" . $date . "-" . $num2;
+
+        return $new_pmCode;
+    }
+
+    public function getLastPromotion()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from promotionmaster left outer join copromotion co 
+        on co.coCode=promotionmaster.coPromotionCode order by PMId desc limit 1";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function promotionInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'PMCode' => 'required|unique:promotionmaster|max:32',
+            'pmName' => 'required|max:32',
+            'datefilter' => 'required',
+            'promDay' => 'required',
+            'promotion_group' => 'required',
+            'discount_per' => 'required',
+        ]);
+        
+        $PMCode = $request->input("PMCode");
+        $pmName = $request->input("pmName");
+        $endDate = $request->input("endDate");
+        $promDay = $request->input("promDay");
+        $promotion_group = $request->input("promotion_group");
+        
+        $pmDetail = $request->input("pmDetail");
+
+        // -------------------------
+
+        $datefilter = $request->input("datefilter");
+
+        $arr_datefilter = explode(" to ", $datefilter);
+
+        $start_date = $arr_datefilter[0];
+        $arr_start_date = explode("T", $start_date);
+        $start_date_format_time = date("G:i", strtotime($arr_start_date[1]));
+
+        $end_date = $arr_datefilter[1];
+        $arr_end_date = explode("T", $end_date);
+        $end_date_format_time = date("G:i", strtotime($arr_end_date[1]));
+
+        // -------------------------
+
+        $discount_per = ($request->input("discount_per") != null) ? $request->input("discount_per") * 1 : 0;
+        $discount = ($request->input("discount") != null) ? $request->input("discount") * 1 : 0;
+
+        $days = implode(",", $promDay);
+
+        $date = date('Y-m-d H:i:s');
+
+        $arr_qury = [
+            "call sp_promotionmaster_insert ('', 'N', '".$days."', '".$end_date_format_time."', '".$start_date_format_time."', '".$PMCode."', '".$pmName."', '', '', '".$arr_start_date[0]."', '".$arr_end_date[0]."', 'Y', 'Y', 'Y', '', 'PRODGETFREE', 'W', '".$date."', 'SINGLE00-0001', '".$date."', 'SINGLE00-0001', 'SINGLE', 0, '".$pmDetail."', 'Y')",
+            "call sp_promotiondetail_insert ('', 0, 0, ".$discount_per.", ".$discount.", 0, 0, '', 'RESULT', 0, 0, 0, 0, 0, '".$PMCode."', 'SINGLE')",
+        ];
+
+        if(isset($promotion_group)){
+            foreach($promotion_group as $key => $item){
+                $call = "call sp_promotiondetail_insert ('".$item."', 0, 0, 0, 0, 1, 1, '', 'CONDITION', 0, 0, 0, 0, 0, '".$PMCode."', 'SINGLE')";
+                array_splice($arr_qury, (count($promotion_group) == 1) ? 1 : count($promotion_group) - 1, 0, $call);
+            }
+        }
+
+        foreach($arr_qury as $item){
+            DB::select(DB::raw($item));
+        }
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'promotion', [
+            'th' => 'เพิ่มโปรโมชั่น ' . $pmName,
+            'en' => 'Successfully created ' . $pmName . ' promotion.',
+        ]);
+        // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+
+        return redirect()->route('adminPromotion')->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function promotionEdit($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $date = date('Y-m-d');
+
+        $qury = "select * from promotionmaster left outer join copromotion co 
+        on co.coCode=promotionmaster.coPromotionCode where ( PMId = '".$id."' and PMEndDate >= '".$date."' )";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        $arr_promDay = explode(",", $get_data[0]->PromDay);
+
+        $startDate = $get_data[0]->PMStartDate . "T" . $get_data[0]->StartTime;
+        $endDate = $get_data[0]->PMEndDate . "T" . $get_data[0]->EndTime;
+
+        $get_promotion_group = app('App\Http\Controllers\Admin\PromotionGroupController')->getPromotionGroup();
+
+        $get_promotion_group2 = self::getPromotionGroup($get_data[0]->PMId, "edit");
+
+        $arr_promotion_group_select = [];
+        foreach($get_promotion_group2 as $key => $item){
+            $arr_promotion_group_select[$key] = $item->PromotionProdGroupCode;
+        }
+
+        $promotion_group_select = implode(",", $arr_promotion_group_select);
+
+        $datefilter_start_value = $get_data[0]->PMStartDate."T".date("g:i a", strtotime($get_data[0]->StartTime));
+        $datefilter_end_value = $get_data[0]->PMEndDate."T".date("g:i a", strtotime($get_data[0]->EndTime));
+
+        return view('login.admin.posone.editPromotion', [
+            'promotion_edit' => $get_data[0],
+            'promotion_group' => $get_promotion_group,
+            'promotion_time' => [
+                'start' => $startDate,
+                'end' => $endDate
+            ],
+            'promotion_dc' => [
+                'discAllRate' => app('App\Http\Controllers\PromotionController')->getpromotionDiscAllRate($get_data[0]->PMId),
+                'discAllAmt' => app('App\Http\Controllers\PromotionController')->getpromotionDiscAllAmt($get_data[0]->PMId)
+            ],
+            'select_promotion_group' => $get_promotion_group2,
+            'arr_promDay' => $arr_promDay,
+            'promotion_group_select' => $promotion_group_select,
+            'datefilter_value' => [
+                'start' => $datefilter_start_value,
+                'end' => $datefilter_end_value
+            ]
+        ]);
+    }
+
+    public function getPromotionGroup($pmId, $status)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        if($status == 'edit'){
+
+            $qury = "select * from promotiondetail pd  join promotionprodgroupmaster pm on pm.PGPCode = pd.PromotionProdGroupCode where pd.PMId = '".$pmId."' and pd.Type = 'CONDITION'" ;
+
+        }elseif($status == 'update'){
+
+            $qury = "select * from promotiondetail where PMId = '".$pmId."'" ;
+        }
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function promotionUpdate(Request $request, $id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'PMCode' => 'required',
+            'pmName' => 'required|max:32',
+            'datefilter' => 'required',
+            'promDay' => 'required',
+            'promotion_group' => 'required',
+        ]);
+
+        $PMCode = $request->input("PMCode");
+        $pmName = $request->input("pmName");
+        $promDay = $request->input("promDay");
+        $pmDetail = $request->input("pmDetail");
+
+        $promotion_group = $request->input("promotion_group");
+
+        // -------------------------
+
+        $datefilter = $request->input("datefilter");
+
+        $arr_datefilter = explode(" to ", $datefilter);
+
+        $start_date = $arr_datefilter[0];
+        $arr_start_date = explode("T", $start_date);
+        $start_date_format_time = date("G:i", strtotime($arr_start_date[1]));
+
+        $end_date = $arr_datefilter[1];
+        $arr_end_date = explode("T", $end_date);
+        $end_date_format_time = date("G:i", strtotime($arr_end_date[1]));
+
+        // -------------------------
+
+        $promotion_group_select = $request->input("promotion_group_select");
+        $arr_promotion_group_select = explode(",", $promotion_group_select);
+
+        $del_promotion = array_diff($arr_promotion_group_select,$promotion_group);
+
+        $ins_promotion = [];
+        $upd_promotion = [];
+
+        foreach($promotion_group as $items){
+            if(in_array($items, $arr_promotion_group_select)){
+                array_push($upd_promotion, $items);
+            }else array_push($ins_promotion, $items);
+        }
+
+        $discount_per = ($request->input("discount_per") != null) ? $request->input("discount_per") * 1 : 0;
+        $discount = ($request->input("discount") != null) ? $request->input("discount") * 1 : 0;
+
+        $days = implode(",", $promDay);
+
+        $date = date('Y-m-d H:i:s');
+
+        $get_promotion_group = self::getPromotionGroup($id, "update");
+
+        $detailId_master = self::searchForId('', 'PromotionProdGroupCode', $get_promotion_group, 'RESULT');
+
+        $arr_qury = [
+            "call sp_promotionmaster_update ('', 'N', '".$days."', '".$end_date_format_time."', '$start_date_format_time', '".$PMCode."', '".$pmName."', '', '', '".$arr_start_date[0]."', '".$arr_end_date[0]."', 'Y', 'Y', 'Y', '', 'PRODGETFREE', 'W', '".$date."', 'SINGLE00-0001', 'SINGLE', 0, '".$pmDetail."', 'Y')",
+            "call sp_promotiondetail_update ('".$detailId_master."', '', 0, 0, ".$discount_per.", ".$discount.", 0, 0, '', 'RESULT', 0, 0, 0, 0, 0, '".$PMCode."', 'SINGLE')",
+        ];
+
+        if(isset($ins_promotion)){
+            foreach($ins_promotion as $key => $item)
+            {
+                $call = "call sp_promotiondetail_insert ('".$item."', 0, 0, 0, 0, 1, 1, '', 'CONDITION', 0, 0, 0, 0, 0, '".$PMCode."', 'SINGLE')";
+                array_splice($arr_qury,(count($promotion_group) == 1) ? 1 : count($promotion_group) - 1, 0, $call);
+            }
+        }
+
+        if(isset($upd_promotion)){
+            foreach($upd_promotion as $key => $item)
+            {
+                $detailId = self::searchForId($item, 'PromotionProdGroupCode', $get_promotion_group, 'CONDITION');
+                $call = "call sp_promotiondetail_update ('".$detailId."', '".$item."', 0, 0, 0, 0, 1, 1, '', 'CONDITION', 0, 0, 0, 0, 0, '".$PMCode."', 'SINGLE')";
+                array_splice($arr_qury,(count($promotion_group) == 1) ? 1 : count($promotion_group) - 1, 0, $call);
+            }
+        }
+
+        if(isset($del_promotion)){
+            foreach($del_promotion as $key => $item)
+            {
+                $detailId = self::searchForId($item, 'PromotionProdGroupCode', $get_promotion_group, 'CONDITION');
+                $call = "call sp_promotiondetail_delete ('".$detailId."', '".$PMCode."', 'SINGLE')";
+                array_splice($arr_qury,(count($promotion_group) == 1) ? 1 : count($promotion_group) - 1, 0, $call);
+            }
+        }
+
+        foreach($arr_qury as $item){
+            DB::select(DB::raw($item));
+        }
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'promotion', [
+            'th' => 'อัพเดทโปรโมชั่น ' . $pmName,
+            'en' => 'Successfully updated ' . $pmName . ' promotion.',
+        ]);
+        // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+
+        return redirect()->route('adminPromotion')->withsuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'อัพเดทสำเร็จ');
+    }
+
+    public function searchForId($value, $index, $array, $type) 
+    {
+        if($type != 'CONDITION'){
+            foreach($array as $key => $item){
+                if($item->Type == 'RESULT'){
+                    return $array[$key]->detailId;
+                }
+            }
+        }else{
+            foreach ($array as $key => $val) {
+                if ($val->$index === $value) {
+                    return $val->detailId;
+                }
+            }
+            return null;
+        }
+    }
+
+    public function promotionDelete($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $date = date('Y-m-d');
+
+        $qury = "select * from promotionmaster left outer join copromotion co 
+        on co.coCode=promotionmaster.coPromotionCode  where   ( pmStatus !='D' and  PMEndDate >= '".$date."' and PMId = '".$id."')";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        if(count($get_data) > 0){
+
+            app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'promotion', [
+                'th' => 'ลบโปรโมชั่น ' . $$get_data[0]->PMName,
+                'en' => 'Successfully delete ' . $$get_data[0]->PMName . ' promotion.',
+            ]);
+            
+            $date2 = date('Y-m-d H:i:s');
+    
+            $qury2 = "call sp_promotionmaster_update ('', 'N', '".$get_data[0]->PromDay."', '".$get_data[0]->EndTime."', '".$get_data[0]->StartTime."', '".$get_data[0]->PMCode."', '".$get_data[0]->PMName."', '', '', '".$get_data[0]->PMStartDate."', '".$get_data[0]->PMEndDate."', 'Y', 'Y', 'Y', '', 'PRODGETFREE', 'D', '".$date2."', 'SINGLE00-0001', 'SINGLE', 0, '".$get_data[0]->PMDetail."', 'Y')";
+    
+            DB::select(DB::raw($qury2));
+
+            // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+    
+            return redirect()->route('adminPromotion')->withsuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+
+        }else{
+
+            return redirect()->route('adminPromotion')->with('fail', (\Session::get('locale') != "th") ? 'Failed to delete.' : 'ลบ ไม่สำเร็จ');
+        }
+
+    }
+
+    public function getPromotionDetail($prodCode, $uomCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from promotionprodgroupdetail pgd
+        inner join promotionprodgroupmaster pgm on pgd.PGPId=pgm.PGPId
+        where pgd.ProductCode = '".$prodCode."' and pgd.ProductUnitCode = '".$uomCode."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        $arr_promotion = [];
+        foreach($get_data as $key => $item){
+            $call = "select * from promotiondetail where PromotionProdGroupCode = '".$item->PGPCode."' ";
+            $get_data = DB::select(DB::raw($call));
+ 
+            // $arr_promotion[$key]['data'] = $item;
+            // $arr_promotion[$key]['promotion'] = $get_data;
+            $arr_promotion[$key] = self::getPromotionFromDetailId($get_data);
+
+        }
+        // return array_filter($arr_promotion);
+
+        if(array_filter($arr_promotion)){
+            $text_promotion = '';
+            $discount = 0;
+            foreach(array_filter($arr_promotion) as $key => $item){
+                if($item != null){
+                    $text_promotion = $text_promotion . " " . $item[0]->PMName;
+                    $discount += $item[0]->DiscAllRate;
+                }else return 1;
+            }
+            return ['text_promotion' => $text_promotion, 'discount' => $discount];
+        }else return null;
+
+    }
+
+    public function getPromotionFromDetailId($arr)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $date = date('Y-m-d');
+
+        $time = date('H:i:s');
+
+        $date_toDay = strtoupper(date('D'));
+
+        $arr_data = [];
+        foreach($arr as $key => $item){
+            $call = "select * from promotiondetail pd
+            inner join promotionmaster pm on pd.PMId=pm.PMId where pd.PMId = '".$item->PMId."' ";
+
+            $get_data = DB::select(DB::raw($call));
+
+            foreach($get_data as $key2 => $item)
+            {
+                // $s_day = $item->PMStartDate >= $date || $item->PMStartDate <= $date;
+                $arr_PromDay = explode(",", $item->PromDay);
+
+                $start_day = $item->PMStartDate <= $date;
+
+                $end_day = $item->PMEndDate < $date;
+
+                $start_time = $time >= $item->StartTime;
+                
+                $end_time = $time > $item->EndTime;
+
+                if($item->Type != 'CONDITION' && $item->PMStatus != 'D' && $start_day && !$end_day && in_array($date_toDay, $arr_PromDay)){
+
+                    if($date == $item->PMStartDate && $date == $item->PMEndDate){
+
+                        if($start_time && !$end_time) $arr_data[$key] = $item;
+                        else unset($get_data[$key2]);
+                        
+                    }else{
+                        if($date == $item->PMStartDate){
+    
+                            if($start_time) $arr_data[$key] = $item;
+                            else unset($get_data[$key2]);
+    
+                        }elseif($date == $item->PMEndDate){
+    
+                            if(!$end_time) $arr_data[$key] = $item;
+                            else unset($get_data[$key2]);
+    
+                        }else $arr_data[$key] = $item;
+                    }
+
+                }else unset($get_data[$key2]);
+                
+            }
+        }
+
+        if($arr_data != null){
+            foreach($arr_data as $item){
+                $result[0] = $item;
+            }
+        }
+
+        return ($arr_data != null) ? $result : null;
+    }
+}

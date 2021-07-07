@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Product;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+
+class ProductBrandController extends Controller
+{
+    public function index($get_data_edit = null)
+    {
+        $get_product_brand = self::getProductBrand();
+
+        return view('login.admin.posone.displayProductBrand', [
+            'product_brand' => $get_product_brand,
+            'data_edit' => $get_data_edit != null ? $get_data_edit[0] : null
+        ]);
+    }
+
+    public function getProductBrand()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productbrand Order by prodBrandCode";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function productBrandInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'prodBrandCode' => 'required|unique:productbrand|max:32',
+            'prodBrandName' => 'required|max:128',
+            'Remark' => 'max:255',
+        ]);
+
+        $code = $request->input('prodBrandCode');
+        
+        $name = $request->input('prodBrandName');
+
+        $remark = $request->input('Remark');
+
+        $qury = "call sp_productbrand_insert ('".$remark."', 'SINGLE', '".$code."', '".$name."', '')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'product brand', [
+            'th' => 'เพิ่มยี่ห้อสินค้า ' . $name,
+            'en' => 'Successfully created ' . $name . ' product brand.',
+        ]);
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function productBrandEdit($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productbrand where prodBrandCode = '".$id."' Order by prodBrandCode";
+
+        $get_data = DB::select(DB::raw($qury));
+    
+        return self::index($get_data);
+    }
+
+    public function productBrandUpdate(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'prodBrandName' => 'required|max:32',
+            'Remark' => 'max:255',
+        ]);
+
+        $code = $request->input('prodBrandCode');
+
+        $name = $request->input('prodBrandName');
+
+        $remark = $request->input('Remark');
+
+        $qury = "call sp_productbrand_update ('".$remark."', 'SINGLE', '".$code."', '".$name."', '')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'product brand', [
+            'th' => 'อัพเดทยี่ห้อสินค้า ' . $name,
+            'en' => 'Successfully updated ' . $name . ' product brand.',
+        ]);
+
+        return redirect()->route('adminProductBrand')->withsuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'อัพเดทสำเร็จ');
+    }
+
+    public function productBrandDelete($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury2 = "select * from productbrand where prodBrandCode = '".$id."'";
+
+        $get_data2 = DB::select(DB::raw($qury2));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'error', 'product brand', [
+            'th' => 'ลบยี่ห้อสินค้า ' . $get_data2[0]->prodBrandName,
+            'en' => 'Deleted ' . $get_data2[0]->prodBrandName . ' product brand successfully.',
+        ]);
+
+        $qury = "call sp_productbrand_delete ('".$id."')";
+
+        DB::select(DB::raw($qury));
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+    }
+
+    public function getProductBrandByCode($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productbrand where prodBrandCode = '".$id."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data != null ? $get_data[0]->prodBrandName : null;
+    }
+}

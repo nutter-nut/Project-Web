@@ -1,0 +1,9 @@
+<?php echo $__env->yieldContent('top'); ?>
+
+<?php echo $__env->make('layouts.auth.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+<?php echo $__env->yieldContent('center'); ?>
+
+<?php echo $__env->make('layouts.auth.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+<?php echo $__env->yieldContent('bottom'); ?><?php /**PATH C:\xampp\htdocs\new_template01_abpon\resources\views/layouts/auth/index.blade.php ENDPATH**/ ?>

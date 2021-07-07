@@ -1,0 +1,170 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Product;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+
+use Auth;
+
+class ProductMenuGroupController extends Controller
+{
+    /**
+     * Handle the incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index($get_data_edit = null)
+    {
+        $get_menugroup = $this->getMenuGroup();
+
+        $data['get_menugroup'] = $get_menugroup;
+
+        $data['get_filter'] = $this->getFilter($get_menugroup);
+
+        $data['get_data_edit'] = $get_data_edit != null ? $this->getDataEdit($get_data_edit[0]) : null;
+
+        return view('login.admin.posone.displayProductMenuGroup', [ 'data' => $data ]);
+    }
+
+    public function productMenuGroupInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'prodMenuGroupName' => 'required',
+            'image' => 'required',
+        ]);
+
+        Validator::make($request->all(), ['image.*' => "required|file|image|mimes:jpg,png,jpeg|max:1000"])->validate();
+
+        $image = $request->image;
+
+        $PMenuGroupName = $request->prodMenuGroupName;
+
+        $PMenuGroupParent = $request->prodMenuGroupType;
+
+        $new_menu_group = $request->new_categorie != null ? 1 : 0;
+
+        if($new_menu_group){
+
+            $get_data = app('App\Http\Controllers\IndexController')->getData();
+
+            $get_menugroup = app('App\Http\Controllers\IndexController')->getFilter($get_data, 1);
+
+            $max = max(array_column($get_menugroup, 'PMenuGroupCode'));
+
+            $PMenuGroupCode = sprintf("%03d", $max + 1);
+
+        }else{
+
+            $arr_PMenuGroupParent = explode("_", $PMenuGroupParent);
+
+            $count = count($arr_PMenuGroupParent);
+
+            $get_data = app('App\Http\Controllers\IndexController')->getData();
+
+            $parent = '';
+            for ($i = 0; $i < $count-1; $i++) { 
+                $parent .= $arr_PMenuGroupParent[$i] . '_';
+            }
+
+            $parent = substr($parent, 0, -1);
+            
+            $get_menugroup = app('App\Http\Controllers\IndexController')->getFilter($get_data, $count, $parent);
+
+            $max = max(array_column($get_menugroup, 'PMenuGroupCode'));
+
+            $arr_max = explode("_", $max);
+
+            $PMenuGroupCode_last = sprintf("%03d", $arr_max[count($arr_max) - 1] + 1);
+
+            $PMenuGroupCode = $arr_max[0] . '_' . $PMenuGroupCode_last;
+
+        }
+        
+        $imageName = $PMenuGroupCode . '_' . $image->getClientOriginalName();
+        $imageEncoded = File::get($image);
+        Storage::disk('local')->put('public/posone_images/SINGLE/MenuGroup/'.$imageName, $imageEncoded);
+
+        $PMenuGroupCode2 = $new_menu_group ? $PMenuGroupCode : $arr_max[count($arr_max) - 2];
+
+        $qury = "call sp_productmenugroup_insert ('".$PMenuGroupCode."', '".$PMenuGroupName."', '".$imageName."',  '".$PMenuGroupCode2."', 'SINGLE', 'N')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'product', [
+            'th' => 'เพิ่มเมนูขาย ' . $PMenuGroupName,
+            'en' => 'Successfully created menugroup' . $PMenuGroupName . ' product.',
+        ]);
+
+        return back()->withSuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function getDataEdit($data)
+    {
+        $image = app('App\Http\Controllers\IndexController')->getImage($data->PMenuGroupPicThumnail);
+        
+        $data->image = $image;
+
+        return $data;
+    }
+
+    public function productMenuGroupEdit($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productmenugroup where PMenuId = '".$id."' ";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $this->index($get_data);
+    }
+
+    public function getFilter($data)
+    {
+        foreach($data as $key => $item){
+            $arr_item = explode("_", $item->PMenuGroupCode);
+            $num = count($arr_item);
+
+            if($num > 1 && $num < 4){
+                $new_data[] = $item;
+            }
+        }
+
+        return $new_data;
+    }
+
+    public function getMenuGroup()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productmenugroup order by PMenuId asc";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        foreach($get_data as $key => $item){
+            $new_data[$key] = $item;
+            $new_data[$key]->type = $this->getName($item->PMenuGroupParent);
+        }
+
+        return $get_data;
+    }
+
+    public function getName($code)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productmenugroup where PMenuGroupCode = '".$code."' ";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return ($get_data != null) ? $get_data[0]->PMenuGroupName : null;
+    }
+}

@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Product;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+
+class ProductModelController extends Controller
+{
+    public function index($get_data_edit = null)
+    {
+        $get_product_model = self::getProductModel();
+
+        $get_edit = app('App\Http\Controllers\Admin\ProductsController')->getDataEdit($get_product_model, $get_data_edit, 'ProdModelID');
+
+        return view('login.admin.posone.displayProductModel', [
+            'product_model' => $get_product_model,
+            'data_edit' => $get_edit
+        ]);
+    }
+
+    public function getProductModel()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productModel Order by prodModelCode";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function productModelInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'ProdModelCode' => 'required|unique:productModel|max:32',
+            'ProdModelName' => 'required|max:128',
+            'Remark' => 'max:1000',
+        ]);
+
+        $code = $request->input('ProdModelCode');
+        
+        $name = $request->input('ProdModelName');
+
+        $remark = $request->input('Remark');
+
+        $qury = "call sp_productmodel_insert ('".$remark."', 'SINGLE', '".$code."', '".$name."', '')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'product model', [
+            'th' => 'เพิ่มรุ่นสินค้า ' . $name,
+            'en' => 'Successfully created ' . $name . ' product model.',
+        ]);
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function productModelEdit($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productModel where prodModelCode = '".$id."' Order by prodModelCode";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return self::index($get_data);
+    }
+
+    public function productModelUpdate(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'ProdModelName' => 'required|max:32',
+            'Remark' => 'max:255',
+        ]);
+
+        $code = $request->input('ProdModelCode');
+
+        $name = $request->input('ProdModelName');
+
+        $remark = $request->input('Remark');
+
+        $qury = "call sp_productmodel_update  ('".$remark."', 'SINGLE', '".$code."', '".$name."', '')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'product model', [
+            'th' => 'อัพเดทรุ่นสินค้า ' . $name,
+            'en' => 'Successfully updated ' . $name . ' product model.',
+        ]);
+
+        return redirect()->route('adminProductModel')->withsuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'อัพเดทสำเร็จ');
+    }
+
+    public function productModelDelete($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury2 = "select * from productModel where prodModelCode = '".$id."'";
+
+        $get_data2 = DB::select(DB::raw($qury2));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'error', 'product model', [
+            'th' => 'ลบรุ่นสินค้า ' . $get_data2[0]->ProdModelCode,
+            'en' => 'Deleted ' . $get_data2[0]->ProdModelCode . ' product model successfully.',
+        ]);
+
+        $qury = "call sp_productmodel_delete  ('".$id."')";
+
+        DB::select(DB::raw($qury));
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+    }
+
+    public function getProductModelByCode($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productModel where prodModelCode = '".$id."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data != null ? $get_data[0]->ProdModelName : null;
+    }
+}

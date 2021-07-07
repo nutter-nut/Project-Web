@@ -1,0 +1,190 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div class="searchparams"
+            data-searchparams="{&quot;subcategory&quot;:&quot;Concrete Screws&quot;,&quot;pid&quot;:&quot;17291&quot;}">
+        </div>
+
+        <ol class="breadcrumb breadcrumb-arrow mb-5">
+            <li><a href="{{ route('Index') }}">Home</a></li>
+            <li><a href="{{ route('categoriesIndex', [ 'id' => $data['breadcrumb']['category_id'], 'name' => $data['breadcrumb']['category_name'] ]) }}">{{ $data['breadcrumb']['category_name'] }}</a></li>
+            <li><a href="{{ route('detalCategories', [ 'id' => $data['breadcrumb']['category_detail_id'], 'name' => $data['breadcrumb']['category_detail'], 'category' => $data['breadcrumb'] ]) }}">{{ $data['breadcrumb']['category_detail'] }}</a></li>
+            <li class="active"><span>{{ str_replace(',', '/', $data['breadcrumb']['name']) }}</span></li>
+            <input type="hidden" name="category_detail_id" id="category_detail_id" value="{{ $data['breadcrumb']['category_detail_id'] }}" />
+        </ol>
+
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 sidebar hidden-xs" id="criteria-container">
+            <div class="filter-wrapper" id="filter-wrapper">
+                <h3><strong>{{ __('index.product.narrow_your_choices') }}</strong></h3>
+                @foreach($data['cate_detail_filter'] as $items)
+                    <div class="check_box" id="check_box_{{ $items['data']->PMenuGroupName }}">
+                        <h4 id="panel-{{ $items['data']->PMenuGroupName }}" class="active panel-toggle" onclick="panelToggle('{{ $items['data']->PMenuGroupName }}', true)">{{ $items['data']->PMenuGroupName }}</h4>
+                        <form id="form-panel-{{ $items['data']->PMenuGroupName }}" action="#" style="display: block;">
+                            <fieldset>
+                                @foreach($items['filter'] as $item)
+                                    <p><input type="checkbox" class="selectable" name="{{ $items['data']->PMenuGroupCode }}" value="{{ $item->PMenuGroupCode }}" @if($data['breadcrumb']['name'] == $items['data']->PMenuGroupName || $data['breadcrumb']['name'] == 'All') checked @endif onclick="checkBox()"><label for="">{{ $item->PMenuGroupName }}</label></p>
+                                @endforeach
+                                <!-- <p><input type="checkbox" class="selectable" name="{{ $items['data']->PMenuGroupCode }}" value="other" @if($data['breadcrumb']['name'] == 'All') checked @endif onclick="checkBox()"><label for="">other</label></p> -->
+                            </fieldset>
+                        </form>
+                    </div>
+                @endforeach
+                <div class="button-wrapper">
+                    <div class="hidden-sm hidden-md hidden-lg" style="text-align: center;  background-color: #fff;">
+                        <button type="submit" id="reset-criteria" class="btn btn-danger" style="background-color: #af1f25; margin:10px 0;">
+                            <span>Reset</span>
+                        </button>
+                        <button type="submit" id="close-criteria" class="btn btn-danger" style="background-color: #af1f25; margin:10px 0;" onclick="closeFilter()">
+                            <span>Done</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-12 col-md-9 machine pull-right" id="products_index_template">
+            <div class="top_box inner_none" style="width:100%">
+                <div class="row">
+                    <div class="col-10 results_count">
+                        <img class="img-mil-spec" src="{{ $data['image']['url'] }}" alt="{{ $data['breadcrumb']['category_detail'] }}">
+                        <h1 class="sizeable">{{ $data['breadcrumb']['category_detail'] }}</h1>
+                        <a href="#" id="toggle_criterias" class="btn btn-success hidden-sm hidden-md hidden-lg toggle-criteria" style="display:none;">{{ __('index.product.filter') }}</a>
+                        <p>Concrete: {{ $data['breadcrumb']['name'] }}</p>
+                    </div>
+                    <div class="col-2 hidden-sm">
+                        <a href="#" id="toggle_criteria" class="btn btn-success hidden-sm hidden-md hidden-lg toggle-criteria" style="display: inline;" onclick="openFilter()">{{ __('index.product.filter') }}</a>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="result_container" id="result_container">
+                <hr>
+                <!-- <div class="table-responsive"> -->
+                <table id="table_id" class="table table-striped table-hover"></table>
+                <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                <!-- </div> -->
+            </div>
+        </div>
+
+        @include('layouts.products_more')
+        
+    </div>
+</section>
+
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="{{ asset('assets/js/view/products.js') }}"></script>
+
+<script>
+
+window.onload = checkBox, table;
+
+var local = document.getElementById("local");
+var url = window.location.origin;
+
+var text_th = '//cdn.datatables.net/plug-ins/1.10.24/i18n/Thai.json';
+var prodCode_th = 'รหัสสินค้า';
+var prodName_th = 'ชื่อสินค้า';
+var prodUom_th = 'หน่วยนับ';
+var prodPrice_th = 'ราคา';
+
+var text_en = '//cdn.datatables.net/plug-ins/1.10.24/i18n/English.json';
+var prodCode_en = 'Product Code';
+var prodName_en = 'Product Name';
+var prodUom_en = 'Product Uom';
+var prodPrice_en = 'Product Price';
+
+
+var dataSet = []
+
+if(local.value != 'th'){
+    var text = text_en;
+    var prodCode = prodCode_en;
+    var prodName = prodName_en;
+    var prodUom = prodUom_en;
+    var prodPrice = prodPrice_en;
+}else{
+    var text = text_th;
+    var prodCode = prodCode_th;
+    var prodName = prodName_th;
+    var prodUom = prodUom_th;
+    var prodPrice = prodPrice_th;
+}
+
+function table(){
+    jQuery.noConflict();
+    var table = $('#table_id').DataTable({
+        // 'processing': true,
+        // 'serverSide': true,
+        bDestroy: true,
+        data: dataSet,
+        columns: [
+            { title: prodCode },
+            { 
+                title: prodName,
+                "render": function(data, type, row, meta){
+                    if(type === 'display'){
+                        var arr_nom = row[2].split("-");
+                        if((row[4] * 1) == 1) var text_best_sell = '<span class="label label-warning">ขายดี</span>';
+                        else var text_best_sell = '';
+                        data = '<a href="/products/' + row[0] + '/' + arr_nom[0] + '?name=' + row[1] + '">' + row[1] + '</a>&nbsp;' + text_best_sell;
+                    }
+                    return data;
+                }
+            },
+            { title: prodUom },
+            { title: prodPrice },
+        ],
+        // "order": [[ 0, "desc" ]],
+        "language": {
+            "url": text,
+            // 'loadingRecords': '&nbsp;',
+            // "processing": '<i class="fa fa-spinner fa-spin fa-2x fa-fw"></i>'
+        }
+    });
+}
+
+function checkBox(){
+    var category_detail_id = document.getElementById('category_detail_id').value;
+    var inputs = document.querySelectorAll('.selectable');
+
+    var id_find = [];
+    for (var i = 0; i < inputs.length; i++) {
+        if(inputs[i].checked){
+            id_find.push(inputs[i].name+','+inputs[i].value);
+        }
+    }
+
+    getProducts(category_detail_id, id_find);
+}
+
+function getProducts(category_detail_id, id_find){
+    jQuery.ajax({
+        url: url + "/products_find/" + JSON.stringify([category_detail_id, id_find]) ,
+        dataType: "json",
+        success: function (data) {
+            dataSet = [];
+            data.forEach((element, index) => {
+                // console.log(element.web);
+                dataSet.push([
+                    element.posone[0].prodCode, 
+                    element.posone[0].prodEName, 
+                    element.posone[0].uomCode+'-'+element.posone[0].uomName, 
+                    (parseInt(element.web.price)).format(2),
+                    element.web.best_seller
+                ]);
+            });
+            table();
+            // console.log(dataSet);
+        }
+    });
+}
+
+Number.prototype.format = function(n, x) {
+    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\.' : '$') + ')';
+    return this.toFixed(Math.max(0, ~~n)).replace(new RegExp(re, 'g'), '$&,');
+};
+
+</script>
+@endsection

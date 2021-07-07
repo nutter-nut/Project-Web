@@ -1,0 +1,80 @@
+@extends('layouts.index.index')
+
+@section('center')
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">{{ __('index.about.title') }}</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="index.html">{{ __('index.about.breadcrumb_home') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="#">{{ __('index.about.breadcrumb_about') }}</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+
+    <!--? About Area Start -->
+    <div class="about-area section-padding40">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="section-tittle mb-60 text-center pt-10">
+                        <h2>{{ __('index.about.corporate_profile') }}</h2>
+                        <p class="pera text-justify">&emsp;&emsp;{{ __('index.about.corporate_profile_1') }}</p>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <div class="about-img pb-bottom">
+                        <img src="assets/img/gallery/item4.png" alt="" class="w-100" height="700px">
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <div class="section-tittle mb-60 text-center pt-10">
+                        <p class="pera text-justify">&emsp;&emsp;{{ __('index.about.corporate_profile_2') }}</p>
+                    </div>
+                    <div class="section-tittle mb-60 text-center pt-10">
+                        <p class="pera text-justify">&emsp;&emsp;{{ __('index.about.corporate_profile_3') }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="section-tittle mb-60 text-center pt-10">
+                        <h2>{{ __('index.about.quality_control') }}</h2>
+                        <p class="pera text-justify">&emsp;&emsp;{{ __('index.about.quality_control_1') }}</p>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="about-img pb-bottom">
+                        <img src="assets/img/gallery/about5.png" alt="" class="w-100">
+                    </div>
+                </div>
+            </div>                                     
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="section-tittle text-center pt-10">
+                        <h2></h2>
+                        <p class="pera text-justify">&emsp;&emsp;{{ __('index.about.footer') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- About Area End -->
+</main>
+
+@endsection

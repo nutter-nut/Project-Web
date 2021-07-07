@@ -1,0 +1,145 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Cart extends Model
+{
+    public $items;
+    public $totalQuantity;
+    public $totalPrice;
+    public $image;
+
+    public function __construct($prevCart)
+    {
+        if($prevCart != null){
+            $this->items = $prevCart->items;
+            $this->totalQuantity  = $prevCart->totalQuantity;
+            $this->totalPrice  = $prevCart->totalPrice;
+            $this->image  = $prevCart->image;
+        }else{
+            $this->items = [];
+            $this->totalQuantity  = 0;
+            $this->totalPrice  = 0;
+            $this->image  = "";
+        }
+    }
+
+    // public function addItem($id,$product,$qunatity)
+    // {
+    //     $price = $product[0]['price'];
+    //     if(array_key_exists($id,$this->items)){
+    //         $productToAdd = $this->items[$id];
+    //         $productToAdd['quantity'] += $qunatity;
+    //         $productToAdd['totalSinglePrice'] = $productToAdd['quantity'] * $price;
+    //         self::updatePriceAndQunatity();
+    //     }else{
+    //         $productToAdd = [
+    //             'quantity' => $qunatity, 
+    //             'totalSinglePrice' => $price * $qunatity, 
+    //             'data' => $product
+    //         ];
+    //     }
+
+    //     $this->items[$id] = $productToAdd;
+    //     $this->totalQuantity++;
+    //     $this->totalPrice  = $this->totalPrice + $price;
+
+    // }
+
+    public function addItem($prodCode, $uomCode, $product, $image, $qunatity, $stock, $get_all_uom) //! หน่วยนับซ้ำ
+    {
+        $price = $product['price'];
+        $ratio = $product['prodUnitRatio'];
+        $vat = $product['prodIsVat'];
+        $stock = [
+            'ProdAllowMinus' => $stock['ProdAllowMinus'],
+            'endQty' => $stock['endQty'],
+            'stock' => $stock['stock'],
+        ];
+
+        if(array_key_exists($prodCode.",".$uomCode, $this->items)){
+            $productToAdd = $this->items[$prodCode.",".$uomCode];
+
+            if($stock['ProdAllowMinus'] != 'Y'){
+                $qunatity2 = $productToAdd['quantity'] + $qunatity; 
+                if($qunatity2 > $stock['endQty']){
+                    $productToAdd['quantity'] = $stock['endQty'];
+                    $productToAdd['totalSinglePrice'] = $price * $stock['endQty'];
+                }else{
+                    $productToAdd['quantity'] = $qunatity2;
+                    $productToAdd['totalSinglePrice'] = $price * $productToAdd['quantity'];
+                };
+            }else{
+                $productToAdd['quantity'] += $qunatity;
+                $productToAdd['totalSinglePrice'] = $price * $productToAdd['quantity'];
+            }
+            
+            $productToAdd['stock'] = $stock;
+            self::updatePriceAndQunatity();
+        }else{
+            $productToAdd = [
+                'ratio' => $product['prodUnitRatio'],
+                'uom_code' => $product['uomCode'],
+                'quantity' => $qunatity, 
+                'price' => $price,
+                'totalSinglePrice' => $price * $qunatity,
+                'image' => ($image != null) ? $image : 'no_picture', 
+                'data' => $product,
+                'stock' => $stock,
+                'get_all_uom' => $get_all_uom
+            ];
+        }
+
+        $this->items[$prodCode.",".$uomCode] = $productToAdd;
+        $this->totalQuantity++;
+        $this->totalPrice  = $this->totalPrice + $price;
+
+    }
+    // public function addItem($prodCode, $uomCode, $product, $image, $qunatity) 
+    // {
+    //     $price = $product->prodUnitPrice;
+    //     $ratio = $product->prodUnitRatio;
+    //     $vat = $product->prodIsVat;
+
+    //     if(array_key_exists($prodCode.",".$uomCode, $this->items)){
+    //         $productToAdd = $this->items[$prodCode.",".$uomCode];
+    //         $productToAdd['quantity'] += $qunatity;
+    //         // $productToAdd['totalSinglePrice'] = $productToAdd['quantity'] * $price;
+    //         $productToAdd['totalSinglePrice'] = app('App\Http\Controllers\CartController')->taxDeduction($vat, $price * $productToAdd['quantity']);
+    //         self::updatePriceAndQunatity();
+    //     }else{
+    //         $productToAdd = [
+    //             'ratio' => $product->prodUnitRatio,
+    //             'uom_name' => $product->uomName,
+    //             'uom_code' => $product->uomCode,
+    //             'quantity' => $qunatity, 
+    //             // 'totalSinglePrice' => $price * $qunatity, 
+    //             'price' => app('App\Http\Controllers\CartController')->taxDeduction($vat, $price),
+    //             'totalSinglePrice' => app('App\Http\Controllers\CartController')->taxDeduction($vat, $price * $qunatity),
+    //             'image' => $image != null ? $image[0]->ProdPicName : 'no_picture', 
+    //             'data' => $product
+    //         ];
+    //     }
+
+    //     $this->items[$prodCode.",".$uomCode] = $productToAdd;
+    //     $this->totalQuantity++;
+    //     $this->totalPrice  = $this->totalPrice + $price;
+
+    // }
+
+    public function updatePriceAndQunatity()
+    {
+        $totalQuantity = 0;
+        $totalPrice = 0;
+
+        foreach($this->items as $item){
+            $totalQuantity = $totalQuantity + $item['quantity'];
+            $totalPrice = $totalPrice + $item['totalSinglePrice'];
+        }
+
+        $this->totalQuantity = $totalQuantity ;
+        $this->totalPrice = $totalPrice ;
+    }
+}

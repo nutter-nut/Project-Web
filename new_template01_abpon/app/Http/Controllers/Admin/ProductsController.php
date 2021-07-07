@@ -1,0 +1,352 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+
+use App\Product;
+use App\Categorie;
+
+class ProductsController extends Controller
+{
+    public function index($text = null)
+    {
+        if($text != null){
+            $products = Product::collection('products')
+            ->select('products.id as id','categories.name as categorie_name','products.image as image','products.name as name','products.stock as stock','products.description as description','products.price as price')
+            ->leftjoin('categories','products.categorie_id','categories.id')
+            ->where('products.name' , 'like' , '%'.$text.'%' )
+            ->orderby('products.id','desc')
+            ->paginate(10);
+        }else{
+            $products = Product::collection('products')
+            ->select('products.id as id','categories.name as categorie_name','products.image as image','products.name as name','products.stock as stock','products.description as description','products.price as price')
+            ->leftjoin('categories','products.categorie_id','categories.id')
+            ->where('products.id', '!=', 0)
+            ->orderby('products.id','desc')
+            ->paginate(10); 
+        }
+
+        return view('login.admin.displayProducts', [
+            'products' => $products,
+            'text_search_product' => $text
+        ]);
+    }
+
+    public function addProduct() //product form
+    {
+        $categories = Categorie::all();
+
+        return view('login.admin.createProduct',[
+            'categories' => $categories
+        ]);
+    }
+
+    public function searchProduct(Request $request)
+    {
+        return self::index($request->input('search'));
+    }
+
+    public function createProduct(Request $request) //store
+    {
+        $details = $request->input("addmore");
+
+        if($details){
+            $array_details = array();
+            foreach ($details as $key => $item) {
+                array_push($array_details, $item);
+            }
+        }else $array_details = null;
+
+        $stock = $request->input('stock');
+        $name = $request->input('name');
+        $description = $request->input('description');
+        $categorie_id = $request->input('categorie_id');
+        $price = $request->input('price')*1.0;
+
+        $standard = $request->input('standard');
+        $material = $request->input('material');
+        $coating = $request->input('coating');
+        $code = $request->input('code');
+        $update = $request->input('update');
+        $date = date_create($update);
+
+        Validator::make($request->all(), ['image.*' => "required|file|image|mimes:jpg,png,jpeg|max:1000"])->validate();
+
+        $id_new_product = Product::database()->collection("products")->getModifySequence('id');
+
+        if($request->hasFile('image'))
+        {
+            $test = Storage::disk('local')->makeDirectory('public/product_images/'.$id_new_product);
+            
+            $names = [];
+            foreach($request->file('image') as $image)
+            {
+                $imageName = $image->getClientOriginalName();
+                $imageEncoded = File::get($image);
+                Storage::disk('local')->put('public/product_images/'.$id_new_product.'/'.$imageName, $imageEncoded);
+                array_push($names, $imageName);          
+            }
+        }
+
+        $newProductArray = array(
+            'id' => $id_new_product,
+            'name' => $name,
+            'stock' => $stock*1,
+            'description' => $description,
+            'categorie_id' => $categorie_id*1,
+            'price' => $price,
+            'ratting' => 0.0,
+            'details' => $array_details,
+            'standard' => $standard,
+            'material' => $material,
+            'coating' => $coating,
+            'code' => $code,
+            'update' => date_format($date,"d-m-Y"),
+            'image' => $names,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+
+        $save = Product::database()->collection("products")->insert($newProductArray);
+
+        if($save){
+            return redirect()->route('adminProducts')->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+        }else{
+            return redirect()->route('adminProducts')->with('fail', (\Session::get('locale') != "th") ? 'Save is not successful.' : 'บันทึกสำเร็จ');
+        }
+    }
+
+    public function editProduct($id)
+    {
+        $product = Product::collection('products')
+            ->select('products.id as product_id','products.name as product_name','products.description as description','products.price as price'
+            ,'products.categorie_id as categorie_id','products.standard as standard','products.material as material','products.coating as coating'
+            ,'products.code as code','products.update as update','products.details as details','products.stock as stock')
+            ->leftjoin('categories','products.categorie_id','categories.id')
+            ->where('products.id','=',$id*1)
+            ->groupby('$selected')
+            ->first();
+
+        $products_id = Product::collection('products')->select('id')->get();
+    
+        $array_id = [];
+        foreach ($products_id as $item) {
+            array_push($array_id, $item['id']);
+        }
+
+        $date = date_create($product[0]['update'] ?? '');
+        $format_date = date_format($date,"Y-m-d");
+
+        array_push($product, $format_date);
+
+        $categories = Categorie::all();
+
+        return view('login.admin.editProduct', [
+            'product' => $product, 
+            'categories' => $categories,
+            'products_id' => $array_id,
+            ]);
+    }
+
+    public function updateProduct(Request $request, $id)
+    {
+        $details = $request->input("addmore");
+        if($details){
+            $array_details = array();
+            foreach ($details as $key => $item) {
+                array_push($array_details, $item);
+            }
+        }else $array_details = null;
+
+        $stock = $request->input('stock');
+        $name = $request->input('name');
+        $description = $request->input('description');
+        $categorie_id = $request->input('categorie_id');
+        $price = $request->input('price');
+
+        $standard = $request->input('standard');
+        $material = $request->input('material');
+        $coating = $request->input('coating');
+        $code = $request->input('code');
+        $update = $request->input('update');
+        $date = date_create($update);
+
+        $save = DB::connection('mongodb')->collection("products")
+            ->where('id',"=",$id*1)
+            ->update([
+                'name' => $name,
+                'stock' => $stock*1,
+                'description' => $description,
+                'categorie_id' => $categorie_id*1,
+                'price' => $price*1.0,
+                'details' => $array_details,
+                'standard' => $standard,
+                'material' => $material,
+                'coating' => $coating,
+                'code' => $code,
+                'update' => date_format($date,"d-m-Y"),
+                'updated_at' => date('Y-m-d H:i:s')
+                ]);
+
+        if($save){
+            return redirect()->route('adminProducts')->withsuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'บันทึกสำเร็จ');
+        }else{
+            return redirect()->route('adminProducts')->with('fail', (\Session::get('locale') != "th") ? 'Failed to update' : 'บันทึก ไม่สำเร็จ');
+        }
+    }
+
+    public function addProductImage(Request $request, $id)
+    {
+        Validator::make($request->all(), ['image' => "required|file|image|mimes:jpg,png,jpeg|max:1000"])->validate();
+
+        if($request->hasFile("image")){
+
+            $imageName = $request->file('image')->getClientOriginalName();
+
+            $imageEncoded = File::get($request->file('image'));
+                
+            Storage::disk('local')->put('public/product_images/'.$id.'/'.$imageName, $imageEncoded);
+
+            $all_images = DB::connection('mongodb')->collection("products")->select('image')->where('id','=',$id*1)->first();
+
+            array_push($all_images['image'], $imageName);
+
+            DB::table('products')->where('id',$id*1)->update(['image' => $all_images['image']]);
+
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully added product images.' : 'เพิ่มรูปสินค้าสำเร็จ');
+
+        }else{
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'Failed to add product images.' : 'เพิ่มรูปสินค้า ไม่สำเร็จ');
+        }
+    }
+
+    public function editProductImage(Request $request, $id)
+    {
+        $product = Product::collection("products")->where('id',"=",$id*1)->first();
+
+        $products_id = Product::collection('products')->select('id')->get();
+    
+        $array_id = [];
+        foreach ($products_id as $item) {
+            array_push($array_id, $item['id']);
+        }
+
+        return view('login.admin.editProductImage',[
+            'product' => $product,
+            'products_id' => $array_id,
+        ]);
+    }
+
+    public function updateProductImage(Request $request, $id)
+    {
+        $input_image = $request->input("type_image");
+
+        Validator::make($request->all(), ['image' => "required|file|image|mimes:jpg,png,jpeg|max:1000"])->validate();
+
+        if($request->hasFile("image")){
+
+            $index = $request->input('index');
+            $file_name = $request->input('file_name');
+            $product = Product::collection("products")->where('id',"=",$id*1)->first();
+
+            
+            $exists = Storage::disk('local')->exists("public/product_images/".$id.'/'.$file_name);
+
+            if($exists){
+                Storage::delete('public/product_images/'.$id.'/'.$file_name);
+            }
+
+            $imageName = $request->file('image')->getClientOriginalName();
+            $imageEncoded = File::get($request->file('image'));
+            
+            Storage::disk('local')->put('public/product_images/'.$id.'/'.$imageName, $imageEncoded);
+
+            $array_file_name = DB::connection('mongodb')->collection("products")->select('image')->where('id','=',$id*1)->first();
+
+            foreach ($array_file_name['image'] as $key => $item) {
+                if($key==$index){
+                    $array_file_name['image'][$key] = $imageName;
+                }
+                }
+
+            DB::table('products')->where('id',$id*1)->update(['image' => $array_file_name['image']]);
+
+            return back()->withsuccess('อัพเดทรูปสินค้า สำเร็จ');
+
+        }else{
+            
+            return back()->with('fail', 'อัพเดทรูปสินค้า ไม่สำเร็จ');
+        }
+        
+    }
+
+    public function deleteProductImage(Request $request, $id, $index)
+    {
+
+        $all_images = DB::connection('mongodb')->collection("products")->select('image')->where('id','=',$id*1)->first();
+
+        if(count($all_images['image']) < 2){
+
+            return back()->with('fail', 'ต้องมีรูปสินค้าไว้ 1 รูป');
+
+        }else{
+            
+            $image_del = $all_images['image'][$index];
+    
+            $exists = Storage::disk('local')->exists("public/product_images/".$id.'/'.$image_del);
+    
+            if($exists){
+    
+                Storage::delete('public/product_images/'.$id.'/'.$image_del);
+    
+                unset($all_images['image'][$index]);
+    
+                DB::table('products')->where('id',$id*1)->update(['image' => $all_images['image']]);
+    
+                return back()->withsuccess('ลบรูปสินค้า สำเร็จ');
+            }else{
+
+                return back()->with('fail', 'ลบรูปสินค้า ไม่สำเร็จ');
+                
+            }
+        }
+    }
+
+    public function deleteProduct($id)
+    {
+        $product = Product::collection("products")->where('id',"=",$id*1)->first();
+
+        $exists = Storage::disk('local')->exists('public/product_images/'.$id);
+
+        if($exists){
+
+            Storage::disk('local')->deleteDirectory('public/product_images/'.$id);
+
+            DB::connection('mongodb')->collection("products")->where("id","=",$id*1)->delete();
+
+            return back()->withsuccess('ลบสินค้า สำเร็จ');
+
+        }else{
+
+            return back()->with('fail', 'ลบสินค้า ไม่สำเร็จ');
+        }
+    }
+
+    public function getDataEdit($arr_data, $data_edit, $val)
+    {
+        if($data_edit != null){
+            $get_edit = $data_edit[0];
+            $get_edit->countRow = count($arr_data);
+            $get_edit->keyRow = array_search($data_edit[0]->{$val}, array_column($arr_data, $val));
+        }else $get_edit = null;
+
+        return $get_edit;
+    } 
+}

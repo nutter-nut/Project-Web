@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class AboutController extends Controller
+{
+    public function index(Request $request)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        return view('about',[
+            'totalQuantity' => $cart->totalQuantity
+        ]);
+    }
+}

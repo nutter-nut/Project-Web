@@ -1,0 +1,684 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>คู่มือซื้อขายสินค้าอุตสาหกรรม (Thailand Business Pages Industrial Directory Guide) ฐานข้อมูลสินค้าอุตสาหกรรม
+    </title>
+    <link rel="shortcut icon" href="https://www.thailandpages.com/images/favicon.ico">
+    <link rel="stylesheet" type="text/css"
+        href="https://www.thailandpages.com/js/jquery-ui-bootstrap/bootstrap/bootstrap.css?" />
+
+    <link rel="stylesheet" type="text/css"
+        href="https://www.thailandpages.com/js/jquery-ui-bootstrap/css/custom-theme/jquery-ui-1.8.16.custom.css?" />
+    <!--[if IE]>
+<link rel="stylesheet" type="text/css" href="http://www.thailandpages.com/js/jquery-ui-bootstrap/css/custom-theme/jquery.ui.1.8.16.ie.css?" />
+<![endif]-->
+
+
+
+
+
+
+
+
+
+    <link rel="stylesheet" type="text/css" href="https://www.thailandpages.com/min_file/main.min.css?">
+    <script src="https://www.thailandpages.com/js/jquery-1.7.2.min.js"></script>
+
+
+
+    <script type="text/javascript" src="https://www.thailandpages.com/js/jquery.Scroller-1.0.min.js?"></script>
+
+
+
+
+
+
+
+
+
+
+
+    <script src="https://www.thailandpages.com/min_file/main.min.js?" type="text/javascript" charset="utf-8" async
+        defer></script>
+
+    <link rel="stylesheet" type="text/css" href="https://www.thailandpages.com//online_chat/chat_box.css">
+
+
+
+    <script type="text/javascript"
+        src="https://www.thailandpages.com/js/fancyapps2/source/jquery.fancybox.js?v=2.1.5?"></script>
+    <link rel="stylesheet" type="text/css"
+        href="https://www.thailandpages.com/js/fancyapps2/source/jquery.fancybox.css?v=2.1.5?" media="screen" />
+    <script type="text/javascript">
+
+        // (function(){
+        // 	var count = 0;
+        // 	setInterval(function(){
+        // 		++count;
+        // 		Tinycon.setBubble(count);
+
+        // 	}, 1000);
+        // })();
+
+
+        jQuery.fn.cviBusy = function (action) {
+            return this.each(function () {
+                action = action || '';
+                switch (action) {
+                    case 'remove':
+                        var indicator = $(this).data('busyOverlay');
+                        if (indicator) indicator.remove();
+                        break;
+                    default:
+                        var indicator = getBusyOverlay(this, { opacity: 0.5 }, { type: 'oval' });
+                        $(this).data('busyOverlay', indicator);
+                }
+
+            });
+        }
+        jQuery(function ($) {
+
+            // start font
+            Cufon.replace('.head_topic');
+            Cufon.replace('.text_quick');
+            Cufon.replace('.txt-detail');
+            Cufon.replace('.inner_topic');
+            Cufon.replace('.cufon');
+
+            $('[rel=tooltip]').tooltip();
+
+            //show button to top
+            $().UItoTop({
+                easingType: 'easeOutQuart'
+            });
+
+            //top keyword
+            $('#keyword_pop').hover(function () {
+                $('#keyword_pop').toggleClass("search_show");
+            });
+
+            $('#search_PRODUCTS ,#search_SUPPLIERS ,#search_BUYERS ,#search_BRANDS ').keypress(function () {
+                $('#keyword_pop').removeClass("search_show");
+            });
+
+            $('.thm_preview').hide();
+
+        });</script>
+    <script async defer type="text/javascript"
+        data-cfasync="false">(function () { var done = false; var script = document.createElement("script"); script.async = true; script.type = "text/javascript"; script.src = "https://app.purechat.com/VisitorWidget/WidgetScript"; document.getElementsByTagName("HEAD").item(0).appendChild(script); script.onreadystatechange = script.onload = function (e) { if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")) { var w = new PCWidget({ c: "80148d8d-8f02-4d82-85da-081b0d025e1e", f: true }); done = true; } }; })();</script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+
+            /* Validation Engine*/
+
+
+            jQuery(function ($) {
+                var emailDefer = jQuery.Deferred();
+                var usernameDefer = jQuery.Deferred();
+
+
+                var form = $("#register_mem").validationEngine();
+
+                // resolve all defer object when these 2 ajax validating is done
+                form.bind('jqv.field.result', function (event, field, errorFound, prompText) {
+
+                    if (field.attr('id') == 'txtEmail')
+                        emailDefer.resolve(errorFound);
+                    if (field.attr('id') == 'txtUsername')
+                        usernameDefer.resolve(errorFound);
+                })
+
+                form.unbind('submit').submit(function () {
+
+                    // re-assign new deferred object
+                    emailDefer = jQuery.Deferred();
+                    usernameDefer = jQuery.Deferred();
+
+
+                    // validate all field, including ajax field
+                    if (!form.validationEngine('validate'))
+                        return false;
+
+                    // now submit form when all ajax field has validated and results are both passed
+                    jQuery.when(emailDefer, usernameDefer).then(function (emailError, usernameError) {
+                        if (!emailError && !usernameError) {
+                            form.unbind('submit');
+                            form.submit();
+                        }
+                    });
+                    return false;
+                });
+            });
+
+            /* End Validation Engine */
+
+            /* Add Text Cufon By SELECTER */
+            Cufon.replace('.bar_topic');
+            Cufon.replace('.cufon-font');
+            Cufon.replace('.promote-text li');
+
+
+
+        });
+    </script>
+</head>
+
+<body>
+    <script type="text/javascript">
+
+
+        jQuery(function ($) {
+
+            //$('form').css('margin-bottom','0px');
+            //$('.pagination').css('height','15px'); 
+            //$('.pagination').css('margin-top','0px'); 
+            //$('.pagination a').css('float','inherit'); 
+            //$('.pagination a').css('padding','5px 9px'); 
+
+            $('#search_PRODUCTS').val('Search Product');
+            $('#search_PRODUCTS').css('color', '#AAA');
+
+            $('#search_SUPPLIERS').val('Search Suppliers');
+            $('#search_SUPPLIERS').css('color', '#AAA');
+
+            $('#search_BUYERS').val('Search Buyers');
+            $('#search_BUYERS').css('color', '#AAA');
+
+            $('#search_BRANDS').val('Search Brands');
+            $('#search_BRANDS').css('color', '#AAA');
+
+            $('.txt_search').focus(function () {
+                $(this).val('');
+            });
+
+            $('.txt_search').keyup(function () {
+                $(this).css('color', '#000');
+            });
+
+            $('#search_PRODUCTS').blur(function () {
+                if ($.trim($('#search_PRODUCTS').val()) == '' || $('#search_PRODUCTS').val() == 'Search Product') {
+                    $('#search_PRODUCTS').val('Search Product');
+                    $('#search_PRODUCTS').css('color', '#AAA');
+                } else {
+                    $('#search_PRODUCTS').css('color', '#000');
+                }
+            });
+
+            $('#search_SUPPLIERS').blur(function () {
+                if ($.trim($('#search_SUPPLIERS').val()) == '' || $('#search_SUPPLIERS').val() == 'Search Suppliers') {
+                    $('#search_SUPPLIERS').val('Search Suppliers');
+                    $('#search_SUPPLIERS').css('color', '#AAA');
+                } else {
+                    $('#search_SUPPLIERS').css('color', '#000');
+                }
+            });
+
+            $('#search_BUYERS').blur(function () {
+                if ($.trim($('#search_BUYERS').val()) == '' || $('#search_BUYERS').val() == 'Search Buyers') {
+                    $('#search_BUYERS').val('Search Buyers');
+                    $('#search_BUYERS').css('color', '#AAA');
+                } else {
+                    $('#search_BUYERS').css('color', '#000');
+                }
+            });
+
+            $('#search_BRANDS').blur(function () {
+                if ($.trim($('#search_BRANDS').val()) == '' || $('#search_BRANDS').val() == 'Search Brands') {
+                    $('#search_BRANDS').val('Search Brands');
+                    $('#search_BRANDS').css('color', '#BBB');
+                } else {
+                    $('#search_BRANDS').css('color', '#000');
+                }
+            });
+
+            //$('#advanced_search').click(function(){
+            //	window.location = "search.php";	
+            //})
+
+            // $('.top_search input:text').hide();
+
+            //$('#lnk_Products').css('background','url(http://www.thailandpages.com/images/Layout/top_button_hover.jpg)').css('color','#FFF').addClass('current');
+            //basename($_SERVER['PHP_SELF'])
+            //echo ucfirst(substr(basename($_SERVER['PHP_SELF']),-4,1));
+
+
+
+            // $('#tbp_logo').click(function(){
+            // window.location = "index.php";
+            // });
+
+            $('.button_menu ul li').mouseover(function () {
+                $(this).css('background', 'url(http://www.thailandpages.com/images/Layout/top_button_hover.jpg)').css('color', '#FFF');
+                $(this).prevUntil().css('background', 'url(http://www.thailandpages.com/images/Layout/top_button.jpg)').css('color', '#6B0AAF');
+                $(this).nextUntil().css('background', 'url(http://www.thailandpages.com/images/Layout/top_button.jpg)').css('color', '#6B0AAF');
+                $('.current').css('background', 'url(http://www.thailandpages.com/images/Layout/top_button_hover.jpg)').css('color', '#FFF');
+            });
+
+            $('.button_menu ul li').mouseout(function () {
+                $('.button_menu ul li').css('background', 'url(http://www.thailandpages.com/images/Layout/top_button.jpg)').css('color', '#6B0AAF');
+                $('.current').css('background', 'url(http://www.thailandpages.com/images/Layout/top_button_hover.jpg)').css('color', '#FFF');
+            });
+
+            // -------------------------------------------------------------------------
+
+            var strlength = 3;
+
+            $("#search_PRODUCTS").autocomplete({
+                source: 'http://www.thailandpages.com/get_data_search.php',
+                minLength: strlength,
+                maxRows: 10,
+                select: function (event, ui) {
+                    window.location = "http://www.thailandpages.com/tags/" + encodeURIComponent(ui.item.value);
+                }
+            });
+
+            $("#search_SUPPLIERS").autocomplete({
+                source: 'http://www.thailandpages.com/get_data_search.php',
+                minLength: strlength,
+                maxRows: 10,
+                select: function (event, ui) {
+                    window.location = "http://www.thailandpages.com/suppliers-detail.php?subject=" + encodeURIComponent(ui.item.value);
+                }
+            });
+
+            $("#search_BUYERS").autocomplete({
+                source: 'http://www.thailandpages.com/get_data_search.php',
+                minLength: strlength,
+                maxRows: 10,
+                select: function (event, ui) {
+                    window.location = "http://www.thailandpages.com/buyers.php?subject=" + encodeURIComponent(ui.item.value);
+                }
+            });
+
+            $("#search_BRANDS").autocomplete({
+                source: 'http://www.thailandpages.com/get_data_search.php',
+                minLength: strlength,
+                maxRows: 10,
+                select: function (event, ui) {
+                    window.location = "http://www.thailandpages.com/brands.php?subject=" + encodeURIComponent(ui.item.value);
+                }
+            });
+
+            // -------------------------------------------------------------------------
+
+            $('.button_menu ul li').click(function () {
+                $('.button_menu ul li')
+                    .css('background', 'url(http://www.thailandpages.com/images/Layout/top_button.jpg)')
+                    .css('color', '#6B0AAF')
+                    .removeClass('current');
+                $(this)
+                    .css('background', 'url(http://www.thailandpages.com/images/Layout/top_button_hover.jpg)')
+                    .css('color', '#FFF')
+                    .addClass('current');
+                // $('.top_search input:text').hide();
+                $('#search_' + $(this).html()).show();
+            });
+            ////pages = "PRODUCTS";		
+            // $('#lnk_Products').click(function(){
+            // location.href = "products-category";
+            ////	pages = "PRODUCTS";
+            // });
+            // $('#lnk_Suppliers').click(function(){
+            // location.href = "suppliers.php";
+            ////	pages = "SUPPLIERS";
+            // });
+            // $('#lnk_Buyers').click(function(){
+            // location.href = "buyers.php";
+            ////	pages = "BUYERS";s
+            // });
+            // $('#lnk_topbrands').click(function(){
+            // location.href = "brands.php";
+            //// pages = "BRANDS";
+            // });
+            $('#search_PRODUCTS, #search_SUPPLIERS, #search_BUYERS, #search_BRANDS').hover(function () {
+                $tmp_keyword = $(this).val();
+                switch ($tmp_keyword) {
+                    case "Search Product":
+                        $('#keyword_pop').addClass("search_show");
+                        break;
+                    case "Search Suppliers":
+                        $('#keyword_pop').addClass("search_show");
+                        break;
+                    case "Search Buyers":
+                        $('#keyword_pop').addClass("search_show");
+                        break;
+                    case "Search Brands":
+                        $('#keyword_pop').addClass("search_show");
+                        break;
+                    default:
+                        break;
+                }
+            }, function () {
+                $('#keyword_pop').removeClass("search_show");
+            });
+            $('#keyword_pop').hover(function () {
+                $('#keyword_pop').addClass("search_show");
+            }, function () {
+                $('#keyword_pop').removeClass("search_show");
+            });
+            $('#search_PRODUCTS ,#search_SUPPLIERS ,#search_BUYERS ,#search_BRANDS ').keypress(function () {
+                $('#keyword_pop').removeClass("search_show");
+            });
+            $('#frm_topsearch_submit').submit(function () {
+                return false;
+            });
+            $('.tab_search #button_searchs').click(function () {
+
+                if (pages_tmp == "PRODUCTS") {
+                    switch ($('#search_PRODUCTS').val()) {
+                        case "":
+                            $('#search_PRODUCTS').val("Search Product");
+                            // $('#search_PRODUCTS').css('color','#FFA555');
+                            // $('#search_PRODUCTS').css('opacity','0.45');
+                            break;
+                        case "Search Product":
+                            $('#search_PRODUCTS').val("Search Product");
+                            // $('#search_PRODUCTS').css('color','#FFA555');
+                            // $('#search_PRODUCTS').css('opacity','0.45');
+                            break;
+                        default:
+                            if ($('#indus_categ').val() == "")
+                                window.location = "http://www.thailandpages.com/tags/" + $('#search_PRODUCTS').val();
+                            else
+                                window.location = "http://www.thailandpages.com/tags/" + $('#search_PRODUCTS').val();
+                            // window.location = "tags/" + $('#search_PRODUCTS').val() + "&catagory=" + $('#indus_categ').val();
+                            return false;
+                            break;
+                    }
+                } else if (pages_tmp == "SUPPLIERS") {
+                    switch ($('#search_SUPPLIERS').val()) {
+                        case "":
+                            $('#search_SUPPLIERS').val("Search Suppliers");
+                            // $('#search_SUPPLIERS').css('color', '#FFA555'); 
+                            // $('#search_SUPPLIERS').css('opacity','0.45');
+                            break;
+                        case "Search Suppliers":
+                            $('#search_SUPPLIERS').val("Search Suppliers");
+                            // $('#search_SUPPLIERS').css('color', '#FFA555');
+                            // $('#search_SUPPLIERS').css('opacity','0.45');
+                            break;
+                        default:
+                            if ($('#indus_categ').val() == "")
+                                window.location = "http://www.thailandpages.com/suppliers-detail.php?subject=" + $('#search_SUPPLIERS').val();
+                            else
+                                window.location = "http://www.thailandpages.com/suppliers-detail.php?subject=" + $('#search_SUPPLIERS').val();
+                            // window.location="suppliers-detail.php?subject="+$('#search_SUPPLIERS').val()+"&catagory="+$('#indus_categ').val();
+                            return false;
+                            break;
+                    }
+                } else if (pages_tmp == "BUYERS") {
+                    switch ($('#search_BUYERS').val()) {
+                        case "":
+                            $('#search_BUYERS').val("Search Buyers");
+                            // $('#search_BUYERS').css('color','#FFA555');
+                            // $('#search_BUYERS').css('opacity','0.45');
+                            break;
+                        case "Search Buyers":
+                            $('#search_BUYERS').val("Search Buyers");
+                            // $('#search_BUYERS').css('color','#FFA555');
+                            // $('#search_BUYERS').css('opacity','0.45');
+
+                            break;
+                        default:
+                            if ($('#indus_categ').val() == "")
+                                window.location = "http://www.thailandpages.com/buyers.php?subject=" + $('#search_BUYERS').val();
+                            else
+                                window.location = "http://www.thailandpages.com/buyers.php?subject=" + $('#search_BUYERS').val();
+                            // window.location="buyers.php?subject="+$('#search_BUYERS').val()+"&catagory="+$('#indus_categ').val();
+                            return false;
+                            break;
+                    }
+                } else if (pages_tmp == "BRANDS") {
+                    switch ($('#search_BRANDS').val()) {
+                        case "":
+                            $('#search_BRANDS').val("Search Brands");
+                            // $('#search_BRANDS').css('color','#FFA555');
+                            // $('#search_BRANDS').css('opacity','0.45');				
+                            break;
+                        case "Search Brands":
+                            $('#search_BRANDS').val("Search Brands")
+                            // $('#search_BRANDS').css('color','#FFA555');	
+                            // $('#search_BRANDS').css('opacity','0.45');
+                            break;
+                        default:
+                            if ($('#indus_categ').val() == "")
+                                window.location = "http://www.thailandpages.com/brands.php?namelogo=" + $('#search_BRANDS').val();
+                            else
+                                window.location = "http://www.thailandpages.com/brands.php?namelogo=" + $('#search_BRANDS').val();
+                            // window.location = "brands.php?namelogo=" + $('#search_BRANDS').val() + "&catagory=" + $('#indus_categ').val();
+                            return false;
+                            break;
+                    }
+                }
+                return false;
+            });
+
+
+        });
+
+        $(function () {
+            $('#th').click(function () {
+                url = $('#click_th').attr('href');
+                window.location = url;
+            })
+            $('#en').click(function () {
+                url = $('#click_en').attr('href');
+                window.location = url;
+            })
+
+            $('#lnk_Products').click(function () {
+                this_url = $(this).find('a').attr('href');
+                window.location = this_url;
+            })
+            $('#lnk_Suppliers').click(function () {
+                this_url = $(this).find('a').attr('href');
+                window.location = this_url;
+            })
+            $('#lnk_Buyers').click(function () {
+                this_url = $(this).find('a').attr('href');
+                window.location = this_url;
+            })
+            $('#lnk_topbrands').click(function () {
+                this_url = $(this).find('a').attr('href');
+                window.location = this_url;
+            })
+
+
+        });
+
+
+
+    </script>
+
+
+    <div id="loadInner">
+        <div id="left_Inner_full">
+            <div class="box_left_Inner_full">
+                <div class="nav_full">
+                    <div id="nav">
+
+                    </div>
+                </div>
+                <div id="top_product" class="bar_inner_left_full">
+                    <div class="inner_topic">สมัครสมาชิก Buyer</div>
+                </div>
+                <div id="mid_product" style="padding-left:10px;">
+                    <div style="margin-top:10px;">
+                        <form id="register_mem" action="do-register-buyer.php" method="POST"
+                            style=" margin-top:20px; width:500px; ">
+                            <input type="hidden" name="package" id="package" value="buyer">
+                            <div class="form-wrapper">
+                                <div class="user-info">
+                                    <h3 class="cufon-font">แบบฟอร์มสมัครสมาชิก</h3>
+                                    <div class="form-body">
+                                        <table width="500">
+                                            <tr>
+                                                <td height="33" align="right">อีเมล์ :</td>
+                                                <td align="left">
+                                                    <div style="float:left"><input name="txtEmail" type="text" size="35"
+                                                            id="txtEmail" autocomplete="off" value=""
+                                                            class="validate[required,custom[email],ajax[ajaxEmailCallPhp]]" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="33" align="right">รหัสผ่าน :</td>
+                                                <td align="left"><input type="password" name="txtPassword"
+                                                        id="txtPassword" size="35"
+                                                        class="validate[required,minsize[6]]" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td height="30" align="right">ยืนยันรหัสผ่านใหม่ :</td>
+                                                <td align="left"><input type="password" name="txtCopassword"
+                                                        id="txtCopassword" size="35"
+                                                        class="validate[required,length[6,15],equals[txtPassword]]" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="32" align="right">ชื่อผู้ใช้ : </td>
+                                                <td align="left"><input type="text" name="txtUsername" id="txtUsername"
+                                                        size="35" autocomplete="off"
+                                                        class="validate[required,minsize[6],ajax[ajaxUserCallPhp]]" />
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="33" align="right">ชื่อ :</td>
+                                                <td align="left"><input type="text" name="txtFirstname"
+                                                        id="txtFirstname" size="35" autocomplete="off"
+                                                        class="validate[required]" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td height="33" align="right">นามสกุล :</td>
+                                                <td align="left"><input type="text" name="txtLastname" id="txtLastname"
+                                                        size="35" autocomplete="off" class="validate[required]" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td height="31" align="right">ที่อยู่ :</td>
+                                                <td align="left"><input type="text" name="txtAddress" id="txtAddress"
+                                                        size="35" class="validate[required]" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td height="31" align="right">เบอร์โทรศัพท์ :</td>
+                                                <td align="left"><input type="text" name="txtTel" id="txtTel" size="35"
+                                                        class="validate[required,custom[phone]]" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td height="33">&nbsp;</td>
+                                                <td>
+                                                    <button type="submit" id="btn_save"
+                                                        class="btn primary" />ส่งข้อมูล</button>
+                                                    <button type="reset" id="btn_clear" class="btn" />ยกเลิก</button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="promote-buyer">
+                            <div class="promote-text">
+                                <li>ค้นหาสินในระบบได้ฟรีไม่จำกัด</li>
+                                <li>ค้นหา Supplier ได้รวดเร็วทันใจ</li>
+                                <li>สะดวกในการสั่งซื้อสินค้าออนไลน์</li>
+                                <li>ลงประกาศซื้อฟรีไม่จำกัด</li>
+                                <li>แจ้งเตือนสินค้าใหม่</li>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="line"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear:both"></div>
+
+
+    </div>
+
+    <div class="layout_chatbox"></div>
+
+
+    <script type="text/javascript" async>
+
+        $(document).ready(function () {
+
+            if ($('body').hasClass('cata_footer')) { $('.cata_footer').tooltip(); };
+
+            if ($('body').hasClass('set_tooltip')) { $('.set_tooltip').tooltip(); };
+
+
+
+
+
+        });
+
+    </script>
+
+
+    <script type="text/javascript" async>
+        /* <![CDATA[ */
+        var google_conversion_id = 997242137;
+        var google_custom_params = window.google_tag_params;
+        var google_remarketing_only = true;
+/* ]]> */
+    </script>
+    <script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js" async></script>
+    <noscript>
+        <div style="display:inline;">
+            <img height="1" width="1" style="border-style:none;" alt=""
+                src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/997242137/?value=0&amp;guid=ON&amp;script=0" />
+        </div>
+    </noscript>
+    <script async>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-34664527-1', 'auto');
+        ga('send', 'pageview');
+
+    </script>
+    <script type="text/javascript" async>
+        /* <![CDATA[ */
+        var google_conversion_id = 997242137;
+        var google_custom_params = window.google_tag_params;
+        var google_remarketing_only = true;
+/* ]]> */
+    </script>
+    <script async type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+    </script>
+    <noscript>
+        <div style="display:inline;">
+            <img height="1" width="1" style="border-style:none;" alt=""
+                src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/997242137/?guid=ON&amp;script=0" />
+        </div>
+    </noscript>
+    <script async type="text/javascript">
+        /* <![CDATA[ */
+        var google_conversion_id = 865298934;
+        var google_custom_params = window.google_tag_params;
+        var google_remarketing_only = true;
+/* ]]> */
+    </script>
+    <script async type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+    </script>
+    <noscript>
+        <div style="display:inline;">
+            <img height="1" width="1" style="border-style:none;" alt=""
+                src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/865298934/?guid=ON&amp;script=0" />
+        </div>
+    </noscript>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,177 @@
+<?php
+
+namespace App\Http\Controllers\Admin\Product;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+
+class ProductTypeController extends Controller
+{
+    public function index($get_data_edit = null)
+    {
+        $get_product_type = self::getProductType();
+
+        $get_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroup();
+
+        $get_edit = app('App\Http\Controllers\Admin\ProductsController')->getDataEdit($get_product_type, $get_data_edit, 'ProdTypeID');
+
+        return view('login.admin.posone.displayProductType', [
+            'product_type' => $get_product_type,
+            'product_group' => $get_product_group,
+            'data_edit' => $get_edit
+        ]);
+    }
+
+    public function getProductType()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+        producttypemaster.ProdTypeID,
+        producttypemaster.ProdTypeCode,
+        producttypemaster.ProdTypeName,
+        producttypemaster.ProdTypeEName,
+        producttypemaster.ProdTypeRemark,
+        producttypemaster.ProdTypeStatus,
+        producttypemaster.CompanyCode,
+        producttypemaster.ProdGroupCode,
+        productgrouppos.prodGroupName
+        FROM
+        producttypemaster
+        Left Outer Join productgrouppos
+        ON producttypemaster.ProdGroupCode = productgrouppos.prodGroupCode
+        Order by producttypemaster.ProdGroupCode, ProdTypeCode";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function productTypeInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'ProdTypeCode' => 'required|unique:producttypemaster|max:32',
+            'ProdTypeName' => 'required|max:128',
+            'prodGroupName' => 'required',
+        ]);
+
+        $code = $request->input('ProdTypeCode');
+        
+        $name = $request->input('ProdTypeName');
+
+        $product_group = $request->input('prodGroupName');
+
+        $qury = "call sp_productTypeMaster_insert ('SINGLE', '".$code."', '".$name."', '', '', 'Y', '".$product_group."')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'product type', [
+            'th' => 'เพิ่มประเภทสินค้า ' . $name,
+            'en' => 'Successfully created ' . $name . ' product type.',
+        ]);
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function productTypeEdit(Request $request, $id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+        producttypemaster.ProdTypeID,
+        producttypemaster.ProdTypeCode,
+        producttypemaster.ProdTypeName,
+        producttypemaster.ProdTypeEName,
+        producttypemaster.ProdTypeRemark,
+        producttypemaster.ProdTypeStatus,
+        producttypemaster.CompanyCode,
+        producttypemaster.ProdGroupCode,
+        productgrouppos.prodGroupName
+        FROM
+        producttypemaster
+        Left Outer Join productgrouppos
+        ON producttypemaster.ProdGroupCode = productgrouppos.prodGroupCode
+        where prodTypeCode = '".$id."'
+        Order by producttypemaster.ProdGroupCode, ProdTypeCode;";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return self::index($get_data);
+    }
+
+    public function productTypeUpdate(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'ProdTypeName' => 'required|max:32',
+            'prodGroupName' => 'required',
+        ]);
+
+        $code = $request->input('ProdTypeCode');
+        
+        $name = $request->input('ProdTypeName');
+
+        $product_group = $request->input('prodGroupName');
+
+        $qury = "call sp_productTypeMaster_update ('SINGLE', '".$code."', '".$name."', '', '', 'Y', '".$product_group."')";
+
+        DB::select(DB::raw($qury));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'product type', [
+            'th' => 'อัพเดทประเภทสินค้า ' . $name,
+            'en' => 'Successfully updated ' . $name . ' product type.',
+        ]);
+
+        return redirect()->route('adminProductType')->withsuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'อัพเดทสำเร็จ');
+    }
+
+    public function productTypeDelete($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury2 = "select * from producttypemaster where prodTypeCode = '".$id."'";
+
+        $get_data2 = DB::select(DB::raw($qury2));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'error', 'product type', [
+            'th' => 'ลบประเภทสินค้า ' . $get_data2[0]->ProdTypeName,
+            'en' => 'Deleted ' . $get_data2[0]->ProdTypeName . ' product type successfully.',
+        ]);
+
+        $qury = "delete from producttypemaster where ProdTypeCode='".$id."'";
+
+        DB::select(DB::raw($qury));
+
+        return back()->withsuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+    }
+
+    public function getProductTypeByCode($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from producttypemaster where ProdTypeCode = '".$id."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data != null ? $get_data[0]->ProdTypeName : null;
+    }
+
+    public function getProductTypeByGroupCode($prodGroupCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        //COUNT(*) as count, ProdTypeName
+        $qury = "select * from producttypemaster where ProdGroupCode = '".$prodGroupCode."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+}

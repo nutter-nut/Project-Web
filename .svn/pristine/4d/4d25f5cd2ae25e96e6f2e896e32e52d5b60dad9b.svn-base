@@ -1,0 +1,282 @@
+@extends('layouts.index.index')
+
+@section('center')
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">{{ __('index.categorie.title') }}</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">{{ __('index.categorie.breadcrumb_home') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('Categories') }}">{{ __('index.categorie.breadcrumb_categorie') }}</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <!-- listing Area Start -->
+    <div class="category-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-7 col-lg-8 col-md-10">
+                    <div class="section-tittle mb-50">
+                        <h2>{{ __('index.categorie.shop_with_us') }}</h2>
+                        <!-- <p>{{ __('index.categorie.browse_start') }} {{ $products_count }} {{ __('index.categorie.browse_end') }}</p> -->
+                        <p>{{ $products_count }} {{__('index.categorie.product_found')}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!--? Left content -->
+                <div class="col-xl-3 col-lg-3 col-md-4 ">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="small-tittle mb-45">
+                                <div class="ion"> <svg xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="12px">
+                                        <path fill-rule="evenodd" fill="rgb(27, 207, 107)"
+                                            d="M7.778,12.000 L12.222,12.000 L12.222,10.000 L7.778,10.000 L7.778,12.000 ZM-0.000,-0.000 L-0.000,2.000 L20.000,2.000 L20.000,-0.000 L-0.000,-0.000 ZM3.333,7.000 L16.667,7.000 L16.667,5.000 L3.333,5.000 L3.333,7.000 Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h4>{{ __('index.categorie.product_group') }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Job Category Listing start -->
+                    <div class="category-listing mb-50">
+                        <!-- Check box -->
+                        <div class="select-checkbox mb-30">
+                            <div class="small-tittle">
+                                <h4>{{ __('index.categorie.categories') }}</h4>
+                            </div>                        
+                            <!-- <form action="/categories" method="GET" id="form_categories" name="form_categories"> 
+                                <ul class="menu">
+                                @foreach($group_categories as $key => $items)
+                                    @if($items['count'] > 0)
+                                    <label class="container">
+                                        <small>{{ $items['prodGroupName'] }} ({{ $items['count'] }})</small>
+                                        <input type="hidden" name="select_sort" value="{{ $select_sort }}">
+                                        <input onChange="this.form.submit()" type="checkbox" name="categories_choice[]" value="{{ $items['prodGroupCode'] }}" @foreach ($categories_selected as $item) @if($item == $items['prodGroupCode']) checked @endif @endforeach >
+                                        <span class="checkmark"></span>
+                                    </label>         
+                                    @endif                    
+                                @endforeach
+                                </ul>
+                            </form> -->
+                            <div class="panel-group" id="accordion">
+                                <div class="panel panel-default">
+                                    <form action="{{ route('Categories') }}" method="GET" id="form_categories" name="form_categories"> 
+                                        @foreach($group_categories as $key => $items)
+                                            <div class="panel-heading accordion accordion-flush">
+                                                <h4 class="panel-title py-3 pl-3">
+                                                    <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne_{{ $items['prodGroupCode'] }}">{{ $items['prodGroupName'] }} <span class="badge2 badge-dark" style="background-color:#ff7940">{{ $items['count'] }}</span></a>
+                                                </h4>
+                                            </div>
+                                            <div id="collapseOne_{{ $items['prodGroupCode'] }}" class="panel-collapse collapse show in" onclick="collapse();">
+                                                <ul class="list-group">
+                                                    @foreach($items['type']['data'] as $key2 => $items2)
+                                                        @if($items['type']['count'][$key2] > 0)
+                                                            <li class="list-group-item">
+                                                                <label class="container" style="margin-bottom:0;">
+                                                                    <small>{{ $items2['ProdTypeName'] }} <span class="badge2 badge-light">{{ $items['type']['count'][$key2] }}</span></small>
+                                                                    <input type="hidden" name="select_sort" value="{{ $select_sort }}">
+                                                                    <input onChange="this.form.submit()" type="checkbox" name="categories_choice[]" value="{{ $items2['ProdTypeCode'] }}" @foreach ($categories_selected as $item) @if($item == $items2['ProdTypeCode']) checked @endif @endforeach >
+                                                                    <span class="checkmark"></span>
+                                                                </label>
+                                                            </li>
+                                                        @endif
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endforeach
+                                    </form>
+                                </div>
+                            </div>       
+                        </div>
+                        <!-- Check box /-->
+                        <!-- Range Slider Start -->
+                        <!-- <div class="range-slider mt-50">
+                            <div class="small-tittle small-tittle2">
+                                <h4>{{ __('index.categorie.price_range') }}</h4>
+                            </div>
+                            <div class="range_item">
+                                <div id="slider-range"></div>
+                                <input type="text" class="js-range-slider" value="" />
+                                <div class="d-flex align-items-center">
+                                    <div class="price_text">
+                                        <p>{{ __('index.categorie.price') }} :</p>
+                                    </div>
+                                    <div class="price_value d-flex justify-content-center">
+                                        <input type="text" class="js-input-from" id="amount" name="price_star" readonly />
+                                        <span>{{ __('index.categorie.to') }}</span>
+                                        <input type="text" class="js-input-to" id="amount" name="price_end" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- Range Slider End -->
+                    </div>
+                    <!-- Job Category Listing End -->
+                </div>
+                <!--?  Right content -->
+                <div class="col-xl-9 col-lg-9 col-md-8 ">
+                    <!-- Count of Job list Start -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="count-job mb-35">
+                                <span>{{ $products->total() }} {{ __('index.categorie.product_found') }}</span>
+                                <!-- Select job items start -->
+                                <div class="select-cat">
+                                    <span>{{ __('index.categorie.sort_by') }}</span>
+
+                                    <form action="/categories" method="GET" id="form_pattern">
+                                        <input type="hidden" id="categories_checked" name="categories_choice" value="{{ $str_categories_selected }}">
+                                        <select name="select_sort" id="select_sort" onchange="this.form.submit()">
+                                            <option value="max-min" @if($select_sort == 'max-min') selected @endif>{{ __('index.categorie.max_min') }}</option>
+                                            <option value="min-max" @if($select_sort == 'min-max') selected @endif>{{ __('index.categorie.min_max') }}</option>
+                                            <option value="create" @if($select_sort == 'create') selected @endif>{{ __('index.categorie.latest') }}</option>
+                                            <option value="old" @if($select_sort == 'old') selected @endif>{{ __('index.categorie.oldest') }}</option>
+                                            <option value="name" @if($select_sort == 'name') selected @endif>{{ __('index.categorie.name') }}</option>
+                                        </select>
+                                    </form>
+                                    
+                                </div>
+                                <!--  Select job items End-->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Count of Job list End -->
+                    <!--? New Arrival Start -->
+                    <div class="new-arrival new-arrival3">
+                        <div class="row">                       
+                        @foreach ($products as $item)
+                            @foreach (array_slice($item, 0, 1) as $key3 => $value)
+                                <div class="col-lg-3 col-md-6 col-sm-8 product-top">
+                                <!-- <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6 product-top"> -->
+                                    <div class="product-grid product">
+                                        <div class="product-image product-img">
+                                            <a href="{{ route('productDetails', [ 'prodCode' => $value['product']->prodCode, 'uomCode' => $value['product']->uomCode ]) }}" class="image">
+                                                @if ($value['image'] != null)
+                                                    <img class="pic-1" style="height:200px;width:200px;" src="{{ $value['image']['url'] }}">
+                                                @else
+                                                    <img class="pic-1" style="height:200px;width:200px;" src="{{ asset('storage') }}/product_images/product_default.png">
+                                                @endif
+                                            </a>
+                                            @if($value['data_product']['best_seller'] == 1)
+                                            <a href="{{ route('productDetails', [ 'prodCode' => $value['product']->prodCode, 'uomCode' => $value['product']->uomCode ]) }}" class="image">
+                                                <div class="pr-1 card-img-overlay d-flex justify-content-end" style="z-index:9;">
+                                                    <img class="pic-1" style="height:35px;width:35px;" src="{{ asset('storage') }}/product_images/best-seller.png">
+                                                </div>
+                                            </a> 
+                                            @endif
+                                            @if(isset($value['data_promotion']))
+                                                <div class="product-label @if($value['data_product']['best_seller'] == 1) pr-5 @endif">
+                                                    <span class="new" style="display: inline-block;">{{ $value['data_promotion']['text_promotion'] }}</span><span class="sale">-{{ number_format($value['data_promotion']['discount'], 2) }}%</span>                                                      
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="product-content">
+
+                                            @php ($value['ratting'] ==5) ? $star = 5 : $star = $value['ratting'] % 5;  @endphp
+                                            <ul class="rating">
+                                                @for ($i = 0; $i < $star; $i++)
+                                                <li class="fas fa-star"></li>
+                                                @endfor
+                                                @php $star_empty = 5 - $star @endphp
+                                                @for ($i = 0; $i < $star_empty; $i++)
+                                                <li class="far fa-star"></li>
+                                                @endfor
+                                            </ul>
+                                            
+                                            <h3 class="title"><a href="{{ route('productDetails', [ 'prodCode' => $value['product']->prodCode, 'uomCode' => $value['product']->uomCode ]) }}">{{ $value['product']->prodTName }}</a></h3>                                                
+                                            @if(isset($value['data_promotion']))
+                                                <div class="price">{{ number_format($value['data_product']['price'], 2) }} {{__('index.index.baht')}}</div>
+                                                <del class="product-old-price">{{ number_format($value['data_product']['price_vat'], 2) }} {{__('index.index.baht')}}</del>
+                                            @endif
+
+                                            @if($value['data_promotion'] == null)
+                                                <div class="price">{{ number_format($value['data_product']['price_vat'], 2) }} {{__('index.index.baht')}}</div>
+                                            @endif
+                                            <a class="add-to-cart" href="{{ route('productDetails', [ 'prodCode' => $value['product']->prodCode, 'uomCode' => $value['product']->uomCode ]) }}">add to cart</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endforeach
+                        </div>
+                        @if($products->lastPage() > 1)
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-end pagination-lg">
+                                @for ($i = 1; $i <= $products->lastPage(); $i++)
+                                <li class="page-item @if($products->currentPage() == $i) active @endif">
+                                    <a class="page-link" @if($products->currentPage() != $i) href="?page={{ $i }}{{ $text_page }}&select_sort={{ $select_sort }}" @endif tabindex="-1">{{ $i }}</a>
+                                </li>
+                                @endfor
+                            </ul>
+                        </nav>
+                        @endif
+                    </div>
+                    <!--? New Arrival End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- listing-area Area End -->
+</main>
+
+<script>
+
+var array_choice = []
+
+var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
+
+for (var i = 0; i < checkboxes.length; i++) {
+    array_choice.push(checkboxes[i].value)
+}
+
+document.getElementById("categories_checked").value = array_choice;
+
+</script>
+
+<style>
+#accordion .glyphicon { margin-right:10px; }
+.panel-collapse>.list-group .list-group-item:first-child {border-top-right-radius: 0;border-top-left-radius: 0;}
+.panel-collapse>.list-group .list-group-item {border-width: 1px 0;}
+.panel-collapse>.list-group {margin-bottom: 0;}
+.panel-collapse .list-group-item {border-radius:0;}
+
+.panel-collapse .list-group .list-group {margin: 0;margin-top: 10px;}
+.panel-collapse .list-group-item li.list-group-item {margin: 0 -15px;border-top: 1px solid #ddd !important;border-bottom: 0;padding-left: 30px;}
+.panel-collapse .list-group-item li.list-group-item:last-child {padding-bottom: 0;}
+
+.panel-collapse div.list-group div.list-group{margin: 0;}
+.panel-collapse div.list-group .list-group a.list-group-item {border-top: 1px solid #ddd !important;border-bottom: 0;padding-left: 30px;}
+.panel-collapse .list-group-item li.list-group-item {border-top: 1px solid #DDD !important;}
+
+.badge2 {
+    display: inline-block;
+    padding: .25em .4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+</style>
+
+@endsection

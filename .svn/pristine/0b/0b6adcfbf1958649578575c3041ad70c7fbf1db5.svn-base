@@ -1,0 +1,282 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+use Carbon\Carbon;
+
+use Auth;
+
+use App\Blog;
+use App\Comment;
+
+class BlogController extends Controller
+{
+    public function index(Request $request, $search = null)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $data = app('App\Http\Controllers\IndexController')->getData();
+
+        $new_data = app('App\Http\Controllers\IndexController')->getFilter($data, 1); //list categorie
+
+        $data['menugroup'] = $new_data;
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = app('App\Http\Controllers\IndexController')->topProducts();
+
+        if($search != null){
+            $blogs = Blog::collection('blogs')
+            ->select('blogs.id as id','users.name as user_name','blogs.date as date','blogs.title as title','blogs.description as description','blogs.image as image','blogs.products as products')
+            ->leftjoin('users','blogs.user_id','users.id')
+            ->where('blogs.title' , 'like' , '%'.$search.'%' )
+            ->orderby('blogs.id','desc')
+            ->paginate(4);
+
+        }else{
+            $blogs = Blog::collection('blogs')
+            ->select('blogs.id as id','users.name as user_name','blogs.date as date','blogs.title as title','blogs.description as description','blogs.image as image','blogs.products as products')
+            ->leftjoin('users','blogs.user_id','users.id')
+            ->where('blogs.id', '!=', 0)
+            ->orderby('blogs.id','desc')
+            ->paginate(4);
+        }
+
+        $array_blog_count = [];
+        foreach($blogs->items as $item){
+            $comment = DB::connection('mongodb')->collection("comments")->where('blog_id','=',$item['id']*1)->count();
+            array_push($array_blog_count, $comment);
+        }
+
+        $array_menu = self::menuBlog();
+
+        return view('blog',[
+            'blogs' => [$blogs,$array_blog_count],
+            'data' => $data,
+            'array_menu' =>  $array_menu,
+            'search' => $search != null ? $search : null
+        ]);
+    }
+
+    public function searchBlog(Request $request)
+    {
+        return self::index($request, $request->input('search'));
+    }
+    
+    public function blogDetails(Request $request, $id, $comment = null)
+    {
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $data = app('App\Http\Controllers\IndexController')->getData();
+
+        $new_data = app('App\Http\Controllers\IndexController')->getFilter($data, 1); //list categorie
+
+        $data['menugroup'] = $new_data;
+
+        $data['cart'] = $cart;
+
+        $data['top_products'] = app('App\Http\Controllers\IndexController')->topProducts();
+
+       if($comment != null){ //กันคนอื่นแก้ไข
+
+            $check_user = Comment::collection('comments')->select('*')->where('id','=',$comment*1)->first();
+
+            if($check_user[0]['user_id'] != Auth::user()->id){
+                return back();
+            }else{
+                $comment_edit = $check_user[0];
+            }
+
+       }else{
+            $comment_edit = null;
+       }
+    
+        $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+        $array_menu = self::menuBlog();
+
+        $blog = Blog::collection('blogs')
+        ->select('blogs.id as id','users.name as user_name','blogs.date as date','blogs.title as title','blogs.description as description','blogs.image as image','blogs.products as products','blogs.like as like')
+        ->leftjoin('users','blogs.user_id','users.id')
+        ->where('blogs.id', '=', $id*1)
+        ->orderby('blogs.id','desc')
+        ->first(1);
+
+        $blog_all = Blog::collection('blogs')->select('*')->where('id', '!=', 0)->orderby('id','desc')->get();
+
+        $blog_all_id = [];
+        foreach($blog_all as $item){
+            array_push($blog_all_id, $item['id']);
+        }
+
+        $index = array_search($id, $blog_all_id);
+
+        $next = array_key_exists($index+1, $blog_all_id) ? Blog::collection('blogs')->select('id','title','image')->where('id', '=', $blog_all_id[$index+1])->first() : null;
+        $before = array_key_exists($index-1, $blog_all_id) ? Blog::collection('blogs')->select('id','title','image')->where('id', '=', $blog_all_id[$index-1])->first() : null;
+
+        $comments = Comment::collection('comments')
+        ->select('comments.id as id','comments.blog_id as blog_id','comments.text as text','comments.created_at as created_at','users.name as user_name','users.image as user_image','users.id as user_id')
+        ->leftjoin('users','comments.user_id','users.id')
+        ->where('comments.blog_id', '=', $id*1)
+        ->orderby('comments.id','desc')
+        ->paginate(3);
+
+        $time = [];
+        foreach($comments->items as $item){
+            $officialDate = Carbon::parse($item['created_at'])->locale('th')->isoFormat('LLL');
+            array_push($time, $officialDate);
+        }
+
+        $comment_count = DB::connection('mongodb')->collection("comments")->where('blog_id','=',$id*1)->count();
+
+        if(Auth::check()){
+            
+            $like = Blog::collection('blogs')->select('like')->where('id', '=', $id*1)->first();
+
+            if($like == null) return redirect()->route('Blog')->with('fail', (\Session::get('locale') != "th") ? 'No data found' : 'ไม่พบข้อมูล');
+
+            if(count($like[0]) > 0){
+
+                if(in_array(Auth::user()->id, $like[0]['like'])){
+                    $like_status = true;
+                }else{
+                    $like_status = false;
+                }
+
+            }else{
+
+                $like_status = null;
+            }
+
+        }else{
+            $like_status = null;
+        }
+
+        return view('blog_details',[
+            'blog' => $blog[0],
+            'next' => !empty($next) ? $next[0] : null,
+            'before' => !empty($before) ? $before[0] : null,
+            'data' => $data,
+            'array_menu' =>  $array_menu,
+            'comments' => [ $comments, $time ],
+            // 'comment_count' => $comment_count < 10 ? '0'.$comment_count : $comment_count
+            'comment_count' => $comment_count,
+            'like_status' => $like_status,
+            'comment_edit' => $comment_edit
+        ]);
+    }
+
+    public function menuBlog()
+    {
+        $array_categories = app('App\Http\Controllers\CategoriesController')->getCategoriesWithCount([]);
+
+        $blogs_list = Blog::collection('blogs')
+        ->select('blogs.id as id','users.name as user_name','blogs.date as date','blogs.title as title','blogs.description as description','blogs.image as image','blogs.products as products','blogs.created_at as created_at')
+        ->leftjoin('users','blogs.user_id','users.id')
+        ->where('blogs.id', '!=', 0)
+        ->orderby('blogs.id','desc')
+        ->limit(4)
+        ->get();
+
+        $time = [];
+        foreach($blogs_list as $item){
+            $officialDate = Carbon::parse($item['created_at'])->locale('th')->isoFormat('LLL');
+            array_push($time, $officialDate);
+        }
+
+        return [$array_categories, $blogs_list, $time];
+    }
+
+    public function sendComment(Request $request, $id)
+    {
+        $newCommentArray = array(
+            'id' => Comment::database()->collection("comments")->getModifySequence('id'),
+            'user_id' => Auth::user()->id,
+            'blog_id' => $id*1,
+            'text' => $request->input('comment'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        );
+
+        $save = Comment::database()->collection("comments")->insert($newCommentArray);
+
+        if($save){
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+        }else{
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'Save is not successful.' : 'บันทึก ไม่สำเร็จ');
+        }
+    }
+
+    public function editComment(Request $request, $blog, $comment)
+    {
+        return self::blogDetails($request, $blog, $comment);
+    }
+
+    public function updeteComment(Request $request, $blog, $comment)
+    {
+        $save = DB::connection('mongodb')->collection("comments")->where('id',"=",$comment*1)->update(['text' => $request->input('comment')]);
+
+        if($save){
+            return redirect()->route('blogDetails', ['id' => $blog ])->withsuccess((\Session::get('locale') != "th") ? 'Successfully update.' : 'อัพเดทสำเร็จ');
+        }else{
+            return redirect()->route('blogDetails', ['id' => $blog ])->with('fail', (\Session::get('locale') != "th") ? 'Failed to update.' : 'อัพเดท ไม่สำเร็จ');
+        }
+    }
+
+    public function deleteComment($id)
+    {
+        $check_user = Comment::collection('comments')->select('*')->where('id','=',$id*1)->first(); //กันคนอื่นลบ
+
+        if($check_user[0]['user_id'] != Auth::user()->id){
+
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'The authorization was not successful.' : 'การอนุญาต ไม่สำเร็จ');
+        }else{
+            $delete = DB::connection('mongodb')->collection("comments")->where("id","=",$id*1)->delete();
+
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+        }
+        
+    }
+
+    public function blogLike($id)
+    {
+        $like = Blog::collection('blogs')->select('like')->where('id', '=', $id*1)->first();
+
+        if(count($like[0]) > 0){
+            $like = $like[0]['like'];
+        }else{
+            $like = [];
+        }
+
+        array_push($like, Auth::user()->id);
+
+        $save = DB::connection('mongodb')->collection("blogs")->where('id',"=",$id*1)->update(['like' => $like]);
+
+        if($save){
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully to like.' : 'กดไลค์สำเร็จ');
+        }else{
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'Failed to like.' : 'กดไลค์ ไม่สำเร็จ');
+        }
+    }
+
+    public function blogUnLike($id)
+    {
+        $like = Blog::collection('blogs')->select('like')->where('id', '=', $id*1)->first();
+
+        if (($key = array_search(Auth::user()->id, $like[0]['like'])) !== false) {
+            unset($like[0]['like'][$key]);
+        }
+
+        $save = DB::connection('mongodb')->collection("blogs")->where('id',"=",$id*1)->update(['like' => $like[0]['like']]);
+
+        if($save){
+            return back()->withsuccess((\Session::get('locale') != "th") ? 'Successfully to unlike.' : 'ไม่กดไลค์สำเร็จ');
+        }else{
+            return back()->with('fail', (\Session::get('locale') != "th") ? 'Failed to unlike.' : 'ไม่กดไลค์ ไม่สำเร็จ');
+        }
+    }
+    
+}

@@ -1,0 +1,118 @@
+
+
+<?php $__env->startSection('center'); ?>
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">Cart List</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('Cart')); ?>">Cart List</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <!--================Cart Area =================-->
+    <section class="cart_area section-padding40">
+        <div class="container">
+            <div class="cart_inner">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Product</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                                <th scope="col">Total</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $__currentLoopData = $cart; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr>
+                                <td>
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <?php $__currentLoopData = array_slice($item['data'][0]['image'],0,1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image_array): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> 
+                                                <img src="<?php echo e(asset('storage')); ?>/product_images/<?php echo e($item['data'][0]['id']); ?>/<?php echo e($image_array); ?>" alt="">
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> 
+                                        </div>
+                                        <div class="media-body">
+                                            <p><?php echo e($item['data'][0]['name']); ?></p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <h5>$<?php echo e($item['data'][0]['price']); ?></h5>
+                                </td>
+                                <td>
+                                    
+                                <div class="product_count">
+                                    <a href="<?php echo e(route('decreaseSingleProduct', ['id' => $item['data'][0]['id']])); ?>" style="color: black;"><span class="input-number-decrement"> <i class="ti-minus"></i></span></a>
+                                    <input class="input-number" type="text" value="<?php echo e($item['quantity']); ?>" min="0" max="10">
+                                    <a href="<?php echo e(route('increaseSingleProduct', ['id' => $item['data'][0]['id']])); ?>" style="color: black;"><span class="input-number-increment"> <i class="ti-plus"></i></span></a>
+
+                                    <!-- <div class="qty-label">
+                                        <div class="input-number">
+                                            <input type="number" name="qunatity" value="<?php echo e($item['quantity']); ?>" min=0 disabled>
+                                            <a href="<?php echo e(route('increaseSingleProduct', ['id' => $item['data'][0]['id']])); ?>"><p >+</p></a>
+                                            <a href="<?php echo e(route('decreaseSingleProduct', ['id' => $item['data'][0]['id']])); ?>"><p >-</p></a>
+                                        </div>
+                                    </div> -->
+
+                                    
+                                        <!-- <span class="input-number-decrement" ><i class="ti-minus"></i></span>
+                                        <input class="input-number" type="text" value="<?php echo e($item['quantity']); ?>" min="0" max="10">
+                                        <span class="input-number-increment"> <i class="ti-plus"></i></span> -->
+                                    </div>
+                                    
+                                </td>
+                                <td>
+                                    <h5>$<?php echo e($item['totalSinglePrice']); ?></h5>
+                                </td>
+                                <td>
+                                    <a href="<?php echo e(route('DeleteItemFromCart', ['id' => $item['data'][0]['id']])); ?>"><button class="delete" onclick="return confirm('Are you sure?')"><i class="fa fa-trash" style="color:red;"></i></button></a>
+                                </td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <h5>Subtotal</h5>
+                                </td>
+                                <td>
+                                    <h5>$<?php echo e($totalPrice); ?></h5>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="checkout_btn_inner float-right">
+                        <a class="btn" href="<?php echo e(route('Categories')); ?>">Continue Shopping</a>
+                        <a class="btn checkout_btn" href="<?php echo e(route('Checkout')); ?>">Proceed to checkout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--================End Cart Area =================-->
+
+</main>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.index.index', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\new_template01_abpon\resources\views/cart.blade.php ENDPATH**/ ?>

@@ -1,0 +1,45 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+        <div class="container">
+            <div class="col-sm-12">
+                <div class="top_box" style="width:100%;">
+                    <ul class="breadcrumb">
+                        <li><a href="{{ route('Index') }}">Home </a></li>
+                        <li>&nbsp;> <a href="{{ route('categoriesIndex', [ 'id' => $data['breadcrumb']['category_id'], 'name' => $data['breadcrumb']['category_name'] ]) }}">{{ $data['breadcrumb']['category_name'] }}</a></li>
+                        <li>&nbsp;> {{ $data['breadcrumb']['category_detail'] }}</li>
+                    </ul>
+
+                    <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/screws-concrete.png') }}" alt="">
+                    <h1>{{ $data['breadcrumb']['category_detail'] }}</h1>
+                    <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    <p style="color:#000; font-size:14px;"></p>
+                </div>
+                <div class="machine_list">
+                    <div class="col-sm-5">
+                        <h3><strong>Filter For</strong></h3>
+                        <ul>
+                            <li class="odd"><a href="{{ route('getProducts', [ 'id' => 123456, 'name' => 'All Concrete mil-spec', 'category' => $data['breadcrumb'] ]) }}">All Concrete mil-spec</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-1 or">
+                        <span>or</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <h3><strong>Follow A Product Path Below</strong></h3>
+                        <ul>
+                            <li class="odd"><a href="{{ route('getProducts', [ 'id' => 123456, 'name' => 'Flat Head , Phillips Drive', 'category' => $data['breadcrumb'] ]) }}">Flat Head / Phillips Drive</a></li>
+                            <li class=""><a href="{{ route('getProducts', [ 'id' => 123456, 'name' => 'Hex Washer Head , Slotted Drive', 'category' => $data['breadcrumb'] ]) }}">Hex Washer Head / Slotted Drive</a></li>
+                            <li class="odd"><a href="{{ route('getProducts', [ 'id' => 123456, 'name' => 'Concrete mil-spec Drill Bits', 'category' => $data['breadcrumb'] ]) }}">Concrete mil-spec Drill Bits</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+@endsection

@@ -1,0 +1,305 @@
+@extends('layouts.index.index')
+
+@section('center')
+
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2 slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">{{ __('index.checkout.title') }}</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">{{ __('index.checkout.breadcrumb_home') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('Cart') }}">{{ __('index.checkout.breadcrumb_cart') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('Checkout') }}">{{ __('index.checkout.breadcrumb_checkout') }}</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <br>
+    <div class="container">
+        @include('alert')
+    </div>
+
+    <!--? Checkout Area Start-->
+    <br>
+    <section-page class="checkout_area section-padding40">
+        <div class="container">
+            <br>
+            @if(!Auth::check())
+            <div class="returning_customer">
+                <div class="check_title">
+                    <h2>
+                        {{ __('index.checkout.login_start') }}
+                        <a href="/login">{{ __('index.checkout.login_end') }}</a>
+                    </h2>
+                </div>
+                <p>{{ __('index.checkout.login_detail') }}</p>
+                <form class="row contact_form" action="{{ route('login') }}" method="POST" novalidate="novalidate">
+                @csrf
+                    <div class="col-md-6 form-group p_star">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="{{ __('index.checkout.input_email') }}" autocomplete="email" autofocus />
+                    </div>
+                    <div class="col-md-6 form-group p_star">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="{{ __('index.checkout.input_password') }}" autocomplete="current-password" />
+                    </div>
+                    <div class="col-md-12 form-group d-flex flex-wrap">
+                        <button type="submit" class="btn">{{ __('index.checkout.log_in') }}</button>
+                    </div>
+                </form>
+            </div>
+            <hr>
+            @endif
+            <br>      
+            <div class="billing_details">                
+                <div class="row">
+                    <form name="FormAddress" class="row contact_form" action="{{ route('sendOrder') }}" method="POST" novalidate="novalidate" >
+                    {{ csrf_field() }}
+                        <div class="col-lg-6">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h3>{{ __('index.checkout.delivery_address') }}</h3>
+                                </div>
+                                @if(Auth::check())
+                                <div>
+                                    <div class="input-group">
+                                        <select name="address_selete" id="address_selete" onchange="addressSelete(this.value)" class="form-control form-control-sm">
+                                            <option value="selete">{{ __('index.checkout.select_address') }}</option>
+                                            @foreach ($address as $item)
+                                                <option value="{{ $item['id'] }}">{{ $item['place_name'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" id="basic-addon2"><a href="{{ route('profile') }}"><i class="fa fa-gear"></i></a></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">* {{ __('index.checkout.first_name') }}</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="first" name="first_name" placeholder="" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">* {{ __('index.checkout.last_name') }}</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="last" name="last_name" placeholder="" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">* {{ __('index.checkout.phone_number') }}</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="phone" name="phone" placeholder="" onkeyup="autoTab2(this,2)" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right">* {{ __('index.checkout.address') }}</label>
+                                    <div class="col-9">
+                                        <textarea class="form-control" id="address" name="address" placeholder="" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 form-group p_star" id="message_store_form">
+                                <div class="row">
+                                    <label for="message_store" class="col-3 col-form-label text-right">{{ __('index.checkout.message_store') }}</label>
+                                    <div class="col-9">
+                                        <textarea class="form-control" id="message_store" name="message_store" placeholder="" required></textarea>
+                                    </div>
+                                </div>
+                            </div> 
+                            <div id="installment_form" style="display:none;">
+                                <div class="col-md-12 form-group p_star" id="bankcode_form">
+                                    <div class="row">
+                                        <label for="bankcode" class="col-3 col-form-label text-right">เลือกบัตร</label>
+                                        <div class="col-9">
+                                            <div class="input-group">
+                                                <select class="form-control" name="bankcode" id="bankcode">
+                                                    <option value="KTC">KTC กรุงไทย</option>
+                                                    <option value="BAY">BAY กรุวศรี</option>
+                                                    <option value="FCY">Fiest Choice Card</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="col-md-12 form-group p_star" id="bankcode_form">
+                                    <div class="row">
+                                        <label for="bankcode" class="col-3 col-form-label text-right">เลือกแผนผ่อนชำระ</label>
+                                        <div class="col-9">
+                                            <div class="row">
+                                                <div class="col input-group">
+                                                    <select class="form-control" name="min" id="min">
+                                                        <option value="3" selected>3 รอบ</option>
+                                                        <option value="4">4 รอบ</option>
+                                                        <option value="5">5 รอบ</option>
+                                                        <option value="6">6 รอบ</option>
+                                                        <option value="7">7 รอบ</option>
+                                                        <option value="8">8 รอบ</option>
+                                                        <option value="9">9 รอบ</option>
+                                                        <option value="10">10 รอบ</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col text-center m-auto">ถึง</div>
+                                                <div class="col input-group">
+                                                    <select class="form-control" name="max" id="max">
+                                                        <option value="3">3 รอบ</option>
+                                                        <option value="4">4 รอบ</option>
+                                                        <option value="6">6 รอบ</option>
+                                                        <option value="9">9 รอบ</option>
+                                                        <option value="10">10 รอบ</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="order_box">
+                                <h2>{{ __('index.checkout.your_order') }}</h2>
+                                <ul class="list">
+                                    <li>
+                                        <a>{{ __('index.checkout.product') }}<span>{{ __('index.checkout.total') }}</span></a>
+                                    </li>
+                                    <table class="table table-borderless -bottom-40table-sm text-muted">
+                                        <tbody>
+                                        @php $i = 1; @endphp
+                                        @foreach($cart as $key => $item)
+                                            <tr>
+                                                <th scope="row">{{ $i }}</th>
+                                                <td><a href="{{ route('productDetails', [ 'prodCode' => $item['data']['prodCode'], 'uomCode' => $item['data']['uomCode'] ]) }}">{{ $item['data']['prodCode'] }} - {{ $item['data']['prodTName'] }}</a></td>
+                                                <td style="text-align: right;">{{ number_format($item['data']['price'], 2) }} x {{ $item['quantity'] }} ({{ $item['data']['uomName'] }})</td>
+                                                <td style="text-align: right;">{{ $item['totalSinglePrice'] }}&nbsp;{{ __('index.checkout.baht') }}</td>
+                                            </tr>
+                                            @php $i++; @endphp
+                                        @endforeach                                
+                                        </tbody>
+                                    </table>
+                                </ul>
+                                <ul class="list list_2">
+                                    <li>
+                                        <a>{{__('index.checkout.shipping')}}
+                                            <span>{{__('index.checkout.free')}}</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>{{ __('index.checkout.result_total') }}
+                                            <span id="totalPrice">{{ number_format($totalPrice, 2) }} {{ __('index.checkout.baht') }}</span>
+                                            <input type="hidden" id="input_totalPrice" value="{{ number_format($totalPrice, 2) }}">
+                                        </a>
+                                    </li>
+                                </ul>
+                                <!-- <br>
+                                <h2>{{ __('index.checkout.payment_channel') }}</h2> -->
+                                <!-- <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="credit_card" name="payment" value="credit_card" onclick="handleClick(this);" required />
+                                        <label for="credit_card">{{ __('index.checkout.credit_card') }}</label>
+                                        <img src="assets/img/gallery/card.jpg" alt="" />
+                                        <div class="check"></div>
+                                    </div>
+                                    <p> {{ __('index.checkout.credit_card_detail') }} </p>
+                                </div> -->
+                                <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="moneyspace" name="payment" value="moneyspace" data-toggle="collapse" onclick="handleClick(this);" checked required />
+                                        <label for="moneyspace">{{ __('index.checkout.credit_card') }}</label>
+                                        <img src="{{ asset('assets/img/gallery/card.jpg') }}" alt="" />
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_moneyspace" class="panel-collapse collapse show">
+                                        <div class="panel-body">
+                                            <p> {{ __('index.checkout.credit_card_detail') }} </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="qrcode" name="payment" value="qrcode" data-toggle="collapse" onclick="handleClick(this);" required />
+                                        <label for="qrcode">{{ __('index.checkout.qrcode') }}</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_qrcode" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <p> {{ __('index.checkout.qrcode_detail') }} </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="installment" name="payment" value="installment" data-toggle="collapse" onclick="handleClick(this);" required />
+                                        <label for="installment">{{ __('index.checkout.installment') }}</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_installment" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <p> {{ __('index.checkout.installment_detail') }} </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="paypal" name="payment" value="paypal" data-toggle="collapse" onclick="handleClick(this);" required />
+                                        <label for="paypal">{{ __('index.checkout.paypal') }}</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_paypal" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <p> {{ __('index.checkout.paypal_detail') }} </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="creat_account checkout-cap">
+                                    <input type="checkbox" id="accept" name="selector" value="accept" required />
+                                    <label for="accept">{{ __('index.checkout.accept_start') }} <a href="#">{{ __('index.checkout.accept_end') }}</a>
+                                    </label>
+                                </div>
+
+                                <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                                <button id="btnSubmit" class="btn w-100" type="submit" style="display: '';" >{{ __('index.checkout.btn_pay') }}</button>
+                                
+                                <div class="d-flex justify-content-center">
+                                    <div id="paypal-button" style="display: none;" ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br>
+    </section-page>
+    <!--End Checkout Area -->
+
+</main>
+
+<script src="https://www.paypalobjects.com/api/checkout.js"></script>
+
+<script type="text/javascript" src="{{ asset('assets/js/view/checkout.js') }}"></script>
+
+<script type="text/javascript" src="{{ asset('assets/js/view/autoTab.js') }}"></script>
+
+@endsection

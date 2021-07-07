@@ -1,0 +1,58 @@
+@extends('layouts.auth.index')
+
+@section('center')
+
+<main class="login-bg">
+    <section>
+        <div class='air air1'></div>
+        <div class='air air2'></div>
+        <div class='air air3'></div>
+        <div class='air air4'></div>
+
+        <div class="register-form-area">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-xl-6 col-lg-8">
+                        <div class="register-form text-center">
+                            <form method="POST" action="{{ url('/reset_password_without_token') }}">
+                                @csrf
+ 
+                                <div class="register-heading">
+                                    <span>{{ __('login.index.reset_password.title') }}</span>
+                                    <p>{{ __('login.index.reset_password.sub_title') }}</p>
+                                </div>
+
+                                <div class="input-box">
+                                    <div class="single-input-fields">
+                                        <label>{{ __('login.index.reset_password.email') }}</label>
+                                        <input id="email" type="email"
+                                            class="form-control @error('email') is-invalid @enderror" name="email"
+                                            value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                        @if (session('status'))
+                                        <div class="alert alert-success" role="alert">
+                                            {{ session('status') }}
+                                        </div>                                                
+                                        @endif
+                                        @error('email')
+                                        <div class="alert alert-danger" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                        @enderror  
+                                    </div>
+                                </div>
+
+                                <div class="register-footer">
+                                    <p> {{ __('login.register.haveAccount') }} <a href="/login">{{ __('login.register.login') }}</a> {{ __('login.register.here') }}</p>
+                                    <button type="submit" class="submit-btn3">{{ __('login.index.reset_password.btn_submit') }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</main>
+
+@endsection

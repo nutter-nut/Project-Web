@@ -1,0 +1,198 @@
+
+
+<?php $__env->startSection('center'); ?>
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">Categories</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('Categories')); ?>">Categories</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <!-- listing Area Start -->
+    <div class="category-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-7 col-lg-8 col-md-10">
+                    <div class="section-tittle mb-50">
+                        <h2>Shop with us</h2>
+                        <p>Browse from 230 latest items</p>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!--? Left content -->
+                <div class="col-xl-3 col-lg-3 col-md-4 ">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="small-tittle mb-45">
+                                <div class="ion"> <svg xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" width="20px" height="12px">
+                                        <path fill-rule="evenodd" fill="rgb(27, 207, 107)"
+                                            d="M7.778,12.000 L12.222,12.000 L12.222,10.000 L7.778,10.000 L7.778,12.000 ZM-0.000,-0.000 L-0.000,2.000 L20.000,2.000 L20.000,-0.000 L-0.000,-0.000 ZM3.333,7.000 L16.667,7.000 L16.667,5.000 L3.333,5.000 L3.333,7.000 Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h4>Filter Product</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Job Category Listing start -->
+                    <div class="category-listing mb-50">
+
+                        <!-- Check box -->
+                        <div class="select-checkbox mb-30">
+                            <div class="small-tittle">
+                                <h4>Categories</h4>
+                            </div>                        
+                            <form action="/categories" method="GET" id="form_categories" name="form_categories"> 
+                                <input type="hidden" name="select_sort" value="<?php echo e($select_sort); ?>"> 
+
+                                <?php $__currentLoopData = $array_categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <label class="container">
+                                    <small><?php echo e($items['categorie_name']); ?> (<?php echo e($items['count']); ?>)</small>
+                                    <input onChange="this.form.submit()" type="checkbox" name="categories_choice[]" value="<?php echo e($items['id']); ?>" <?php $__currentLoopData = $categories_selected; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <?php if($item == $items['id']): ?> checked <?php endif; ?> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>>
+                                    <span class="checkmark"></span>
+                                </label>                             
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                            </form>
+                        </div>
+                        <!-- Check box /-->
+
+                        <!-- Range Slider Start -->
+                        <!-- <div class="range-slider mt-50">
+                            <div class="small-tittle small-tittle2">
+                                <h4>Price Range</h4>
+                            </div>
+                            <div class="range_item">
+                                <div id="slider-range"></div>
+                                <input type="text" class="js-range-slider" value="" />
+                                <div class="d-flex align-items-center">
+                                    <div class="price_text">
+                                        <p>Price :</p>
+                                    </div>
+                                    <div class="price_value d-flex justify-content-center">
+                                        <input type="text" class="js-input-from" id="amount" readonly />
+                                        <span>to</span>
+                                        <input type="text" class="js-input-to" id="amount" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- Range Slider End -->
+
+                    </div>
+                    <!-- Job Category Listing End -->
+                </div>
+
+                <?php $id_checked_categories = ''; ?>
+                <?php $__currentLoopData = $categories_selected; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $list): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php if($list!=0): ?>
+                        <?php
+                            $text = '&categories_choice[]='.$list ;
+                            $id_checked_categories .= $text ;
+                        ?> 
+                    <?php endif; ?>               
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                <!--?  Right content -->
+                <div class="col-xl-9 col-lg-9 col-md-8 ">
+                    <!-- Count of Job list Start -->
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="count-job mb-35">
+                                <span><?php echo e($products->total); ?> Product found</span>
+                                <!-- Select job items start -->
+                                <div class="select-cat">
+                                    <span>Sort by</span>
+
+                                    <form action="/categories" method="GET" id="form_pattern">
+                                        <input type="hidden" id="categories_checked" name="categories_choice" value="<?php echo e($id_checked_categories); ?>">
+                                        <select name="select_sort" id="select_sort" onchange="this.form.submit()">
+                                            <option value="max-min" <?php if($select_sort == 'max-min'): ?> selected <?php endif; ?>>max-min</option>
+                                            <option value="min-max" <?php if($select_sort == 'min-max'): ?> selected <?php endif; ?>>min-max</option>
+                                            <option value="create" <?php if($select_sort == 'create'): ?> selected <?php endif; ?>>Latest</option>
+                                            <option value="name" <?php if($select_sort == 'name'): ?> selected <?php endif; ?>>name</option>
+                                        </select>
+                                    </form>
+
+                                </div>
+
+                                <!--  Select job items End-->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Count of Job list End -->
+
+                    <!--? New Arrival Start -->
+                    <div class="new-arrival new-arrival3">
+                        <div class="row">
+
+                            <?php $__currentLoopData = $products->items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6">
+                                <div class="single-new-arrival mb-50 text-center">
+                                    <div class="popular-img">
+                                        <?php $__currentLoopData = array_slice($item['products_image'],0,1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image_array): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> 
+                                            <img src="<?php echo e(asset('storage')); ?>/product_images/<?php echo e($item['products_id']); ?>/<?php echo e($image_array); ?>" alt="">
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> 
+                                    </div>
+                                    <div class="popular-caption">
+                                        <h3><a href="<?php echo e(route('productDetails', ['id' => $item['products_id']])); ?>"><?php echo e($item['products_name']); ?></a></h3>
+                                        <span>$<?php echo e($item['products_price']); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    
+                        </div>
+                        <!-- Button -->
+                        <div class="row justify-content-center">
+                            <div class="room-btn mt-20">
+                                <a href="catagori.html" class="border-btn">Browse More</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!--? New Arrival End -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- listing-area Area End -->
+
+</main>
+
+<script>
+
+var array_choice = []
+
+var checkboxes = document.querySelectorAll('input[type=checkbox]:checked')
+
+for (var i = 0; i < checkboxes.length; i++) {
+    array_choice.push(checkboxes[i].value)
+}
+
+document.getElementById("categories_checked").value = array_choice;
+
+</script>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.index.index', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\anan\Desktop\template-poom\new_template01_abpon\resources\views/categories.blade.php ENDPATH**/ ?>

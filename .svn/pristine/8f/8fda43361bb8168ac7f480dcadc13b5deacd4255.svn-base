@@ -1,0 +1,327 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div class="searchparams"
+            data-searchparams="{&quot;subcategory&quot;:&quot;Concrete Screws&quot;,&quot;pid&quot;:&quot;17291&quot;}">
+        </div>
+
+        <ol class="breadcrumb breadcrumb-arrow mb-5">
+            <li><a href="{{ route('Index') }}">Home</a></li>
+            <li><a href="{{ route('categoriesIndex', [ 'id' => $data['breadcrumb']['category_id'], 'name' => $data['breadcrumb']['category_name'] ]) }}">{{ $data['breadcrumb']['category_name'] }}</a></li>
+            <li><a href="">{{ $data['breadcrumb']['category_detail'] }}</a></li>
+            <li class="active"><span>{{ $data['breadcrumb']['name'] }}</span></li>
+        </ol>
+
+        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 sidebar hidden-xs" id="criteria-container">
+            <div class="filter-wrapper" id="filter-wrapper">
+                <h3><strong>Narrow Your Choices</strong></h3>
+                <div class="check_box" id="check_box_size">
+                    <h4 id="panel-size" class="active panel-toggle" onclick="panelToggle('size', true)">Size</h4>
+                    <form id="form-panel-size" action="#" style="display: block;">
+                        <fieldset>
+                            <p><input type="checkbox" class="selectable" name="size" value="3/16">
+                                <label for="">3/16</label>
+                            </p>
+
+                            <p><input type="checkbox" class="selectable" name="size" value="1/4">
+                                <label for="">1/4</label>
+                            </p>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="check_box" id="check_box_length">
+                    <h4 id="panel-length" class="active panel-toggle" onclick="panelToggle('length', true)">Length</h4>
+                    <form id="form-panel-length" action="#" style="display: block;">
+                        <fieldset>
+                            <p><input type="checkbox" class="selectable" name="length" value="1 1/4">
+                                <label for="">1 1/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="1 3/4">
+                                <label for="">1 3/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="2 1/4">
+                                <label for="">2 1/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="2 3/4">
+                                <label for="">2 3/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="3 1/4">
+                                <label for="">3 1/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="3 3/4">
+                                <label for="">3 3/4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="4">
+                                <label for="">4</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="5">
+                                <label for="">5</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="length" value="6">
+                                <label for="">6</label>
+                            </p>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="check_box" id="check_box_head_style">
+                    <h4 id="panel-hs" class="active panel-toggle" onclick="panelToggle('hs', true)">Head Style</h4>
+                    <form id="form-panel-hs" action="#" style="display: block;">
+                        <fieldset>
+                            <p><input type="checkbox" class="selectable" name="head_style" value="Flat Head">
+                                <label for="">Flat Head</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="head_style" value="Hex Washer Head">
+                                <label for="">Hex Washer Head</label>
+                            </p>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="check_box" id="check_box_drive_style">
+                    <h4 id="panel-ds" class="active panel-toggle" onclick="panelToggle('ds', true)">Drive Style</h4>
+                    <form id="form-panel-ds" action="#" style="display: block;">
+                        <fieldset>
+                            <p><input type="checkbox" class="selectable" name="drive_style" value="Phillips">
+                                <label for="">Phillips</label>
+                            </p>
+                            <p><input type="checkbox" class="selectable" name="drive_style" value="Slotted">
+                                <label for="">Slotted</label>
+                            </p>
+                        </fieldset>
+                    </form>
+                </div>
+                <div class="button-wrapper">
+                    <div class="hidden-sm hidden-md hidden-lg" style="text-align: center;  background-color: #fff;">
+                        <button type="submit" id="reset-criteria" class="btn btn-danger" style="background-color: #af1f25; margin:10px 0;">
+                            <span>Reset</span>
+                        </button>
+                        <button type="submit" id="close-criteria" class="btn btn-danger" style="background-color: #af1f25; margin:10px 0;" onclick="closeFilter()">
+                            <span>Done</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-12 col-md-9 machine pull-right" id="products_index_template">
+            <div class="top_box inner_none" style="width:100%">
+                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}" alt="Concrete Screws">
+                <h1 class="sizeable">{{ $data['breadcrumb']['category_detail'] }}</h1>
+                <a href="#" id="toggle_criterias" class="btn btn-success hidden-sm hidden-md hidden-lg toggle-criterias" style="display:none;">Filter</a>
+                <p>Concrete Mil-spec</p>
+            </div>
+            <div class="result_container" id="result_container">
+                <div class="row">
+                    <div class="col-sm-12 hidden-xs">
+                        <h1>{{ __('index.product.your_results') }}</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-10 results_count">
+                        <h4>Showing 1-30 of 31 Results. Continue Filtering or Select a Part Below</h4>
+                    </div>
+                    <div class="col-2 hidden-sm">
+                        <a href="#" id="toggle_criteria" class="btn btn-success hidden-sm hidden-md hidden-lg toggle-criteria" style="display: inline;" onclick="openFilter()">Filter</a>
+                    </div>
+                </div>
+
+                <div class="paging top hidden-xs" style="float:right;">
+                    <ul style="float:right;">
+                        <li class="active">
+                            <a href="#" data-page="1" class="pagination">1</a>
+                        </li>
+                        <li class="">
+                            <a href="#" data-page="2" class="pagination">2</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="result_list" id="products-container">
+                    <div class="common_row">
+                        <span class="col1">{{ __('index.product.part_no') }}</span>
+                        <span class="col2">{{ __('index.product.part_description') }}</span>
+                        <span class="col3 text-right">{{ __('index.product.carton_qty') }}</span>
+                        <span class="col4 text-right">{{ __('index.product.price') }}</span>
+                    </div>
+                    <div class="common_row ">
+                        <span class="col1">282981</span>
+                        <span class="col2">
+                            <a href="{{ route('productDetal', [ 'id' => 1, 'name' => 'test', 'pid' => 12345 ]) }}">3/16" x 1 1/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</a>
+                            <br>
+                            <small>Case Hardened Steel | 1 Drill Bit Per Box</small>
+                            <div class="review-block-rate mb-0">
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </span>
+                        <span class="col3 text-right">100</span>
+                        <span class="col4 text-right">$11.25</span>
+                    </div>
+
+
+                    <div class="common_row odd">
+                        <span class="col1">282996</span>
+                        <span class="col2">
+                            <a href="{{ route('productDetal', [ 'id' => 1, 'name' => 'test', 'pid' => 12345 ]) }}">3/16" x 1 1/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+                            <br>
+                            <small>Case Hardened Steel | 1 Drill Bit Per Box</small>                           
+                            <div class="review-block-rate mb-0">
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                            </div>                           
+                        </span>
+                        <span class="col3 text-right">100</span>
+                        <span class="col4 text-right">$11.38</span>
+                    </div>
+
+                    <div class="common_row ">
+                        <span class="col1">283041</span>
+                        <span class="col2">
+                            <a href="{{ route('productDetal', [ 'id' => 1, 'name' => 'test', 'pid' => 12345 ]) }}">3/16" x 1 3/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</a>
+                            <br>
+                            <small>Case Hardened Steel | 1 Drill Bit Per Box</small>
+                            <div class="review-block-rate mb-0">
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </span>
+                        <span class="col3 text-right">100</span>
+                        <span class="col4 text-right">$11.16</span>
+                    </div>
+
+                    <div class="common_row odd">
+                        <span class="col1">283054</span>
+                        <span class="col2">
+                            <a href="{{ route('productDetal', [ 'id' => 1, 'name' => 'test', 'pid' => 12345 ]) }}">3/16" x 1 3/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+                            <br>
+                            <small>Case Hardened Steel | 1 Drill Bit Per Box</small>
+                            <div class="review-block-rate mb-0">
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-grey btn-xs" aria-label="Left Align">
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </span>
+                        <span class="col3 text-right">100</span>
+                        <span class="col4 text-right">$10.12</span>
+                    </div>
+
+                </div>
+
+                <div class="paging bottom hidden-xs" style="float:right;">
+                    <ul style="float:right;">
+                        <li class="active">
+                            <a href="#" data-page="1" class="pagination">1</a>
+                        </li>
+                        <li class="">
+                            <a href="#" data-page="2" class="pagination">2</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        @include('layouts.products_more')
+        
+    </div>
+</section>
+
+<script>
+    function panelToggle(panel_value, open){
+        var form_panel = document.getElementById('form-panel-'+panel_value);
+        var panel = document.getElementById('panel-' + panel_value);
+        if(open){
+            panel.className = "panel-toggle";
+            panel.setAttribute("onClick", "panelToggle('"+panel_value+"', false)");
+            form_panel.style.display = "none";
+        }else{
+            panel.className = "active panel-toggle";
+            panel.setAttribute("onClick", "panelToggle('"+panel_value+"', true)");
+            form_panel.style.display = "block";
+        }
+    }
+
+    // $(function () {
+    //     $(".sidebar h4").click(function () {
+    //         $(this).next('form').slideToggle();
+    //         $(this).toggleClass('active');
+    //     });
+    // });
+</script>
+
+<script>
+    function openFilter(){
+        var x = document.getElementById('criteria-container');
+        x.className = 'col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 sidebar';
+    }
+
+    function closeFilter(){
+        var x = document.getElementById('criteria-container');
+        x.className = 'col-xs-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 sidebar hidden-xs';
+    }
+
+    // $(document).ready(function () {
+    //     window.first_toggle = true;
+    //     $('#toggle_criteria').click(function () {
+    //         if (window.first_toggle) {
+    //             window.first_toggle = false;
+    //         }
+    //         $('#criteria-container').show('slide', {
+    //             direction: 'left'
+    //         }, 800);
+    //     })
+    // });
+</script>
+
+@endsection

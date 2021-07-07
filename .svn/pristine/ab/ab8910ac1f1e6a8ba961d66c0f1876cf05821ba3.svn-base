@@ -1,0 +1,197 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div class="col-sm-12">
+            <ul class="breadcrumb">
+                <li><a href="{{ route('Index') }}">Home </a></li>
+                <li>&nbsp;> <a href="">Screws</a></li>
+                <li>&nbsp;> <a href="">Concrete Screws</a></li>
+                <li>&nbsp;> <a href="">All Concrete Screws</a></li>
+            </ul>
+            <!-- 14 august code starts -->
+            <section class="product_page">
+                <h1>3/16" x 1 1/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</h1>
+                <p>Case Hardened Steel | 1 Drill Bit Per Box</p>
+                <div class="product_details">
+                    <div class="col-sm-8">
+                        <h4>Product Details</h4>
+                        <div class="common_box">
+                            <div class="box_row">
+                                <span class="col"><strong>Part Number: </strong>282981</span>
+                                <span class="col"><strong>Carton Quantity: </strong>
+                                    100 pcs
+                                </span>
+                                <span class="col">
+                                    <strong>Carton Weight: </strong>1.75 lbs
+                                </span>
+                            </div>
+                        </div>
+                        <div class="technial_box">
+                            <div class="pic_box">
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}"
+                                    alt="3/16&quot; x 1 1/4&quot; Concrete Screws / Phillips / Flat Head / Blue Perma-Seal">
+                                <small>Please Note: Item in picture may not reflect size and finish of actual
+                                    part</small>
+                            </div>
+                            <div class="specs_box">
+                                <h4>Technical Specs</h4>
+                                <ul class="specs_list">
+                                    <li>
+                                        <a href="/product_specs/screws-concrete" target="_blank">
+                                            <img src="{{ asset('assets/tp-fastener/images/pdf_icon.png') }}" alt="Screw Style Spec">Screw Style Spec
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/product_specs/finishes-coatings-plating" target="_blank">
+                                            <img src="{{ asset('assets/tp-fastener/images/pdf_icon.png') }}" alt="Plating / Finish Spec">Plating / Finish Spec
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="common_box">
+                            <h4>Pricing Information</h4>
+                            <div class="box_row">
+                                <span class="col_box"><em>1-2 Carton Price: </em></span>
+                                <span class="col_box big"><strong>$11.25 / Carton of 100 pcs</strong></span>
+                                <span class="col_box"><em>($ 0.11250 Each)</em></span>
+                            </div>
+                            <div class="box_row even"><span class="col_box"><em>3-4 Carton Price: </em></span>
+                                <span class="col_box big"><strong>$10.50 / Carton of 100 pcs</strong></span>
+                                <span class="col_box"><em>($ 0.10500 Each)</em></span>
+                            </div>
+                            <div class="box_row">
+                                <span class="col_box"><em>5+ Carton Price: </em></span>
+                                <span class="col_box big"><strong>$9.84 / Carton of 100 pcs</strong></span>
+                                <span class="col_box"><em>($ 0.09844 Each)</em></span>
+                            </div>
+                        </div>
+                        <div class="add_cart_box">
+                            <form class="cart_form" id="new_cart_item" action="/cart_items?telepart=282981"
+                                accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="✓"><input
+                                    type="hidden" name="authenticity_token"
+                                    value="NIVw9ySJmmf0vFlE+SX7ZafUhN3U0pVyN0V3igUzmcpUsO5nyoqvlTDvMBzZIDwKyYKNZJUTv2I5sokK2cw2IA==">
+                                <div class="select_box">
+                                    <label>Select Number of Cartons to Order:</label>
+                                    <select class="form-control" name="cart_item[carton_quantity]"
+                                        id="cart_item_carton_quantity">
+                                        <option selected="selected" value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13">13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                        <option value="21">21</option>
+                                        <option value="22">22</option>
+                                        <option value="23">23</option>
+                                        <option value="24">24</option>
+                                        <option value="25">25</option>
+                                        <option value="26">26</option>
+                                        <option value="27">27</option>
+                                        <option value="28">28</option>
+                                        <option value="29">29</option>
+                                        <option value="30">30</option>
+                                        <option value="31">31</option>
+                                        <option value="32">32</option>
+                                        <option value="33">33</option>
+                                        <option value="34">34</option>
+                                        <option value="35">35</option>
+                                        <option value="36">36</option>
+                                        <option value="37">37</option>
+                                        <option value="38">38</option>
+                                        <option value="39">39</option>
+                                        <option value="40">40</option>
+                                        <option value="41">41</option>
+                                        <option value="42">42</option>
+                                        <option value="43">43</option>
+                                        <option value="44">44</option>
+                                        <option value="45">45</option>
+                                        <option value="46">46</option>
+                                        <option value="47">47</option>
+                                        <option value="48">48</option>
+                                        <option value="49">49</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="cart_submit_btn">
+                                    <span style="float:left;">Add to Cart</span>
+                                    <img src="{{ asset('assets/tp-fastener/images/cart_icon.png') }}" alt="Add to Cart" class="add_to_cart_bg">
+                                </button>
+                            </form>
+                        </div>
+                        <p class="warning" style="display:none;">Note: This product is a special order and requires a
+                            lead time of 14 days. Estimated shipping date is 12/21/2020</p>
+
+                        <div class="" style="float:left; width:100%;">
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <h4>Product Specs</h4>
+                        <div class="right_common">
+                            <ul>
+                                <li><span class="left">Part Number:</span> <span class="right">282981</span></li>
+                                <li class="odd">
+                                    <span class="left">Product Category:</span>
+                                    <span class="right">Concrete Screws</span>
+                                </li>
+                                <li class="">
+                                    <span class="left">Size:</span>
+                                    <span class="right">3/16</span>
+                                </li>
+                                <li class="odd">
+                                    <span class="left">Length:</span>
+                                    <span class="right">1 1/4"</span>
+                                </li>
+                                <li class="">
+                                    <span class="left">Head Style:</span>
+                                    <span class="right">Flat Head</span>
+                                </li>
+                                <li class="odd">
+                                    <span class="left">Drive Style:</span>
+                                    <span class="right">Phillips</span>
+                                </li>
+                                <li class="">
+                                    <span class="left">Material:</span>
+                                    <span class="right">Steel</span>
+                                </li>
+                                <li class="odd">
+                                    <span class="left">Finish:</span>
+                                    <span class="right">Blue Perma-Seal</span>
+                                </li>
+                                <li class="">
+                                    <span class="left">RoHS:</span>
+                                    <span class="right">On Request</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <script>
+            var google_custom_params = {
+                ecomm_prodid: 282981,
+                ecomm_pagetype: 'product'
+            };
+        </script>
+    </div>
+</section>
+
+@endsection

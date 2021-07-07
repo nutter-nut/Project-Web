@@ -1,0 +1,278 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+use PDF;
+
+use App\Order;
+
+class PdfController extends Controller
+{
+    public function getPdf(Request $request, $id)
+    {
+        PDF::SetTitle('document:' . $id);
+        
+        PDF::setPrintHeader(false);
+        PDF::setPrintFooter(false);
+
+        PDF::SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+        PDF::SetAuthor('Tawatsak Tangeaim');
+        PDF::SetDisplayMode('real', 'default');
+        PDF::SetHeaderData();
+
+        PDF::SetFont('thsarabun', '', 13, '', true);
+
+        $company = self::getCompany();
+        $order = self::getOrder($id);
+        $user = app('App\Http\Controllers\Admin\UsersController')->getUserData($order['user_id']);
+        $user_posone = app('App\Http\Controllers\Admin\UsersController')->getUserInPosone($user['employee']);
+
+        if($user_posone == null) return redirect()->route('home')->with('fail', (\Session::get('locale') != "th") ? 'Unable to view data.' : 'ไม่สามารถดูช้อมูลได้');
+
+        $arr_customer_name = explode("-", $user_posone[0]->empPOSName);
+
+        $doc = json_encode($order['_id']);
+        $doc_id = substr($doc, 9, -2);
+
+        $date = strtotime($order['date']);
+        $doc_date =  date("d/m/Y");
+        $due_date = date("d/m/Y", strtotime("+1 month", $date));
+
+        $data = [
+            'company_name' => $company['company_name'],
+            'source' => ($request->input('source') == 1) ? 'ต้นฉบับ' : 'สำเนา',
+            'address' => $company['company_address'],
+            "tax_no" => $company['contact_tax_no'],
+            'customer_name' => $arr_customer_name[0] . $arr_customer_name[1] . ' ' . $arr_customer_name[2] . ' (' . $user_posone[0]->empPOSNickName . ')'
+        ];
+
+        $date_customer = [
+            "code" => $user_posone[0]->empCode,
+            "name" => $user_posone[0]->empPOSNickName,
+            "address" => $user_posone[0]->empPOSAddress,
+            "tel" => $user_posone[0]->empPOSTel,
+            // "fax" => "-",
+            "tax_no" => $user_posone[0]->empPOSTaxId,
+            "doc_no" => $doc_id,
+            "doc_date" => $doc_date,
+            "due_date" => $due_date,
+            "ref_doc" => $order['document_refer'],
+            "contact_name" => str_replace("-", "", $user_posone[0]->empPOSReferName) . ' ' . $user_posone[0]->empPOSReferSurName, 
+        ];
+
+        $cart_products = $order['cart'];
+
+        $baht = self::baht_text($order['cart']['totalPrice']);
+
+        $html = view('login.admin.pdf', [
+            'data' => $data,
+            'date_customer' => $date_customer,
+            'cart_products' => $cart_products,
+            'baht' => $baht,
+        ]);
+
+        PDF::AddPage();
+        // PDF::AddPage('L', 'A4');
+        PDF::writeHTML($html, true, false, true, false, '');
+
+        $footer = view('login.admin.pdf_footer', [
+            'data' => $data,
+        ]);
+
+        $y = PDF::getPageHeight() - 70;
+
+        PDF::writeHTMLCell(0, 0, '', $y, $footer, 0, 0, 0, true, 'J', true);
+
+        PDF::Output('document:' . $id . '.pdf');
+    }
+
+
+    public function envelopePdf(Request $request, $id)
+    {
+        PDF::SetTitle('document:' . $id);
+        
+        PDF::setPrintHeader(false);
+        PDF::setPrintFooter(false);
+
+        PDF::SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+        PDF::SetAuthor('Tawatsak Tangeaim');
+        PDF::SetDisplayMode('real', 'default');
+        PDF::SetHeaderData();
+        
+        PDF::SetFont('thsarabun', '', 13, '', true);
+        PDF::AddPage('L', 'A5');
+
+        $company = self::getCompany();
+        $order = self::getOrder($id);
+        $user = app('App\Http\Controllers\Admin\UsersController')->getUserData($order['user_id']);
+        $user_posone = app('App\Http\Controllers\Admin\UsersController')->getUserInPosone($user['employee']);
+
+        if($user_posone == null) return redirect()->route('home')->with('fail', (\Session::get('locale') != "th") ? 'Unable to view data.' : 'ไม่สามารถดูช้อมูลได้');
+
+        $arr_customer_name = explode("-", $user_posone[0]->empPOSName);
+
+        $doc = json_encode($order['_id']);
+        $doc_id = substr($doc, 9, -2);
+
+        $date = strtotime($order['date']);
+        $doc_date =  date("d/m/Y");
+        $due_date = date("d/m/Y", strtotime("+1 month", $date));
+
+        $data = [
+            'company_name' => $company['company_name'],
+            'source' => ($request->input('source') == 1) ? 'ต้นฉบับ' : 'สำเนา',
+            'address' => $company['company_address'],
+            "tax_no" => $company['contact_tax_no'],
+            'customer_name' => $arr_customer_name[0] . $arr_customer_name[1] . ' ' . $arr_customer_name[2] . ' (' . $user_posone[0]->empPOSNickName . ')'
+        ];
+
+        $date_customer = [
+            "code" => $user_posone[0]->empCode,
+            "name" => $user_posone[0]->empPOSNickName,
+            "address" => $user_posone[0]->empPOSAddress,
+            "tel" => $user_posone[0]->empPOSTel,
+            // "fax" => "-",
+            "tax_no" => $user_posone[0]->empPOSTaxId,
+            "doc_no" => $doc_id,
+            "doc_date" => $doc_date,
+            "due_date" => $due_date,
+            "ref_doc" => $order['document_refer'],
+            "contact_name" => str_replace("-", "", $user_posone[0]->empPOSReferName) . ' ' . $user_posone[0]->empPOSReferSurName, 
+        ];
+        
+        $cart_products = $order['cart'];
+
+        $baht = self::baht_text($order['cart']['totalPrice']);
+
+        $html = view('login.admin.pdf_envelop', [
+            'data' => $data,
+            'date_customer' => $date_customer,
+            'cart_products' => $cart_products,
+            'baht' => $baht,
+            'company' => $company,
+        ]);
+        // dd("data",$data,"date_customer",$date_customer,"company",$company);
+        // PDF::AddPage();
+
+        PDF::writeHTML($html, true, false, true, false, '');
+
+        // $footer = view('login.admin.pdf_footer_envelop', [
+        //     'data' => $data,
+        // ]);
+
+        $y = PDF::getPageHeight() - 70;
+
+        // PDF::writeHTMLCell(0, 0, '', $y, $footer, 0, 0, 0, true, 'J', true);
+
+        PDF::Output('document:' . $id . '.pdf');
+    }
+
+    public function getOrder($id)
+    {
+        $orders = DB::connection('mongodb')->collection("orders")->where('id', '=', $id * 1)->get();
+
+        return $orders[0];
+    }
+
+    public function getCompany()
+    {
+        $config = DB::connection('mongodb')->collection("config")->get();
+
+        $data = [
+            'company_name' => $config[19]['value'],
+            'company_about' => $config[15]['value'],
+            'company_address' => $config[16]['value'],
+            'company_phone' => $config[17]['value'],
+            'company_email' => $config[18]['value'],
+            'contact_tax_no' => $config[21]['value'],
+        ];
+
+        return $data;
+    }
+
+    public function baht_text($number, $include_unit = true, $display_zero = true)
+    {
+        $BAHT_TEXT_NUMBERS = ['ศูนย์', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+        $BAHT_TEXT_UNITS = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+        $BAHT_TEXT_ONE_IN_TENTH = 'เอ็ด';
+        $BAHT_TEXT_TWENTY = 'ยี่';
+        $BAHT_TEXT_INTEGER = 'ถ้วน';
+        $BAHT_TEXT_BAHT = 'บาท';
+        $BAHT_TEXT_SATANG = 'สตางค์';
+        $BAHT_TEXT_POINT = 'จุด';
+
+        if (!is_numeric($number)) {
+            return null;
+        }
+
+        $log = floor(log($number, 10));
+        if ($log > 5) {
+            $millions = floor($log / 6);
+            $million_value = pow(1000000, $millions);
+            $normalised_million = floor($number / $million_value);
+            $rest = $number - ($normalised_million * $million_value);
+            $millions_text = '';
+            for ($i = 0; $i < $millions; $i++) {
+                $millions_text .= $BAHT_TEXT_UNITS[6];
+            }
+            return baht_text($normalised_million, false) . $millions_text . baht_text($rest, true, false);
+        }
+
+        $number_str = (string)floor($number);
+        $text = '';
+        $unit = 0;
+
+        if ($display_zero && $number_str == '0') {
+            $text = $BAHT_TEXT_NUMBERS[0];
+        } else for ($i = strlen($number_str) - 1; $i > -1; $i--) {
+            $current_number = (int)$number_str[$i];
+
+            $unit_text = '';
+            if ($unit == 0 && $i > 0) {
+                $previous_number = isset($number_str[$i - 1]) ? (int)$number_str[$i - 1] : 0;
+                if ($current_number == 1 && $previous_number > 0) {
+                    $unit_text .= $BAHT_TEXT_ONE_IN_TENTH;
+                } else if ($current_number > 0) {
+                    $unit_text .= $BAHT_TEXT_NUMBERS[$current_number];
+                }
+            } else if ($unit == 1 && $current_number == 2) {
+                $unit_text .= $BAHT_TEXT_TWENTY;
+            } else if ($current_number > 0 && ($unit != 1 || $current_number != 1)) {
+                $unit_text .= $BAHT_TEXT_NUMBERS[$current_number];
+            }
+
+            if ($current_number > 0) {
+                $unit_text .= $BAHT_TEXT_UNITS[$unit];
+            }
+
+            $text = $unit_text . $text;
+            $unit++;
+        }
+
+        if ($include_unit) {
+            $text .= $BAHT_TEXT_BAHT;
+
+            $satang = explode('.', number_format($number, 2, '.', ''))[1];
+            $text .= $satang == 0
+                ? $BAHT_TEXT_INTEGER
+                : $this->baht_text($satang, false) . $BAHT_TEXT_SATANG;
+        } else {
+            $exploded = explode('.', $number);
+            if (isset($exploded[1])) {
+                $text .= $BAHT_TEXT_POINT;
+                $decimal = (string)$exploded[1];
+                for ($i = 0; $i < strlen($decimal); $i++) {
+                    $text .= $BAHT_TEXT_NUMBERS[$decimal[$i]];
+                }
+            }
+        }
+
+        return $text;
+    }
+}

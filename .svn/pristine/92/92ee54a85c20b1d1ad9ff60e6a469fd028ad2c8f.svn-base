@@ -1,0 +1,9 @@
+<?php echo $__env->yieldContent('top'); ?>
+
+<?php echo $__env->make('layouts.index.header', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+<?php echo $__env->yieldContent('center'); ?>
+
+<?php echo $__env->make('layouts.index.footer', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+
+<?php echo $__env->yieldContent('bottom'); ?><?php /**PATH C:\Users\anan\Desktop\template-poom\new_template01_abpon\resources\views/layouts/index/index.blade.php ENDPATH**/ ?>

@@ -1,0 +1,65 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div class="col-sm-12">
+            <ul class="breadcrumb">
+                <li><a href="{{ route('Index') }}">Home </a></li>
+                <li>&nbsp;> {{ $data['breadcrumb']['category_name'] }}</li>
+            </ul>
+
+            <h1 style="text-align: left!important;">{{ \ucfirst($data['breadcrumb']['category_name']) }} Categories</h1>
+            <div class="category_extra_description hidden-xs">
+                <p>Using the right kind of screw is essential to any construction project, large or small, whether you are a contractor doing a renovation or a builder erecting an entire residential subdivision or office complex. You need screws specifically manufactured for the material to be fastened — whether it’s concrete, wood, metal or something else — and that will hold up for their designated use. At Fastener SuperStore we provide a wide range of options for customers looking to buy wholesale screws of virtually any type. Below is a list of screw categories and some common uses, along with information about what Fastener SuperStore can do for you.</p>
+            </div>
+            <h3><span>Select a Category Below</span></h3>
+
+            <section class="category_list">
+                <ul>
+                    <li>
+                        <a href="{{ route('detalCategories', [ 'id' => 5969, 'name' => 'concrete-screws', 'category' => $data['breadcrumb'] ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/screws-concrete.png') }}" alt="">
+                            </span>
+                            <h2>Concrete screws</h2>
+                        </a>
+                        <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    </li>
+                    <li>
+                        <a href="{{ route('detalCategories', [ 'id' => 5969, 'name' => 'deck-screws', 'category' => $data['breadcrumb'] ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/screws-deck.png') }}" alt="">
+                            </span>
+                            <h2>Deck screws</h2>
+                        </a>
+                        <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    </li>
+                    <li>
+                        <a href="{{ route('detalCategories', [ 'id' => 5969, 'name' => 'drywall-screws', 'category' => $data['breadcrumb'] ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/screws-drywall.png') }}" alt="">
+                            </span>
+                            <h2>Drywall screws</h2>
+                        </a>
+                        <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    </li>
+                    <li>
+                        <a href="{{ route('detalCategories', [ 'id' => 5969, 'name' => 'lag-screws', 'category' => $data['breadcrumb'] ]) }}">
+                            <span>
+                                <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/screws-lag.png') }}" alt="">
+                            </span>
+                            <h2>Lag screws</h2>
+                        </a>
+                        <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    </li>
+                </ul>
+            </section>
+        </div>
+    </div>
+
+</section>
+
+@endsection
+

@@ -1,0 +1,296 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container-fastener">
+        <div id="cart">
+
+            <ol class="breadcrumb breadcrumb-arrow mb-5">
+                <li><a href="{{ route('Index') }}">Home</a></li>
+                <li class="active"><span>Cart</span></li>
+            </ol>
+
+            <div class="col-sm-12">
+                <section class="shopping_cart">
+                    <h1 style="text-align: left!important;">Shopping Cart</h1>
+                    <span class="cart" id="flash-message">Part Added to Shopping Cart.</span>
+                    <span class="cart" id="flash-message-ajax"></span>
+                    <div id="cart_container" class="shopping_details">
+                        <div class="heading_row">
+                            <span class="col">Product Description</span>
+                            <span class="col_small">Quantity</span>
+                            <span class="col_small">Price</span>
+                            <span class="col_small">Total</span>
+                        </div>
+                        <div class="common_row">
+                            <form class="" id="edit_cart_item_273614" action="/cart_items/273614" accept-charset="UTF-8" data-remote="true" method="post">
+                                <input name="utf8" type="hidden" value="✓">
+                                <input type="hidden" name="_method" value="patch">
+                                <div class="first_col">
+                                    <div class="img-mil-spe">
+                                        <a href="../mil-spec/Concretmil-spec.html"><img alt="" src="{{ asset('assets/tp-fastener/style/image/screws-concrete.png') }}"></a>
+                                    </div>
+                                    <span class="remove_cart">
+                                        <a rel="nofollow" data-method="delete" href="/cart_items/273614">
+                                            <img src="{{ asset('assets/tp-fastener/images/red_btn.jpg') }}" alt="Red btn">
+                                        </a>
+                                        <a rel="nofollow" data-method="delete" href="/cart_items/273614">Remove from cart</a>
+                                    </span>
+                                </div>
+                                <div class="second_col">
+                                    <h4>
+                                    <a href="../mil-spec/Concretmil-spec.html">3/16" x 1 1/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</a></h4>
+                                    <p><strong>Fastener Superstore Part Number:</strong> 282981</p>
+                                    <p>
+                                        <strong>Ship Date: </strong>
+                                        <span class="ship_alert" style="display:none;">!</span>
+                                        <input value="05-28-2021" class="ship_date hasDatepicker" id="dp1622180174440" type="text" name="cart_item[ship_date]">
+                                        <a href="#" class="ship_date_toggle">Schedule a later ship date</a>
+                                    </p>
+                                    <p>
+                                        <strong>Internal Part Number: </strong>
+                                        <span class="customer_part_number_holder"></span>
+                                        <input class="customer_part_number_field" type="text" name="cart_item[customer_part_number]" id="cart_item_customer_part_number">
+                                        <a href="#" class="customer_part_number_toggle">Reference an internal part number</a>
+                                        <a href="#" class="customer_part_number_update_toggle" style="display:none;">Enter to update</a>
+                                    </p>
+                                </div>
+                                <div class="third_col">
+                                    <input type="text" class="form-control" name="cart_item" value="">
+                                    <strong>100</strong>
+                                    <small>(1 Carton
+                                        x 100 pcs/ctn)
+                                    </small>
+                                </div>
+                                <div class="four_col">$11.25</div>
+                                <div class="five_col">$11.25</div>
+                            </form>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="display:none;"><span class="ship_alert">!</span> This product is special order and has a lead time.</p>
+                        <p><span class="ship_alert">*</span> Orders received after 4:30 CST may ship the following business day.</p>
+                    </div>
+                    <!-- <div class="shopping_total_box">
+                        <div class="cart_buttons">
+                            <span class="cart_btn">
+                                <a href="/">Continue Shopping <img src="{{ asset('assets/tp-fastener/images/cart_icon.png') }}" alt="" style="display:inline;"></a>
+                            </span>
+                            <span class="secure_btn">
+                                <a href="/checkout/shipping">Secure Checkout</a>
+                            </span>
+                        </div>
+                        <div class="total_right">
+                            <div class="total_col">
+                                <strong>Subtotal</strong><small>$11.25</small></div>
+                            <div class="total_col">
+                                <strong> UPS Ground*</strong><small>$8.82</small> </div>
+                            <div class="total_col">
+                                <strong> Total</strong><small>$20.07</small>
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="related_product bg-sendorder">
+                        <div class="col-md-4">
+                            <h4>ที่อยู่สำหรับจัดส่ง</h4><hr>
+                            <div class="form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">* ชื่อ</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="first" name="first_name" placeholder="" required="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">*นามสกุล</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="last" name="last_name" placeholder="" required="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right m-auto">* เบอร์โทรศัพท์</label>
+                                    <div class="col-9">
+                                        <input type="text" class="form-control" id="phone" name="phone" placeholder="" required="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group p_star">
+                                <div class="row">
+                                    <label for="password" class="col-3 col-form-label text-right">* ที่อยู่</label>
+                                    <div class="col-9">
+                                        <textarea class="form-control" id="address" name="address" placeholder="" required=""></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group p_star" id="message_store_form">
+                                <div class="row">
+                                    <label for="message_store" class="col-3 col-form-label text-right">ข้อความถึงร้านค้า</label>
+                                    <div class="col-9">
+                                        <textarea class="form-control" id="message_store" name="message_store" placeholder="" required=""></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="col-md-4">
+                            <h4>Payment</h4><hr>
+                            <div class="order_box">
+                            <div class="payment_item">
+                                <div class="radion_btn">
+                                    <input type="radio" id="moneyspace" name="payment" value="moneyspace" data-toggle="collapse" onclick="handleClick(this);" checked="" required="">
+                                    <label for="moneyspace">Credit Card</label>
+                                    <img src="{{asset('assets/img/gallery/card.jpg')}}" alt="">
+                                    <div class="check"></div>
+                                </div>
+                                <div id="collapse_moneyspace" class="panel-collapse collapse show">
+                                    <div class="panel-body">
+                                        <p> เมื่อคลิกชำระเงินด้วยบัตรเครดิตลูกค้าจะนำไปสู่หน้ากรอกข้อมูลบัตร </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment_item">
+                                <div class="radion_btn">
+                                    <input type="radio" id="qrcode" name="payment" value="qrcode" data-toggle="collapse" onclick="handleClick(this);" required="">
+                                    <label for="qrcode">QR Code</label>
+                                    <div class="check"></div>
+                                </div>
+                                <div id="collapse_qrcode" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <p> สแกน QR Code ของร้านค้าผ่านแอปพลิเคชันที่อยู่บนสมาร์ทโฟน </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="installment" name="payment" value="installment" data-toggle="collapse" onclick="handleClick(this);" required="">
+                                        <label for="installment">Installment</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_installment" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <p> ผู้ซื้อที่เลือกแบ่งชำระจะถูกส่งไปที่หน้าเว็บไซต์หรือแอปพลิเคชันของทางธนาคารเพื่อยืนยันยอดชำระและทำรายการ *ต้องชำระเงินมากกว่า 3000 และ ไม่เกิน 10000 บาท </p>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <!-- <div class="payment_item">
+                                    <div class="radion_btn">
+                                        <input type="radio" id="paypal" name="payment" value="paypal" data-toggle="collapse" onclick="handleClick(this);" required="">
+                                        <label for="paypal">Paypal</label>
+                                        <div class="check"></div>
+                                    </div>
+                                    <div id="collapse_paypal" class="panel-collapse collapse">
+                                        <div class="panel-body">
+                                            <p> ชำระสินค้าหรือบริการที่คุณซื้อได้ง่ายและปลอดภัยยิ่งขึ้น สิ่งที่คุณต้องมีคือที่อยู่อีเมลหรือหมายเลขโทรศัพท์มือถือเพื่อชำระเงิน </p>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h4>ใบสั่งซื้อสินค้า</h4><hr>
+                            <div class="order_box">
+                                <ul class="list">
+                                <li>
+                                    <a>สินค้า<span>ราคา</span></a>
+                                </li>
+                                <table class="table table-borderless -bottom-40table-sm text-muted">
+                                    <tbody>                                                                            
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td><a href="https://screwshop.thaisearchs.com/product_details/B001/12">B001 - สกรูหัวเหลี่ยมเกลียวตลอด สแตนเลส 304 มิล</a></td>
+                                            <td style="text-align: right;">75.00 x 1 (แพ็ค)</td>
+                                            <td style="text-align: right;">75&nbsp;บาท</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td><a href="https://screwshop.thaisearchs.com/product_details/B004/12">B004 - สกรูหัวเหลี่ยมเกลียวตลอด สแตนเลส 304 มิล</a></td>
+                                            <td style="text-align: right;">25.00 x 1 (แพ็ค)</td>
+                                            <td style="text-align: right;">25&nbsp;บาท</td>
+                                        </tr>                                                                          
+                                    </tbody>
+                                    </table>
+                                </ul>
+                                <ul class="list list_2">
+                                    <li>
+                                        <a>การส่งสินค้า
+                                            <span>ฟรี</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>ราคาทั้งหมด
+                                            <span id="totalPrice">100.00 บาท</span>
+                                            <input type="hidden" id="input_totalPrice" value="100.00">
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div class="shopping_total_box cart_buttons">
+                                    <span class="secure_btn" ><a href="#" id="btnSubmit">Secure Checkout</a></span>
+                                </div>
+                           
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xs-12">
+                        <span class="shipping_options">**Additional shipping options available at checkout</span>
+                    </div>
+                    <div class="related_product">
+                        <h4>Related Products</h4>
+                        <div class="col-md-4">
+                            <div class="left_box">
+                                <div class="mil-spec">
+                                    <a href="../mil-spec/Concretmil-spec.html">
+                                        <img src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}" alt="">
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="right_box">
+                                <small>#283298</small>
+                                <strong>
+                                    <a href="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}"> 1/4" x 1 1/4" Concrete Screws / Phillips / Flat Head / Blue Perma-Seal</a>
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="left_box">
+                                <a href="../mil-spec/">
+                                    <div class="mil-spec">
+                                        <img src="{{ asset('assets/tp-fastener/style/image/สกรูหัวจม สเตนเลส.jpg') }}"
+                                            alt="">
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="right_box">
+                                <small>#282996</small>
+                                <strong>
+                                    <a href="{{ asset('assets/tp-fastener/style/image/สกรูหัวจม สเตนเลส.jpg') }}"> 3/16" x 1 1/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="left_box">
+                                <a href="../mil-spec/">
+                                    <div class="mil-spec">
+                                        <img src="{{ asset('assets/tp-fastener/style/image/สกรู แบบขั้นบันได - ฟิลลิปส์.jpg') }}" alt="">
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="right_box">
+                                <small>#283308</small>
+                                <strong>
+                                    <a href="../mil-spec/"> 1/4" x 1 1/4" Concrete Screws / Slotted / Hex Washer Head / Blue Perma-Seal</a>
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+
+@endsection

@@ -1,0 +1,260 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+
+use Auth;
+use Redirect;
+
+use App\Product;
+use App\Cart;
+
+class IndexController extends Controller
+{
+    public function index(Request $request)
+    {
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1); //list categorie
+
+        $data['menugroup'] = $new_data;
+
+        return view('index', [ 'data' => $data ]);
+    }
+
+    public function categoriesIndex(Request $request)
+    {
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1);
+
+        $get_cate = $this->getFilter($data, 2, $request->id); //list categorie data
+
+        $data['menugroup'] = $new_data;
+
+        $data['breadcrumb'] = [
+            'category_id' => $request->id,
+            'category_name' => $request->name
+        ];
+
+        $data['cate_data'] = $get_cate;
+
+        return view('categories', [ 'data' => $data ]);
+    }
+
+    public function detalCategories(Request $request, $name)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT * from productmenugroup where PMenuGroupCode = '".$request->id."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        $data = $this->getData();
+
+        $new_data = $this->getFilter($data, 1);
+
+        $get_cate_de = $this->getFilter($data, 3, $request->id); //list categorie detail data
+
+        $data['menugroup'] = $new_data;
+
+        $data['breadcrumb'] = [
+            'category_id' => $request->category['category_id'],
+            'category_name' => $request->category['category_name'],
+            'category_detail' => $name,
+        ];
+
+        $data['cate_detail'] = $get_data[0];
+        $data['cate_detail_filter'] = $get_cate_de;
+
+        $data['image'] = $this->getImage($get_data[0]->PMenuGroupPicThumnail);
+
+        return view('categories_detail', [ 'data' => $data ]);
+    }
+
+    public function getProducts(Request $request, $name)
+    {
+        $data = $this->getData();
+        $data['breadcrumb'] = [
+            'category_id' => $request->category['category_id'],
+            'category_name' => $request->category['category_name'],
+            'category_detail' => $request->category['category_detail'],
+            'name' => $name,
+            'id' => $request->id,
+        ];
+
+        return view('products', [ 'data' => $data ]);
+    }
+
+    public function productDetal(Request $request, $name)
+    {
+        $data = $this->getData();
+    
+        return view('product_detail', [ 'data' => $data ]);
+    }
+
+    public function cartIndex(Request $request)
+    {
+        $data = $this->getData();
+    
+        return view('cart', [ 'data' => $data ]);
+    }
+
+    public function getFilter($data, $num_in, $cate = null)
+    {
+        $new_data = [];
+
+        foreach($data['menugroup'] as $key => $item){
+            $arr_item = explode("_", $item->PMenuGroupCode);
+            $num = count($arr_item);
+
+            $if_cate = $cate != null && $num_in != 3 ? $arr_item[0] == $cate : true;
+
+            if($num == $num_in && $if_cate){
+                if($num_in == 3){
+                    $text = $arr_item[0].'_'.$arr_item[1];
+                    if($text == $cate) $new_data[] = $item;
+                }else{
+                    $new_data[] = $item;
+                }
+            }
+        }
+        
+        return $new_data;
+    }
+
+    public function getData()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from productmenugroup";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        foreach ($get_data as $key => $item) {
+            $get_data[$key]->{'image'} = $this->getImage($item->PMenuGroupPicThumnail);
+        }
+
+        $data = [
+            'menugroup' => $get_data
+        ];
+
+        return $data;
+    }
+
+    public function getImage($file)
+    {
+        if (\File::exists('posone_images/SINGLE/MenuGroup/' . $file) && $file != null) {
+            $data = [
+                'exists' => true,
+                'url' => url("posone_images/SINGLE/MenuGroup/{$file}"),
+            ];
+
+        } else {
+            $data = [
+                'exists' => false,
+                'url' => url("storage/product_images/product_default.png"),
+            ];
+        } 
+        return $data;
+    }
+
+
+//     public function index(Request $request)
+//     {
+//         \Config::set('database.default', 'posone_mysql');
+
+//         $qury = "SELECT
+//         pm.prodCode,
+//         pm.prodTName,
+//         pm.prodEName,
+//         pm.prodShortName,
+//         pm.prodStatus,
+//         pm.prodIsComplementary,
+//         pm.prodIsVat,
+//         pm.CompanyCode,
+//         pm.prodGroupCode,
+//         pg.prodGroupName,
+//         pm.referProdCode,
+//         pm.productCalcType,ProdAllowMinus ,WarrantyPeriod,ExpirePeriod,ProdInsID,SUPPCode,ProdDetail,
+//         pu.prodUnitRatio,
+//         pu.prodUnitBarcode,
+//         pu.prodUnitPrice,
+//         pu.prodUnitDiscount,
+//         pu.prodUnit1UOMCode,
+//         pu.productPOSCode,
+//         pu.isProdBaseUnit,
+//         pu.prodUnitPrice1,
+//         pu.prodUnitPrice2,
+//         pu.prodUnitPrice3,
+//         pu.prodUnitPrice4,
+//         pu.prodUnitPrice5,
+//         pu.prodUnitPrice6,
+//         pu.prodUnitPrice7,
+//         pu.prodUnitPrice8,
+//         pu.prodUnitPrice9,
+//         u.uomCode,
+//         u.uomName,
+//         u.uomDescription,
+//         u.uomNameEn,
+//         plo.PlaceOrder,
+//         psm.IsMenuSet
+//         from productshopmasterpos pm
+//         inner join productunitpos pu on pm.prodCode=pu.productposCode
+//         inner join unitofmeasurepos u on u.uomCode=pu.prodUnit1UOMCode
+//         left outer join productplaceorder plo on plo.prodcode=pm.prodCode
+//         left outer join productsetmenu psm on psm.prodcode=pm.prodCode
+//         LEFT OUTER JOIN productgrouppos pg ON pm.prodGroupCode = pg.prodGroupCode
+//         Where pm.companyCode='SINGLE' and prodstatus='N'";
+
+//         $get_data = DB::select(DB::raw($qury));
+//         $arr_get_data = array();
+//         foreach ($get_data as $key => $item) {
+//             $arr_get_data[$item->prodGroupCode][$key] = $item;
+//         }
+
+//         $arr_get_data2 = array();
+//         foreach ($arr_get_data as $keys => $items) {
+//             foreach($items as $key => $item){
+ 
+//                 $review_count = app('App\Http\Controllers\ProductsController')->reviewCount($item->prodCode, $item->uomCode);
+
+//                 $arr_data = [
+//                     'item' => $item,
+//                     'stock' => app('App\Http\Controllers\Admin\Treasury\StockController')->getSearchStock($item->prodCode, $item->uomCode),
+//                     'image' => app('App\Http\Controllers\ProductsController')->getLocationAttribute(app('App\Http\Controllers\ProductsController')->getImage($item->prodCode)),
+//                     'ratting' => app('App\Http\Controllers\ProductsController')->sumRattingProduct($item->prodCode, $item->uomCode, $review_count),
+//                     'data_promotion' => app('App\Http\Controllers\Admin\PromotionController')->getPromotionDetail($item->prodCode, $item->uomCode),
+//                     'data_product' => app('App\Http\Controllers\ProductsController')->getProduct($item->prodCode, $item->uomCode),
+//                 ];
+//                 $arr_get_data2[$keys][$item->prodCode][$key] = $arr_data;
+
+//             }
+//         }
+//         ksort($arr_get_data2, SORT_NUMERIC);
+// // dd($arr_get_data2);
+//         $firstKey = array_key_first($arr_get_data2);
+
+//         $cart = app('App\Http\Controllers\CartController')->getCart($request);
+
+//         // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+//         // dd($refresh_promotion);
+//         // composer require guzzlehttp/guzzle
+
+//         // $insert_product_all = app('App\Http\Controllers\Admin\Product\ProductController')->insertProductAll();
+//         // dd($insert_product_all);
+        
+//         $get_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroup();
+
+//         return view('index', [
+//             'get_data' => $arr_get_data2,
+//             'firstKey' => $firstKey,
+//             'group_categories' => $get_product_group,
+//             'totalQuantity' => $cart->totalQuantity,
+//         ]);
+//     }
+
+}

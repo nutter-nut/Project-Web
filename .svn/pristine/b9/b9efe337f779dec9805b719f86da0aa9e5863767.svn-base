@@ -1,0 +1,13 @@
+@yield('top')
+
+@include('layouts.tp-fastener-index.header')
+
+@yield('center')
+
+@include('layouts.chat')
+
+<!-- @include('layouts.notification') -->
+
+@include('layouts.tp-fastener-index.footer')
+
+@yield('bottom')

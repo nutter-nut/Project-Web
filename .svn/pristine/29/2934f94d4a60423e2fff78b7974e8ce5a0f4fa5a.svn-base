@@ -1,0 +1,358 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use Auth;
+
+class PromotionGroupController extends Controller
+{
+    public function index()
+    {
+        $get_promotion_group = self::getPromotionGroup();
+
+        $new_promotion_group = [];
+        foreach($get_promotion_group as $key => $item){
+            $new_promotion_group[$key]['data'] = $item;
+            $new_promotion_group[$key]['products'] = self::getProductInPromotionGroup($item->PGPId);
+        }
+
+        $get_product = app('App\Http\Controllers\Admin\Product\ProductController')->getProducts();
+
+        $get_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroup();
+
+        $get_last_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getLastProductGroup();
+
+        $get_product = self::getProduct($get_last_product_group[0]->prodGroupCode);
+
+        return view('login.admin.posone.displayPromotionGroup', [
+            'promotion_group' => $new_promotion_group,
+            'product_group' => $get_product_group,
+            'get_product' => $get_product
+        ]);
+    }
+
+    public function getProductInPromotionGroup($pgpId)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from promotionprodgroupdetail  where PGPId = '".$pgpId."'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        $arr_product = [];
+        foreach($get_data as $item){
+            $product = app('App\Http\Controllers\ProductsController')->getProduct($item->ProductCode, $item->ProductUnitCode);
+
+            ($product != null) ? array_push($arr_product, $product['prodTName']."(".$product['uomName'].")") : '';
+        }
+
+        return $arr_product;
+    }
+
+    public function getPromotionGroup()
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from promotionprodgroupmaster  where (PGPStatus='A' or PGPStatus is null  or PGPStatus ='' )  order by PGPCODE";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function promotionGroupInsert(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $request->validate([
+            'pgpCode' => 'required|unique:promotionprodgroupmaster|max:32',
+            'pgpName' => 'required|max:32',
+            'prodCode' => 'required',
+        ]);
+
+        $pgpCode = $request->input("pgpCode");
+        $pgpName = $request->input("pgpName");
+        $pgpRemark = $request->input("pgpRemark");
+        $prodCode = $request->input("prodCode");
+        $uomCode = $request->input("uomCode");
+
+        $check = self::CheckUom($prodCode, $uomCode);
+        if($check) return redirect()->route('adminPromotionGroup')->with('fail', (\Session::get('locale') != "th") ? 'Item unit contains duplicate data.' : 'หน่วยนับของสินค้า มีข้อมูลซ้ำ');
+
+        $date = date('Y-m-d H:i:s');
+
+        $arr_qury = [
+            "call sp_promotionprodgroupmaster_insert ('".$pgpCode."', '".$pgpName."', '', 'A', 'SINGLE', '', '', '".$date."', 'SINGLE00-0001', '".$date."', 'SINGLE00-0001')"
+        ];
+
+        foreach($prodCode as $key => $item){
+
+            $call = "call sp_promotionprodgroupdetail_insert ('".$pgpCode."', 'SINGLE', '".$item."', '1', '".$uomCode[$key]."')";
+
+            array_push($arr_qury, $call);
+        }
+
+        foreach($arr_qury as $item){
+
+            DB::select(DB::raw($item));
+        }
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'success', 'promotion group', [
+            'th' => 'เพิ่มกลุ่มโปรโมชั่น ' . $pgpName,
+            'en' => 'Successfully added promotion group ' . $pgpName . '.',
+        ]);
+        // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+
+        return redirect()->route('adminPromotionGroup')->withSuccess((\Session::get('locale') != "th") ? 'Successfully saved.' : 'บันทึกสำเร็จ');
+    }
+
+    public function CheckUom($prodCode, $uomCode)
+    {
+        foreach($prodCode as $key => $item){
+            $result[$key] = $item.",".$uomCode[$key];
+        }
+
+        return count($result) !== count(array_unique($result));
+    }
+
+    public function promotionGroupEdit($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "select * from promotionprodgroupmaster where (PGPStatus='A' or PGPStatus is null or PGPStatus ='' ) and PGPId = '".$id."'  order by PGPCODE";
+
+        $get_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroup();
+
+        $get_last_product_group = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getLastProductGroup();
+
+        $get_product = self::getProduct($get_last_product_group[0]->prodGroupCode);
+        
+        $get_data = DB::select(DB::raw($qury));
+
+        $get_uom = self::getUomEdit($get_data[0]->PGPCode);
+
+        $arr_uom = [];
+        foreach($get_uom as $key => $item){
+            $get_uom_arr = self::getUomArray($item->ProductCode);
+            $arr_uom[$key]['data'] = $item;
+            $arr_uom[$key]['uom'] = $get_uom_arr;
+        }
+
+        return view('login.admin.posone.editPromotionGroup', [
+            'promotion_group_edit' => $get_data[0],
+            'product_group' => $get_product_group,
+            'get_product' => $get_product,
+            'get_uom' => $arr_uom,
+        ]);
+    }
+
+    public function getUomArray($prodCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+                pm.prodCode,
+                pm.prodTName,
+                pm.prodEName,
+                pm.prodShortName,
+                pm.prodStatus,
+                pm.prodIsComplementary,
+                pm.prodIsVat,
+                pm.CompanyCode,
+                pm.prodGroupCode,
+                pm.referProdCode,
+                pm.productCalcType,ProdAllowMinus ,WarrantyPeriod,ExpirePeriod,ProdInsID,SUPPCode,ProdDetail,
+                pu.prodUnitRatio,
+                pu.prodUnitBarcode,
+                pu.prodUnitPrice,
+                pu.prodUnitDiscount,
+                pu.prodUnit1UOMCode,
+                pu.productPOSCode,
+                pu.isProdBaseUnit,
+                pu.prodUnitPrice1,
+                pu.prodUnitPrice2,
+                pu.prodUnitPrice3,
+                pu.prodUnitPrice4,
+                pu.prodUnitPrice5,
+                pu.prodUnitPrice6,
+                pu.prodUnitPrice7,
+                pu.prodUnitPrice8,
+                pu.prodUnitPrice9,
+                u.uomCode,
+                u.uomName,
+                u.uomDescription,
+                u.uomNameEn,
+                plo.PlaceOrder,
+                psm.IsMenuSet
+                from productshopmasterpos pm
+                inner join productunitpos pu on  pm.prodCode=pu.productposCode
+                inner join unitofmeasurepos u  on  u.uomCode=pu.prodUnit1UOMCode 
+                left outer join productplaceorder plo on plo.prodcode=pm.prodCode
+                left outer join productsetmenu psm on psm.prodcode=pm.prodCode
+                Where pm.prodcode='".$prodCode."' 
+                and pm.companyCode='SINGLE' and prodstatus='N'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+
+    public function getUomEdit($pgpCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+        promotionprodgroupdetail.detailId,
+        promotionprodgroupdetail.ProductCode,
+        promotionprodgroupdetail.ProdQty,
+        promotionprodgroupdetail.ProductUnitCode,
+        promotionprodgroupdetail.PGPId,
+        promotionprodgroupdetail.ver,
+        promotionprodgroupmaster.PGPCode,
+        promotionprodgroupmaster.pgpStatus,
+        productshopmasterpos.prodTName,
+        unitofmeasurepos.uomName
+        FROM
+        promotionprodgroupmaster
+        Inner Join promotionprodgroupdetail ON promotionprodgroupmaster.PGPId = promotionprodgroupdetail.PGPId
+        Inner Join productshopmasterpos ON promotionprodgroupdetail.ProductCode = productshopmasterpos.prodCode
+        Inner Join unitofmeasurepos ON promotionprodgroupdetail.ProductUnitCode = unitofmeasurepos.uomCode
+        
+        where (PGPStatus='A' or PGPStatus is null ) and PGPCODE = '".$pgpCode."' and productshopmasterpos.prodStatus != 'Y'";
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+
+    public function promotionGroupUpdate(Request $request)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $PGPCode = $request->input("PGPCode");
+        $PGPName = $request->input("PGPName");
+        $PGPRemark = $request->input("PGPRemark");
+        $prodCode = $request->input("prodCode");
+        $uomCode = $request->input("uomCode");
+
+        $prodCode_new = $request->input("prodCode_new");
+        $uomCode_new = $request->input("uomCode_new");
+
+        $del_prod = $request->input("del_prod");
+
+        $date = date('Y-m-d H:i:s');
+
+        $arr_qury = [
+            "call sp_promotionprodgroupmaster_update ('".$PGPCode."', '".$PGPName."', '".$PGPRemark."', 'A', 'SINGLE', 'Y', '', '".$date."', 'SINGLE00-0001')"
+        ];
+
+        if(isset($prodCode)){
+            foreach($prodCode as $key => $item){
+                $call = "call sp_promotionprodgroupdetail_update ('".$PGPCode."', 'SINGLE', '".$item."', '1', '".$uomCode[$key]."')";
+                array_push($arr_qury, $call);
+            }
+        }
+
+        if(isset($prodCode_new)){
+            foreach($prodCode_new as $key => $item){
+                $call = "call sp_promotionprodgroupdetail_insert ('".$PGPCode."', 'SINGLE', '".$item."', '1', '".$uomCode_new[$key]."')";
+                array_push($arr_qury, $call);
+            }
+        }
+
+        if(isset($del_prod)){
+            $arr_del = explode(",", $del_prod);
+            foreach($arr_del as $item){
+                $call = "call sp_promotionprodgroupdetail_delete ('".$PGPCode."', 'SINGLE', '".$item."')";
+                array_push($arr_qury, $call);
+            }
+        }
+
+        foreach($arr_qury as $item){
+
+            DB::select(DB::raw($item));
+        }
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'warning', 'promotion group', [
+            'th' => 'อัพเดทกลุ่มโปรโมชั่น ' . $pgpName,
+            'en' => 'Successfully updated promotion group ' . $pgpName . '.',
+        ]);
+        // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+
+        return redirect()->route('adminPromotionGroup')->withSuccess((\Session::get('locale') != "th") ? 'Successfully updated.' : 'อัพเดทสำเร็จ');
+    }
+
+    public function promotionGroupDelete($id)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $get_data = DB::select(DB::raw("select * from promotionprodgroupmaster  where (PGPStatus='A' or PGPStatus is null or PGPStatus ='' ) and PGPId = '".$id."' order by PGPCODE"));
+
+        app('App\Http\Controllers\Admin\LogActivityController')->eventNotification(Auth::user()->getAttributes(), 'error', 'promotion group', [
+            'th' => 'ลบกลุ่มโปรโมชั่น ' . $get_data[0]->PGPName,
+            'en' => 'Successfully deleted promotion group ' . $get_data[0]->PGPName . '.',
+        ]);
+
+        $date = date('Y-m-d H:i:s');
+
+        $arr_qury = [
+            "delete from promotionprodgroupdetail where pgpid='".$id."'",
+            "delete from promotionprodgroupmaster where pgpid='".$id."'",
+            "call sp_promotionprodgroupmaster_update ('".$get_data[0]->PGPCode."', '".$get_data[0]->PGPName."', '".$get_data[0]->PGPRemark."', 'D', 'SINGLE', '', '', '".$date."', 'SINGLE00-0001')"
+        ];
+        
+        foreach($arr_qury as $item){
+            DB::select(DB::raw($item));
+        }
+
+        // $refresh_promotion = app('App\Http\Controllers\PromotionController')->refreshPromotionPrice(); //! ให้ทำออโต ตอนหลังคืน
+
+        return redirect()->route('adminPromotionGroup')->withSuccess((\Session::get('locale') != "th") ? 'Deleted successfully.' : 'ลบสำเร็จ');
+    }
+
+    public function getProduct($pgpCode)
+    {
+        \Config::set('database.default', 'posone_mysql');
+
+        $qury = "SELECT
+        productshopmasterpos.productPOSId,
+        productshopmasterpos.prodCode,
+        productshopmasterpos.prodTName,
+        productshopmasterpos.prodEName,
+        productshopmasterpos.prodShortName,
+        plo.placeOrder,
+        productshopmasterpos.prodStatus,
+        productshopmasterpos.prodIsComplementary,
+        productshopmasterpos.prodIsVat,
+        productshopmasterpos.CompanyCode,
+        productshopmasterpos.prodGroupCode,referProdCode,productCalcType,  ifnull(psm.isMenuSet,'N') as isMenuSet,ProdAllowMinus,
+        productshopmasterpos.prodBrandCode,productshopmasterpos.prodModelCode,ComRateCode,ProdDetail,
+        productshopmasterpos.WarrantyPeriod,
+        productshopmasterpos.ProdTypeCode,
+        productshopmasterpos.ProdReqNo,
+        productshopmasterpos.ProdTypeMedicine,
+        productshopmasterpos.ExpirePeriod,
+        productshopmasterpos.ver,
+        productgrouppos.prodGroupName,
+        productunitpos.prodUnit1UOMCode,
+        unitofmeasurepos.uomName
+        FROM
+        productshopmasterpos
+        Inner Join productunitpos ON productshopmasterpos.prodCode = productunitpos.productPOSCode
+        Inner Join unitofmeasurepos ON productunitpos.prodUnit1UOMCode = unitofmeasurepos.uomCode
+        Inner Join productgrouppos ON productshopmasterpos.prodGroupCode = productgrouppos.prodGroupCode
+        left outer join productplaceorder plo on plo.prodcode=productshopmasterpos.prodCode
+        left outer join productsetmenu psm on psm.prodcode=productshopmasterpos.prodCode
+        where prodStatus='N' and productshopmasterpos.prodGroupCode = '".$pgpCode."'";
+        // prodUnitRatio=1  and
+
+        $get_data = DB::select(DB::raw($qury));
+
+        return $get_data;
+    }
+}

@@ -1,0 +1,91 @@
+@extends('layouts.index.index')
+
+@section('center')
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">{{ __('index.blog.title') }}</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('index.blog.breadcrumb_home') }}</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('Blog') }}">{{ __('index.blog.breadcrumb_about') }}</a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <br>
+    <div class="container">
+        @include('alert')
+    </div>
+    <br>
+    <!--? Blog Area Start-->
+    <br>
+    <section-page class="blog_area section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-8 mb-5 mb-lg-0">
+                    <div class="blog_left_sidebar">
+                        @if($blogs[0]->items==null)
+                            <h3>{{ __('index.blog.not_found') }}</h3>
+                        @endif
+                        @foreach($blogs[0]->items as $key => $item)
+                            <article class="blog_item">
+                                <div class="blog_item_img">
+                                    <img class="card-img rounded-0" src="{{ asset('storage') }}/blog_images/{{$item['image']}}" alt="">
+                                    <a href="#" class="blog_item_date">
+                                        <h3>{{ $item['date'][0] }}</h3>
+                                        <p>{{ $item['date'][1][1] }}</p>
+                                    </a>
+                                </div>
+                                <div class="blog_details">
+                                    <a class="d-inline-block" href="{{ route('blogDetails',['id' => $item['id'] ]) }}">
+                                        <h2 class="blog-head" style="color: #2d2d2d;">{{ $item['title'] }}</h2>
+                                    </a>
+                                    <div class="blog_text">
+                                        {!! $item['description'] !!}
+                                    </div>
+                                    <br>
+                                    <ul class="blog-info-link">
+                                        <li><a href="#"><i class="fa fa-user"></i> {{ $item['user_name'] }}</a></li>
+                                        <li><a href="#"><i class="fa fa-comments"></i> {{ $blogs[1][$key] }} {{ __('index.blog.comments') }}</a></li>
+                                    </ul>
+                                </div>
+                            </article>
+                        @endforeach
+                        <nav class="blog-pagination justify-content-center d-flex">
+                            <ul class="pagination">
+                            @foreach ($blogs[0]->links as $key => $values)
+                                <li class="{{$values['stly_classes']}}">
+                                    <a href="?page={{$values['page']}}" class="page-link" aria-label="Previous">
+                                        {{$values['icon']}}
+                                    </a>
+                                </li>
+                            @endforeach
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-4 mb-7 mb-lg-0">
+                    @include('layouts.blog_menu')
+                </div>
+            </div>
+        </div>
+        <br>
+    </section-page>
+    <!-- Blog Area End -->
+</main>
+
+@endsection

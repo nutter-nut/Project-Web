@@ -1,0 +1,389 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\DB;
+
+use App\Order;
+use App\OrderItem;
+use App\Payment;
+
+class DashboardsController extends Controller
+{
+    public function index(Request $request)
+    {
+        $year = $request->input('year');
+        $year ? $year = $year : $year = date("Y");
+
+        $all_year = self::getYearAll();
+
+        $total = '$' . number_format(self::getTotal($year), 2);
+
+        $all_orders = self::getAllOrders($year);
+
+        $total_month = self::getTotalMonth($year);
+
+        $categorie_quantity = self::getCategorieQuantity($year);
+
+        $top_user = self::getTopUser($year);
+
+        $top_product = self::getTopProducts($year);
+
+        $logs = self::getLog();
+
+        return view('login.admin.displayDashboard', [
+            'total' => $total,
+            'all_orders' => $all_orders,
+            'select_year' => $year,
+            'all_year' => $all_year,
+            'total_month' => $total_month,
+            'categorie_quantity' => $categorie_quantity,
+            'top_user' => $top_user,
+            'top_product' => $top_product,
+            'logs' => $logs
+        ]);
+    }
+
+    public function getLog()
+    {
+        $logs = DB::connection('mongodb')->collection("user_activities")->orderby('id', 'desc')->get();
+
+        $arr_log = [];
+        foreach($logs as $key => $item){
+            $user = DB::connection('mongodb')->collection("users")->where('id', '=', $item['user_id'] * 1)->first(); 
+
+            $arr_log[$key]['data'] = $item;
+            $arr_log[$key]['user'] = self::getStatus($user) . ': '. $user['name'];
+        }
+
+        return $arr_log;
+    }
+
+    public function getStatus($user)
+    {
+        $data_user = $user;
+
+        if($data_user['admin'] != 1){
+            if($data_user['employee'] == '0'){
+                $user_status = 'User';
+            }else $user_status = 'Employee';
+        }else $user_status = 'Admin';
+
+        return $user_status;
+    }
+
+    public function getTopProducts($year)
+    {
+        $top_products = OrderItem::collection('order_items')
+            ->select(
+                'order_items.id as order_items_id',
+                'order_items.product_quantity as product_quantity',
+                'order_items.product_id as product_id',
+                'order_items.product_total as product_total',
+                'products.prodTName as product_name',
+                'products.prodGroupCode as prodGroupCode',
+                'orders.created_at',
+                'payment.txn_xtatus as txn_xtatus',
+                )
+            ->leftjoin('orders','order_items.order_id','orders.id')
+            ->leftjoin('products','order_items.product_id','products.prodCode')
+            ->leftjoin('payment','orders.id','payment.order_id')
+            ->where('order_items.created_at','>=', $year."-00-00 00:00:00")
+            ->andwhere('order_items.created_at','<=', $year."-12-31 23:59:59")
+            ->where('payment.txn_xtatus','=',0)
+            ->where('payment.txn_xtatus','=','0')
+            ->groupby('$selected')
+            ->get();
+
+        $top_products_forment = [];
+        
+        foreach($top_products as $key => $item){
+            if(isset($item['product_name']) && isset($item['txn_xtatus']) && $item['txn_xtatus'] != 1 && $item['txn_xtatus'] != '1'){
+                $categorie_name = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroupByCode($item['prodGroupCode']);
+                if($categorie_name != null){
+                    array_push($top_products_forment, array(
+                        'order_items_id' => $item['order_items_id'],
+                        'product_id' => $item['product_id'],
+                        'product_name' => $item['product_name'],
+                        'product_quantity' => $item['product_quantity'],
+                        'product_total' => $item['product_total'],
+                        'product_image' => app('App\Http\Controllers\ProductsController')->getLocationAttribute(app('App\Http\Controllers\ProductsController')->getImage($item['product_id'])),
+                        'categorie_name' => $categorie_name[0]->prodGroupName
+                    ));
+                }
+            }
+        }
+
+        $result_top_products = array_reduce($top_products_forment, function($carry, $item){
+            if(!isset($carry[$item['product_id']])){
+                $carry[$item['product_id']] = [
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['product_name'], 
+                    'product_quantity' => $item['product_quantity'],
+                    'product_total' => $item['product_total'],
+                    'product_image' => $item['product_image'],
+                    'categorie_name' => $item['categorie_name']
+                ];
+            } else {
+                $carry[$item['product_id']]['product_quantity'] += $item['product_quantity'];
+                $carry[$item['product_id']]['product_total'] += $item['product_total'];
+            }
+            return $carry;
+        });
+        
+        if($result_top_products != null){
+
+            $result_top_products_new = array_values($result_top_products);
+    
+            $arr_top_product = array_slice(array_reverse(array_sort($result_top_products_new, 'product_total')), 0, 5);
+            $sum = 0;
+    
+            foreach($arr_top_product as $item){ $sum += $item['product_total']; }
+    
+            foreach($arr_top_product as $key => $item){ 
+                $percen = ($item['product_total']*100) / $sum; 
+                $arr_top_product[$key]['percen'] = sprintf("%0.2f", $percen);
+            }
+    
+            return $arr_top_product;
+        }else{
+            return null;
+        }
+    }
+
+    public function getTopUser($year)
+    {
+        $top_users = Order::collection('orders')
+            ->select(
+                'orders.id as orders_id',
+                'orders.price as orders_price',
+                'users.name as user_name','orders.user_id as user_id',
+                'users.email as user_email',
+                'users.image as image',
+                'orders.created_at',
+                'payment.txn_xtatus as txn_xtatus',
+                )
+            ->leftjoin('users','orders.user_id','users.id')
+            ->leftjoin('payment','orders.id','payment.order_id')
+            ->where('orders.created_at','>=', $year."-00-00 00:00:00")
+            ->andwhere('orders.created_at','<=', $year."-12-31 23:59:59")
+            ->where('payment.txn_xtatus','=',0)
+            ->where('payment.txn_xtatus','=','0')
+            ->groupby('$selected')
+            ->andwhere('orders.user_id','!=','no')
+            ->get();
+
+        $top_users_forment = [];
+        foreach($top_users as $key => $item){
+            if(isset($item['txn_xtatus']) && $item['txn_xtatus'] != 1 && $item['txn_xtatus'] != '1') $top_users_forment[$key] = $item;
+        }
+
+        $result_top_users = array_reduce($top_users_forment, function($carry, $item){
+            if(!isset($carry[$item['user_id']])){
+                $carry[$item['user_id']] = [
+                    'user_id' => $item['user_id'],
+                    'user_name' => $item['user_name'],
+                    'orders_price' => $item['orders_price'],
+                    'user_email' => $item['user_email'],
+                    'image' => app('App\Http\Controllers\Admin\UsersController')->checkImageFile($item['image'])
+                ];
+            } else {
+                $carry[$item['user_id']]['orders_price'] += $item['orders_price'];
+            }
+            return $carry;
+        });
+
+        $arr_top_users = array_slice(array_reverse(array_sort($result_top_users, 'orders_price')), 0, 5);
+        
+        return $arr_top_users;
+    }
+
+    public function getCategorieQuantity($year)
+    {
+        $categorie_quantity = OrderItem::collection('order_items')
+            ->select(
+                'order_items.id as order_items_id',
+                'order_items.product_id as product_id',
+                'orders.status_payment',
+                'order_items.product_quantity as product_quantity',
+                'order_items.product_total as product_total',
+                'order_items.product_price as product_price',
+                'orders.created_at',
+                'products.prodGroupCode as prodGroupCode',
+                'payment.txn_xtatus as txn_xtatus',
+                )
+            ->leftjoin('orders','order_items.order_id','orders.id')
+            ->leftjoin('products','order_items.product_id','products.prodCode')
+            ->leftjoin('payment','orders.id','payment.order_id')
+            ->where('orders.created_at','>=', $year."-00-00 00:00:00")
+            ->andwhere('orders.created_at','<=', $year."-12-31 23:59:59")
+            ->where('payment.txn_xtatus','=',0)
+            ->where('payment.txn_xtatus','=','0')
+            ->groupby('$selected')
+            ->orderby('order_items.id','desc')
+            ->get();
+
+        $categorie_quantity_forment = [];
+        foreach($categorie_quantity as $key => $item){
+            if(isset($item['prodGroupCode']) && isset($item['txn_xtatus']) && $item['txn_xtatus'] != 1 && $item['txn_xtatus'] != '1') $categorie_quantity_forment[$key] = $item;
+        }
+        
+        $array_categorie_quantity = [];
+        foreach($categorie_quantity_forment as $key => $item){
+      
+            $categories = app('App\Http\Controllers\Admin\Product\ProductGroupController')->getProductGroupByCode($item['prodGroupCode']);
+
+            if($categories != null){
+
+                $categories_id = $categories[0]->prodGroupCode;
+                $categories_name = $categories[0]->prodGroupName;
+    
+                array_push($array_categorie_quantity, array(
+                    'order_items_id' => $item['order_items_id'],
+                    'categories_id' => $categories_id,
+                    'categories_name' => $categories_name,
+                    'product_total' => $item['product_total'],
+                ));
+                
+                foreach($array_categorie_quantity as $key => $item){
+                    if($array_categorie_quantity[$key]['categories_id'] == null){
+                        unset($array_categorie_quantity[$key]);
+                    }
+                }
+            
+                $array_categorie_quantity_format = array_values($array_categorie_quantity);
+            
+                $result = array_reduce($array_categorie_quantity_format,function($carry, $item){
+    
+                    if(!isset($carry[$item['categories_id']])){
+                        $carry[$item['categories_id']] = [
+                            'categories_name' => $item['categories_name'],
+                            'product_total' => $item['product_total'],
+                        ];
+                    } else {
+                        $carry[$item['categories_id']]['product_total'] += $item['product_total'];
+                    }
+                    return $carry;
+                });
+            
+            }
+        }
+
+        $arr = array_slice(array_reverse(array_sort($result, 'product_total')), 0, 4);
+        
+        $arr_catename = [];
+        $arr_catequan = [];
+
+        foreach($arr as $item){
+            array_push($arr_catename, $item['categories_name']);
+            array_push($arr_catequan, $item['product_total']);
+        }
+        $categorie_quantity = [
+            implode(",", $arr_catename),
+            implode(",", $arr_catequan),
+        ];
+
+        return $categorie_quantity;
+        //composer require laravel/helpers
+    }
+
+    public function getTotalMonth($year)
+    {
+        $total_order_count = [];
+        $order_count = 0;
+        $total_month = [];
+        $count = 1;
+
+        for ($i=2; $i <= 13; $i++) {
+            ($i < 10) ? $i = "0".$i : $i ;
+            $j = ($i <= 10) ? "0".($i - 1) : $i - 1 ;
+
+            $price = DB::connection('mongodb')->collection("payment")
+                ->select('*')
+                ->whereBetween('created_at', [$year.'-'.$j, $year.'-'.$i])
+                ->get();
+
+            $order_count = DB::connection('mongodb')->collection("payment")
+                ->select('*')
+                ->whereBetween('created_at', [$year.'-'.$j, $year.'-'.$i])
+                ->get();
+
+            $amount_payment = 0;
+            foreach($price as $item){
+                if($item['txn_xtatus'] == 0 || $item['txn_xtatus'] == '0') $amount_payment = $amount_payment + ($item['amount'] * 1.0);
+            }
+
+            $result_order_count = 0;
+            foreach($order_count as $item){
+                if($item['txn_xtatus'] == 0 || $item['txn_xtatus'] == '0') $result_order_count += 1;
+            }
+
+            $total_month[$count] = $amount_payment;
+            $total_order_count[$count] = $result_order_count;
+            $count++;
+        }
+
+        $data = [
+            'total_month' => array_values($total_month),
+            'total_order_count' => array_values($total_order_count),
+        ];
+
+        return $data;
+    }
+
+    public function getAllOrders($year)
+    {
+        $result_all_orders = 0;
+
+        $all_orders = DB::connection('mongodb')->collection("payment")
+            ->select('*')
+            ->whereBetween('created_at', [ $year, trim($year + 1) ])
+            ->get();
+
+        foreach($all_orders as $item){
+            if($item['txn_xtatus'] == 0 || $item['txn_xtatus'] == '0') $result_all_orders += 1;
+        }
+
+        return $result_all_orders;
+    }
+
+    public function getTotal($year)
+    {
+        $total = 0;
+
+        $amount = DB::connection('mongodb')->collection("payment")
+            ->select('*')
+            ->whereBetween('created_at', [ $year, trim($year+1) ])
+            ->get();
+
+        foreach($amount as $item){
+            if($item['txn_xtatus'] == 0 || $item['txn_xtatus'] == '0') $total += $item['amount'] * 1.0;
+        }
+
+        return $total;
+    }
+
+    public function getYearAll()
+    {
+        $array_year = [];
+
+        $get_year = DB::connection('mongodb')->collection("payment")
+            ->select('id','created_at')
+            ->where('txn_xtatus','=',0)
+            ->orwhere('txn_xtatus','=','0')
+            ->groupBy('created_at')
+            ->orderby('created_at','desc')
+            ->get();
+
+        foreach($get_year as $key => $item){
+            array_push($array_year, date('y', strtotime($get_year[$key]['created_at'])));
+        }
+        
+        $all_year = array_count_values($array_year);
+            
+        return $all_year;
+    }
+}

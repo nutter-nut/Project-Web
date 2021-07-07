@@ -1,0 +1,194 @@
+var local = document.getElementById("local");
+var text_th = '//cdn.datatables.net/plug-ins/1.10.24/i18n/Thai.json';
+var text_en = '//cdn.datatables.net/plug-ins/1.10.24/i18n/English.json';
+
+if(local.value != 'th') var text = text_en;
+else var text = text_th;
+
+$(document).ready(function() {
+    $.noConflict();
+    var table = $('#table_id').DataTable({
+        "order": [
+            [0, "desc"]
+        ],
+        "lengthChange": false,
+        "lengthMenu": [[3], [3]],
+        "searching": false,
+        "columnDefs": [
+            { "orderable": false },
+        ],
+        "language": {
+            "url": text
+        }
+    });
+});
+
+$(function() {
+	
+	$(document).on({
+		mouseover: function(event) {
+			$(this).find('.far').addClass('star-over');
+			$(this).prevAll().find('.far').addClass('star-over');
+		},
+		mouseleave: function(event) {
+			$(this).find('.far').removeClass('star-over');
+			$(this).prevAll().find('.far').removeClass('star-over');
+		}
+	}, '.rate');
+
+
+	$(document).on('click', '.rate', function() {
+		if ( !$(this).find('.star').hasClass('rate-active') ) {
+			$(this).siblings().find('.star').addClass('far').removeClass('fas rate-active');
+			$(this).find('.star').addClass('rate-active fas').removeClass('far star-over');
+			$(this).prevAll().find('.star').addClass('fas').removeClass('far star-over');
+		} else {
+			console.log('has');
+		}
+	});
+	
+});
+
+// --------------------------------------------------------------------------
+
+var max_default = 999;
+
+function calProdUnitRatio(id) {
+    var qunatity = parseInt(document.getElementById("qunatity").value);
+
+    var arr_ratio = id.split(",");
+    var uom_code = arr_ratio[0];
+
+    var ratio = parseInt(arr_ratio[1]);
+    var price = parseInt(arr_ratio[2]);
+
+    var vat = arr_ratio[3];
+    var promotion = arr_ratio[4];
+    var prod_code = arr_ratio[5];
+
+    var type = arr_ratio[6];
+    var max = parseInt(arr_ratio[7]);
+    var sum = price * qunatity;
+
+    // var url = window.location.origin+'/product_details/'+prod_code+'/'+uom_code;
+    // window.location.href = url;
+
+    // console.log(arr_ratio);
+
+    if (promotion) {
+        document.getElementById("promotion").innerHTML = promotion;
+    } else {
+        document.getElementById("promotion").innerHTML = '';
+    }
+
+    if (type != 'Y') { //n ติดลบไม่ได้
+        if ((ratio * qunatity) > 0 && (ratio * qunatity) <= max) {
+            setValueSell(ratio, qunatity, sum);
+        } else {
+            setValueMax2(ratio, price, max);
+        }
+    } else {
+        if ((ratio * qunatity) > 0 && (ratio * qunatity) <= max_default) {
+            setValueSell(ratio, qunatity, sum);
+        } else {
+            setValueMax2(ratio, price, max_default);
+        }
+    }
+}
+
+function calProdUnitRatio2(qty, type, max) {
+    var qty_int = parseInt(qty);
+    var max_int = parseInt(max);
+
+    var uomCode = document.getElementById("uomCode").value;
+    var arr_ratio = uomCode.split(",");
+
+    var ratio = parseInt(arr_ratio[1]);
+    var price = parseInt(arr_ratio[2]);
+
+    var vat = arr_ratio[3];
+    var sum = price * qty_int;
+
+    if (type != 'Y') { //n ติดลบไม่ได้
+        if (qty_int > 0 && qty_int <= max_int) {
+            if ((ratio * qty_int) <= max_int) {
+                // console.log("11");
+                setValueSell(ratio, qty_int, sum);
+            } else {
+                // console.log("12");
+                setValueMax2(ratio, price, max_int);
+            }
+        } else if (qty_int > max_int) {
+            // console.log("21");
+            setValueMax(ratio, price, max_int);
+        } else {
+            // console.log("22");
+            setValueDefault(ratio, price);
+        }
+    } else { //y ติดลบได้
+        if (qty_int > 0 && qty_int <= max_default) {
+            if ((ratio * qty_int) <= max_default) {
+                setValueSell(ratio, qty_int, sum);
+            } else {
+                setValueMax2(ratio, price, max_default);
+            }
+        } else if (qty_int > (max_default / ratio)) {
+            setValueMax(ratio, price, max_default);
+        } else {
+            setValueDefault(ratio, price);
+        }
+    }
+}
+
+function setValueDefault(ratio, price) {
+    // console.log("setValueDefault");
+    document.getElementById("qunatity").value = 0;
+    // document.getElementById("prodUnitRatio").innerHTML = ratio * 0;
+    document.getElementById("prodUnitPrice").value = price * 0;
+    document.getElementById("btn_add_to_cart").style.display = 'none';
+    document.getElementById("text_out_of_stock").style.display = '';
+}
+
+function setValueSell(ratio, qty, sum) {
+    // console.log("setValueSell");
+    document.getElementById("qunatity").value = qty;
+    // document.getElementById("prodUnitRatio").innerHTML = ratio * qty;
+    document.getElementById("prodUnitPrice").value = sum.toFixed(2);
+    document.getElementById("btn_add_to_cart").style.display = '';
+    document.getElementById("text_out_of_stock").style.display = 'none';
+}
+
+function setValueMax(ratio, price, max_int) {
+    // console.log("setValueMax");
+    if(max_int > 0){
+        document.getElementById("qunatity").value = max_int;
+        // document.getElementById("prodUnitRatio").innerHTML = ratio * max_int;
+        document.getElementById("prodUnitPrice").value = price * max_int;
+        document.getElementById("btn_add_to_cart").style.display = '';
+        document.getElementById("text_out_of_stock").style.display = 'none';
+    }else{
+        document.getElementById("qunatity").value = max_int;
+        // document.getElementById("prodUnitRatio").innerHTML = ratio * max_int;
+        document.getElementById("prodUnitPrice").value = price * max_int;
+        document.getElementById("btn_add_to_cart").style.display = 'none';
+        document.getElementById("text_out_of_stock").style.display = '';
+    }
+}
+
+function setValueMax2(ratio, price, max_int) {
+    // console.log("setValueMax2");
+    var result = Math.floor(max_int / parseInt(ratio));
+    if(result > 0){
+        document.getElementById("qunatity").value = result;
+        // document.getElementById("prodUnitRatio").innerHTML = (ratio * result).toFixed(0);
+        document.getElementById("prodUnitPrice").value = (price * result).toFixed(0);
+        document.getElementById("btn_add_to_cart").style.display = '';
+        document.getElementById("text_out_of_stock").style.display = 'none';
+    }else{
+        document.getElementById("qunatity").value = 0;
+        // document.getElementById("prodUnitRatio").innerHTML = (ratio * result).toFixed(0);
+        document.getElementById("prodUnitPrice").value = (price * 0).toFixed(0);
+        document.getElementById("btn_add_to_cart").style.display = 'none';
+        document.getElementById("text_out_of_stock").style.display = '';
+    }
+}

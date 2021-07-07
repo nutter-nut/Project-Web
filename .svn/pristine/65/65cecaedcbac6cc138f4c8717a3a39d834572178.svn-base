@@ -1,0 +1,458 @@
+
+
+<?php $__env->startSection('center'); ?>
+
+<main>
+    <!--? slider Area Start-->
+    <div class="slider-area ">
+        <div class="slider-active">
+            <div class="single-slider hero-overly2  slider-height2 d-flex align-items-center slider-bg2">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-8 col-md-8">
+                            <div class="hero__caption hero__caption2">
+                                <h1 data-animation="fadeInUp" data-delay=".4s">Product details</h1>
+                                <nav aria-label="breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('Categories')); ?>">Categories</a></li>
+                                        <li class="breadcrumb-item"><a href="<?php echo e(route('productDetails', ['id' => $product[0]['id']])); ?>"><?php echo e($product[0]['name']); ?></a></li>
+                                    </ol>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- slider Area End-->
+    <!--? Single Product Area Start-->
+    <div class="product_image_area section-padding40">
+        <div class="container">
+            <div class="row s_product_inner">
+                <div class="col-lg-5">
+                    <div class="product_slider_img">
+                        <div id="vertical">
+                            <?php $__currentLoopData = $product[0]['image']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>                            
+                            <div data-thumb="<?php echo e(asset('storage')); ?>/product_images/<?php echo e($product[0]['id']); ?>/<?php echo e($item); ?>">
+                                <img src="<?php echo e(asset('storage')); ?>/product_images/<?php echo e($product[0]['id']); ?>/<?php echo e($item); ?>" / class="w-100">
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 offset-lg-1">
+                    <div class="s_product_text">
+                        <h3><?php echo e($product[0]['name']); ?></h3>
+                        <h2>$<?php echo e($product[0]['price']); ?></h2>
+                        <ul class="list">
+                            <li>
+                                <a class="active" href="#">
+                                    <span>ประเภทสินค้า</span> : <?php echo e($product[0]['categorie']); ?></a>
+                            </li>
+                            <li>
+                                <a href="#"> <span>สถานะ</span> : <?php echo e($product[0]['stock']); ?></a>
+                            </li>
+                        </ul>
+                        <div class="card_area">
+                            <form action="<?php echo e(route('AddToCartProduct',['id' => $product[0]['id']])); ?>" method="GET">
+                                <div class="product_count d-inline-block">
+                                    <span class="inumber-decrement"> <i class="ti-minus"></i></span>
+                                    <input class="input-number" name="qunatity" type="text" value="1" min="0" max="10">
+                                    <span class="number-increment"> <i class="ti-plus"></i></span>
+                                </div>
+                                <div class="add_to_cart">
+                                    <button class="btn" type="submit">add to cart</button>
+                                </div>
+                            </form>
+                            <div class="social_icon">
+                                <a href="#" class="fb"><i class="ti-facebook"></i></a>
+                                <a href="#" class="tw"><i class="ti-twitter-alt"></i></a>
+                                <a href="#" class="li"><i class="ti-linkedin"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Single Product Area End-->
+    <!--? Product Description Area Start-->
+    <section class="product_description_area">
+        <div class="container">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+                        aria-selected="true">คำอธิบาย</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                        aria-controls="profile" aria-selected="false">รายละเอียดสินค้า</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab"
+                        aria-controls="contact" aria-selected="false">Comments</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab"
+                        aria-controls="review" aria-selected="false">Reviews</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
+                    <p>
+                        <?php echo e($product[0]['description']); ?>
+
+                    </p>
+                </div>
+                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td><h5>STANDARD</h5></td>
+                                    <td><h5><?php echo e($product[0]['standard']); ?></h5></td>
+                                </tr>
+                                <tr>
+                                    <td><h5>MATERIAL</h5></td>
+                                    <td><h5><?php echo e($product[0]['material']); ?></h5></td>
+                                </tr>
+                                <tr>
+                                    <td><h5>COATING</h5></td>
+                                    <td><h5><?php echo e($product[0]['coating']); ?></h5></td>
+                                </tr>
+                                <tr>
+                                    <td><h5>CODE</h5></td>
+                                    <td><h5><?php echo e($product[0]['code']); ?></h5></td>
+                                </tr>
+                                <tr>
+                                    <td><h5>UPDATE</h5></td>
+                                    <td><h5><?php echo e($product[0]['update']); ?></h5></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <br>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
+                                <h1>รายละเอียดเพิ่มเติม</h1>
+                                <table class="table table-bordered table-details">
+                                    <thead>
+                                        <tr>
+                                            <?php $__currentLoopData = $product[0]['details'][0] ?? ''; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <th scope="col"><?php echo e($key); ?>  </th>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php $__currentLoopData = $product[0]['details'] ?? ''; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <tr>
+                                            <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <td><?php echo e($item); ?></td>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?> 
+                                            </tr>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>                         
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="comment_list">
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-1.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <h5>12th Feb, 2017 at 05:56 pm</h5>
+                                            <a class="reply_btn" href="#">Reply</a>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                                <div class="review_item reply">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-2.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <h5>12th Feb, 2017 at 05:56 pm</h5>
+                                            <a class="reply_btn" href="#">Reply</a>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-3.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <h5>12th Feb, 2017 at 05:56 pm</h5>
+                                            <a class="reply_btn" href="#">Reply</a>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="review_box">
+                                <h4>Post a comment</h4>
+                                <form class="row contact_form" action="contact_process.php" method="post"
+                                    id="contactForm" novalidate="novalidate">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="name" name="name"
+                                                placeholder="Your Full name" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                placeholder="Email Address" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="number" name="number"
+                                                placeholder="Phone Number" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="message" id="message" rows="1"
+                                                placeholder="Message"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-right">
+                                        <button type="submit" value="submit" class="btn">
+                                            Submit Now
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="row total_rate">
+                                <div class="col-6">
+                                    <div class="box_total">
+                                        <h5>Overall</h5>
+                                        <h4><?php echo e($product[0]['ratting']); ?></h4>
+                                        <h6>(03 Reviews)</h6>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="rating_list">
+                                        <h3>Based on 3 Reviews</h3>
+                                        <ul class="list">
+                                            <li>
+                                                <a href="#">5 Star
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i> 01</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">4 Star
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i> 01</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">3 Star
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i> 01</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">2 Star
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i> 01</a>
+                                            </li>
+                                            <li>
+                                                <a href="#">1 Star
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i>
+                                                    <i class="fa fa-star"></i> 01</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review_list">
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-1.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-2.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                                <div class="review_item">
+                                    <div class="media">
+                                        <div class="d-flex">
+                                            <img src="assets/img/gallery/review-3.png" alt="" />
+                                        </div>
+                                        <div class="media-body">
+                                            <h4>Blake Ruiz</h4>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                            <i class="fa fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <p>
+                                        Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+                                        nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="review_box">
+                                <h4>Add a Review</h4>
+                                <p>Your Rating:</p>
+                                <ul class="list">
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-star"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-star"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-star"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-star"></i>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#">
+                                            <i class="fa fa-star"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                                <p>Outstanding</p>
+                                <form class="row contact_form" action="contact_process.php" method="post"
+                                    novalidate="novalidate">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="name"
+                                                placeholder="Your Full name" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="email" class="form-control" name="email"
+                                                placeholder="Email Address" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="number"
+                                                placeholder="Phone Number" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="message" rows="1"
+                                                placeholder="Review"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 text-right">
+                                        <button type="submit" value="submit" class="btn">
+                                            Submit Now
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Product Description Area End-->
+
+</main>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.index.index', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\new_template01_abpon\resources\views/product_details.blade.php ENDPATH**/ ?>

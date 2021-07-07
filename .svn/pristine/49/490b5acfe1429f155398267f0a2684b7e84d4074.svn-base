@@ -1,0 +1,456 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+Route::get('/', ["uses"=>"IndexController@index", 'as' => 'Index']);
+
+Route::get('/category', [ "uses" => "IndexController@categoriesIndex", 'as' => 'categoriesIndex' ]);
+
+Route::get('/category/{name}', [ "uses" => "IndexController@detalCategories", 'as' => 'detalCategories' ]);
+
+Route::get('/products/{name}', [ "uses" => "IndexController@getProducts", 'as' => 'getProducts' ]);
+
+Route::get('/products/{prodCode}/{uomCode}', [ "uses" => "IndexController@productDetal", 'as' => 'productDetal' ]);
+
+Route::get('/products_find/{id}', [ "uses" => "IndexController@findProducts", 'as' => 'findProducts' ]);
+
+Route::get('/cart', ["uses"=>"IndexController@cartIndex", 'as' => 'cartIndex']);
+
+// Route::get('/test', ["uses"=>"CheckoutController@test", 'as' => 'test']);
+
+
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home')->middleware('auth');
+
+Route::get('/admin/payment_detail/{id}', ["uses"=>"Payment\PaymentsController@getDetail", 'as' => 'getDetail'])->middleware('auth');
+
+Route::post('/admin/order_status_update/{id}', ["uses"=>"HomeController@updateStatus", 'as' => 'updateStatus'])->middleware('restricToEmployee');
+
+Route::get('/pay_again/{id}', ["uses"=>"CheckoutController@payAgain", 'as' => 'payAgain'])->middleware('auth');
+
+
+// Route::get('/product_details/{id?}', ["uses"=>"ProductsController@productDetails", 'as' => 'productDetails']);
+Route::get('/product_details/{prodCode?}/{uomCode?}', ["uses"=>"ProductsController@productDetails", 'as' => 'productDetails']);
+
+Route::get('/about', ["uses"=>"AboutController@index", 'as' => 'About']);
+
+// Route::get('/categories', ["uses"=>"CategoriesController@index", 'as' => 'Categories']);
+
+// Route::get('/cart', ["uses"=>"CartController@index", 'as' => 'Cart']);
+
+// Route::get('/cart_qty_plus/{id}', ["uses" => "CartController@increaseSingleProduct", 'as' => 'increaseSingleProduct']);
+Route::get('/cart_qty_plus/{prodCode}/{uomCode}', ["uses" => "CartController@increaseSingleProduct", 'as' => 'increaseSingleProduct']);
+
+// Route::get('/cart_qty_minus/{id}', ["uses" => "CartController@decreaseSingleProduct", 'as' => 'decreaseSingleProduct']);
+Route::get('/cart_qty_minus/{prodCode}/{uomCode}', ["uses" => "CartController@decreaseSingleProduct", 'as' => 'decreaseSingleProduct']);
+
+// Route::get('/cart/deleteItemFromCart/{id}', ["uses"=>"CartController@deleteItemFromCart", 'as' => 'DeleteItemFromCart']);
+Route::get('/cart/deleteItemFromCart/{prodCode}/{uomCode}', ["uses"=>"CartController@deleteItemFromCart", 'as' => 'DeleteItemFromCart']);
+
+
+// Route::get('/cart/addToCart/{id}', ["uses"=>"CartController@addProductToCart", 'as' => 'AddToCartProduct']);
+Route::get('/cart/addToCart/{prodCode}', ["uses"=>"CartController@addProductToCart", 'as' => 'AddToCartProduct']);
+Route::post('/cart/addToCart_arr', ["uses"=>"CartController@addProductToCartArray", 'as' => 'addProductToCartArray']);
+
+// Route::get('/checkout', ["uses"=>"CheckoutController@index", 'as' => 'Checkout']);
+
+Route::get('/blog', ["uses"=>"BlogController@index", 'as' => 'Blog']);
+
+Route::get('/blog/search', ["uses"=>"BlogController@searchBlog", 'as' => 'searchBlog']);
+
+Route::get('/blog_details/{id}', ["uses"=>"BlogController@blogDetails", 'as' => 'blogDetails']);
+
+Route::post('/blog_details/comment/{id}', ["uses"=>"BlogController@sendComment", 'as' => 'sendComment'])->middleware('restricToEmployee');
+
+Route::get('/blog_details/comment/edit/{blog}/{comment}', ["uses"=>"BlogController@editComment", 'as' => 'editComment'])->middleware('restricToEmployee');
+
+Route::post('/blog_details/comment/update/{blog}/{comment}', ["uses"=>"BlogController@updeteComment", 'as' => 'updeteComment'])->middleware('restricToEmployee');
+
+Route::get('/blog_details/comment/delete/{id}', ["uses"=>"BlogController@deleteComment", 'as' => 'deleteComment'])->middleware('restricToEmployee');
+
+Route::get('/blog_details/{id}/like', ["uses"=>"BlogController@blogLike", 'as' => 'blogLike'])->middleware('restricToEmployee');
+
+Route::get('/blog_details/{id}/unlike', ["uses"=>"BlogController@blogUnLike", 'as' => 'blogUnLike'])->middleware('restricToEmployee');
+
+Route::get('/contact', ["uses"=>"ContactController@index", 'as' => 'Contact']);
+
+Route::post('/send_order', ["uses"=>"CheckoutController@sendOrder", 'as' => 'sendOrder'])->middleware('auth');
+
+Route::get('/search', ["uses"=>"ProductsController@searchProduct", 'as' => 'searchProduct']);
+
+Route::get('/search_all', ["uses"=>"HomeController@searchAll", 'as' => 'searchAll'])->middleware('restricToAdmin');
+
+//review
+// Route::post('/product_review/{id}', ["uses"=>"ProductsController@reviewProduct", 'as' => 'reviewProduct']);
+Route::post('/product_review/{prodCode?}/{uomCode?}', ["uses"=>"ProductsController@reviewProduct", 'as' => 'reviewProduct']);
+
+//payment
+Route::post('tbpapi/{id}', ["uses"=>"CheckoutController@paymentResponse", 'as' => 'paymentResponse'], ['only'=> ['paymentResponse']]);
+
+
+
+// !Admin product
+
+// *product menu group
+Route::get('/admin/product/menu/group', ["uses"=>"Admin\Product\ProductMenuGroupController@index", 'as' => 'adminProductMenuGroup'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/menu/group/insert', ["uses"=>"Admin\Product\ProductMenuGroupController@productMenuGroupInsert", 'as' => 'productMenuGroupInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/menu/group/edit/{id}', ["uses"=>"Admin\Product\ProductMenuGroupController@productMenuGroupEdit", 'as' => 'productMenuGroupEdit'])->middleware('restricToEmployee');
+
+
+
+// *product group
+Route::get('/admin/product/group', ["uses"=>"Admin\Product\ProductGroupController@index", 'as' => 'adminProductGroup'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/group/insert', ["uses"=>"Admin\Product\ProductGroupController@productGroupInsert", 'as' => 'productGroupInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/group/edit/{id}', ["uses"=>"Admin\Product\ProductGroupController@productGroupEdit", 'as' => 'productGroupEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/group/update', ["uses"=>"Admin\Product\ProductGroupController@productGroupUpdate", 'as' => 'productGroupUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/group/delete/{id}', ["uses"=>"Admin\Product\ProductGroupController@productGroupDelete", 'as' => 'productGroupDelete'])->middleware('restricToEmployee');
+
+// *product type
+Route::get('/admin/product/type', ["uses"=>"Admin\Product\ProductTypeController@index", 'as' => 'adminProductType'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/type/insert', ["uses"=>"Admin\Product\ProductTypeController@productTypeInsert", 'as' => 'productTypeInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/type/edit/{id}', ["uses"=>"Admin\Product\ProductTypeController@productTypeEdit", 'as' => 'productTypeEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/type/update', ["uses"=>"Admin\Product\ProductTypeController@productTypeUpdate", 'as' => 'productTypeUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/type/delete/{id}', ["uses"=>"Admin\Product\ProductTypeController@productTypeDelete", 'as' => 'productTypeDelete'])->middleware('restricToEmployee');
+
+// *product brand
+Route::get('/admin/product/brand', ["uses"=>"Admin\Product\ProductBrandController@index", 'as' => 'adminProductBrand'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/brand/insert', ["uses"=>"Admin\Product\ProductBrandController@productBrandInsert", 'as' => 'productBrandInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/brand/edit/{id}', ["uses"=>"Admin\Product\ProductBrandController@productBrandEdit", 'as' => 'productBrandEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/brand/update', ["uses"=>"Admin\Product\ProductBrandController@productBrandUpdate", 'as' => 'productBrandUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/brand/delete/{id}', ["uses"=>"Admin\Product\ProductBrandController@productBrandDelete", 'as' => 'productBrandDelete'])->middleware('restricToEmployee');
+
+// *product model
+Route::get('/admin/product/model', ["uses"=>"Admin\Product\ProductModelController@index", 'as' => 'adminProductModel'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/model/insert', ["uses"=>"Admin\Product\ProductModelController@productModelInsert", 'as' => 'productModelInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/model/edit/{id}', ["uses"=>"Admin\Product\ProductModelController@productModelEdit", 'as' => 'productModelEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/model/update', ["uses"=>"Admin\Product\ProductModelController@productModelUpdate", 'as' => 'productModelUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/model/delete/{id}', ["uses"=>"Admin\Product\ProductModelController@productModelDelete", 'as' => 'productModelDelete'])->middleware('restricToEmployee');
+
+// *product unitofmeasurepos
+Route::get('/admin/product/unitofmeasurepos', ["uses"=>"Admin\Product\ProductUnitofmeasureposController@index", 'as' => 'adminProductUnitofmeasurepos'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/unitofmeasurepos/insert', ["uses"=>"Admin\Product\ProductUnitofmeasureposController@productUomInsert", 'as' => 'productUomInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/unitofmeasurepos/edit/{id}', ["uses"=>"Admin\Product\ProductUnitofmeasureposController@productUomEdit", 'as' => 'productUomEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/unitofmeasurepos/update', ["uses"=>"Admin\Product\ProductUnitofmeasureposController@productUomUpdate", 'as' => 'productUomUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/unitofmeasurepos/delete/{id}', ["uses"=>"Admin\Product\ProductUnitofmeasureposController@productUomDelete", 'as' => 'productUomDelete'])->middleware('restricToEmployee');
+
+// *product main
+Route::get('/admin/product', ["uses"=>"Admin\Product\ProductController@index", 'as' => 'adminProduct'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/create', ["uses"=>"Admin\Product\ProductController@productCreate", 'as' => 'productCreate'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/insert', ["uses"=>"Admin\Product\ProductController@productInsert", 'as' => 'productInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/edit/{prodCode}', ["uses"=>"Admin\Product\ProductController@productEdit", 'as' => 'productEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/edit/update/{prodCode}', ["uses"=>"Admin\Product\ProductController@productUpdate", 'as' => 'productUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/delete/{prodCode}', ["uses"=>"Admin\Product\ProductController@productDelete", 'as' => 'productDelete'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/get_product_type/{prodGroupCode}', ["uses"=>"Admin\Product\ProductTypeController@getProductTypeByGroupCode", 'as' => 'getProductTypeByGroupCode'])->middleware('restricToEmployee');
+
+
+// ! treasury
+
+// *treasury
+Route::get('/admin/treasury', ["uses"=>"Admin\Treasury\TreasuryController@index", 'as' => 'adminTreasury'])->middleware('restricToEmployee');
+
+Route::post('/admin/treasury/insert', ["uses"=>"Admin\Treasury\TreasuryController@treasuryInsert", 'as' => 'treasuryInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/treasury/edit/{id}', ["uses"=>"Admin\Treasury\TreasuryController@treasuryEdit", 'as' => 'treasuryEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/treasury/update', ["uses"=>"Admin\Treasury\TreasuryController@treasuryUpdate", 'as' => 'treasuryUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/treasury/delete/{id}', ["uses"=>"Admin\Treasury\TreasuryController@treasuryDelete", 'as' => 'treasuryDelete'])->middleware('restricToEmployee');
+
+
+// *stock
+Route::get('/admin/stock', ["uses"=>"Admin\Treasury\StockController@index", 'as' => 'adminStock'])->middleware('restricToEmployee');
+
+Route::post('/admin/stock/insert', ["uses"=>"Admin\Treasury\StockController@stockInsert", 'as' => 'stockInsert'])->middleware('restricToEmployee');
+
+Route::get('/admin/stock/get_uomcode/{prodCode}', ["uses"=>"Admin\Treasury\StockController@getUomCode", 'as' => 'getUomCode'])->middleware('restricToEmployee');
+
+Route::get('/admin/stock/edit/{whCode}/{stockProdCode}', ["uses"=>"Admin\Treasury\StockController@stockEdit", 'as' => 'stockEdit'])->middleware('restricToEmployee');
+
+Route::post('/admin/stock/update', ["uses"=>"Admin\Treasury\StockController@stockUpdate", 'as' => 'stockUpdate'])->middleware('restricToEmployee');
+
+Route::get('/admin/stock/delete/{whCode}/{stockProdCode}', ["uses"=>"Admin\Treasury\StockController@stockDelete", 'as' => 'stockDelete'])->middleware('restricToEmployee');
+
+
+//--
+Route::get('/get_price_tax/{prodIsVat}/{price}', ["uses"=>"CartControllerr@taxDeduction", 'as' => 'taxDeduction']);
+
+// ! admin promotion
+Route::get('/admin/promotion', ["uses"=>"Admin\PromotionController@index", 'as' => 'adminPromotion'])->middleware('restricToAdmin');
+
+Route::post('/admin/promotion/insert', ["uses"=>"Admin\PromotionController@promotionInsert", 'as' => 'promotionInsert'])->middleware('restricToAdmin');
+
+Route::get('/admin/promotion/edit/{id}', ["uses"=>"Admin\PromotionController@promotionEdit", 'as' => 'promotionEdit'])->middleware('restricToAdmin');
+
+Route::post('/admin/promotion/update/{id}', ["uses"=>"Admin\PromotionController@promotionUpdate", 'as' => 'promotionUpdate'])->middleware('restricToAdmin');
+
+Route::get('/admin/promotion/delete/{id}', ["uses"=>"Admin\PromotionController@promotionDelete", 'as' => 'promotionDelete'])->middleware('restricToAdmin');
+
+// ! admin promotion group
+Route::get('/admin/promotion/group', ["uses"=>"Admin\PromotionGroupController@index", 'as' => 'adminPromotionGroup'])->middleware('restricToAdmin');
+
+Route::post('/admin/promotion/group/insert', ["uses"=>"Admin\PromotionGroupController@promotionGroupInsert", 'as' => 'promotionGroupInsert'])->middleware('restricToAdmin');
+
+Route::get('/admin/promotion/group/edit/{id}', ["uses"=>"Admin\PromotionGroupController@promotionGroupEdit", 'as' => 'promotionGroupEdit'])->middleware('restricToAdmin');
+
+Route::post('/admin/promotion/group/update', ["uses"=>"Admin\PromotionGroupController@promotionGroupUpdate", 'as' => 'promotionGroupUpdate'])->middleware('restricToAdmin');
+
+Route::get('/admin/promotion/group/delete/{id}', ["uses"=>"Admin\PromotionGroupController@promotionGroupDelete", 'as' => 'promotionGroupDelete'])->middleware('restricToAdmin');
+
+Route::get('/admin/promotion/group/get_product/{pgpCode}', ["uses"=>"Admin\PromotionGroupController@getProduct", 'as' => 'getProduct'])->middleware('restricToAdmin');
+
+
+// Route::get('/admin/stock/update/test', ["uses"=>"Admin\Treasury\StockController@getSearchStockWhCode", 'as' => 'getSearchStockWhCode']);
+
+
+// Route::get('/cc', function() {
+//     Artisan::call('cache:clear');
+//     return "Cache is cleared";
+// });
+
+// * adminDisplayDashboards
+Route::get('/admin/dashboards', ["uses"=>"Admin\DashboardsController@index", 'as' => 'adminDisplayDashboards'])->middleware('restricToAdmin');
+
+Route::get('/admin/dashboards/year', ["uses"=>"Admin\DashboardsController@index", 'as' => 'adminDashboardSelectYear'])->middleware('restricToAdmin');
+
+
+Route::get('/admin/products', ["uses"=>"Admin\ProductsController@index", 'as' => 'adminProducts'])->middleware('restricToEmployee');
+
+Route::get('/admin/products/search', ["uses"=>"Admin\ProductsController@searchProduct", 'as' => 'adminSearchProduct'])->middleware('restricToEmployee');
+
+Route::get('/admin/products/add', ["uses"=>"Admin\ProductsController@addProduct", 'as' => 'addProduct'])->middleware('restricToEmployee');
+
+// Route::post('/admin/products/create', ["uses"=>"Admin\ProductsController@createProduct", 'as' => 'createProduct'])->middleware('restricToEmployee');
+
+// Route::get('/admin/products/edit/{id}', ["uses" => "Admin\ProductsController@editProduct", 'as' => 'editProduct'])->middleware('restricToEmployee');
+// Route::post('/admin/products/update/{id}', ["uses" => "Admin\ProductsController@updateProduct", 'as' => 'updateProduct'])->middleware('restricToEmployee');
+
+// Route::post('admin/products/add_image/{id}', ["uses"=>"Admin\ProductsController@addProductImage", 'as' => 'addProductImage'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/image/{prodCode}', ["uses"=>"Admin\Product\ProductImageController@index", 'as' => 'productEditImage'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/add_image/{prodCode}', ["uses"=>"Admin\Product\ProductImageController@addProductImage", 'as' => 'addProductImage'])->middleware('restricToEmployee');
+
+Route::post('/admin/product/update_image/{prodCode}/{image}', ["uses" => "Admin\Product\ProductImageController@updateProductImage", 'as' => 'updateProductImage'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/update_image/default/{prodCode}/{image}', ["uses"=>"Admin\Product\ProductImageController@updateProductImageDefault", 'as' => 'updateProductImageDefault'])->middleware('restricToEmployee');
+
+Route::get('/admin/product/delete_image/{prodCode}/{image}', ["uses"=>"Admin\Product\ProductImageController@deleteProductImage", 'as' => 'deleteProductImage'])->middleware('restricToEmployee');
+
+
+
+//Admin Blog
+Route::get('/admin/blogs', ["uses"=>"Admin\BlogsController@index", 'as' => 'adminBlogs'])->middleware('restricToAdmin');
+
+Route::get('/admin/blogs/search', ["uses"=>"Admin\BlogsController@searchBlog", 'as' => 'adminSearchBlog'])->middleware('restricToAdmin');
+
+Route::get('/admin/blogs/add', ["uses"=>"Admin\BlogsController@addBlog", 'as' => 'addBlog'])->middleware('restricToAdmin');
+Route::post('/admin/blogs/create', ["uses"=>"Admin\BlogsController@createBlog", 'as' => 'createBlog'])->middleware('restricToAdmin');
+
+Route::get('/admin/blogs/delete/{id}', ["uses"=>"Admin\BlogsController@deleteBlog", 'as' => 'deleteBlog'])->middleware('restricToAdmin');
+
+Route::get('/admin/blogs/edit/{id}', ["uses"=>"Admin\BlogsController@editBlog", 'as' => 'editBlog'])->middleware('restricToAdmin');
+Route::post('/admin/blogs/update/{id}', ["uses"=>"Admin\BlogsController@updateBlog", 'as' => 'updateBlog'])->middleware('restricToAdmin');
+
+
+//Admin categories
+Route::get('/admin/categories', ["uses"=>"Admin\CategoriesController@index", 'as' => 'adminCategories'])->middleware('restricToEmployee');
+
+Route::get('/admin/categories/search', ["uses"=>"Admin\CategoriesController@searchCategorie", 'as' => 'adminSearchCategorie'])->middleware('restricToEmployee');
+
+Route::get('/admin/categories/{id}/show_products', ["uses"=>"Admin\CategoriesController@showProducts", 'as' => 'showProducts'])->middleware('restricToEmployee');
+
+Route::post('admin/categories/create', ["uses" => "Admin\CategoriesController@createCategorie", 'as' => 'createCategorie'])->middleware('restricToEmployee');
+
+Route::get('admin/categories/edit/{id}', ["uses" => "Admin\CategoriesController@editCategorie", 'as' => 'editCategorie'])->middleware('restricToEmployee');
+Route::post('admin/categories/update/{id}', ["uses" => "Admin\CategoriesController@updateCategorie", 'as' => 'updateCategorie'])->middleware('restricToEmployee');
+
+Route::get('admin/categories/delete/{id}', ["uses" => "Admin\CategoriesController@deleteCategorie", 'as' => 'deleteCategorie'])->middleware('restricToEmployee');
+
+//Admin product
+Route::get('/profile', 'ProfileController@showdata')->name('profile')->middleware('auth');
+
+//Admin users
+Route::get('/admin/users', ["uses"=>"Admin\UsersController@index", 'as' => 'adminUsers'])->middleware('restricToAdmin');
+
+Route::get('/admin/users/search', ["uses"=>"Admin\UsersController@searchUser", 'as' => 'adminSearchUser'])->middleware('restricToAdmin');
+
+Route::post('/admin/user/insert', ["uses"=>"Admin\UsersController@userInsert", 'as' => 'userInsert'])->middleware('restricToAdmin');
+Route::post('/admin/user/insert/posone', ["uses"=>"Admin\UsersController@userInsertPosone", 'as' => 'userInsertPosone'])->middleware('restricToAdmin');
+
+Route::get('/admin/user/data/{id}', ["uses"=>"Admin\UsersController@getUserData", 'as' => 'getUserData'])->middleware('restricToAdmin');
+Route::post('/admin/user/update', ["uses"=>"Admin\UsersController@userUpdate", 'as' => 'userUpdate'])->middleware('restricToAdmin');
+Route::post('/admin/user/update/posone', ["uses"=>"Admin\UsersController@userUpdateInPosone", 'as' => 'userUpdateInPosone'])->middleware('restricToAdmin');
+
+Route::get('/admin/get_user/posone/{empCode}', ["uses"=>"Admin\UsersController@getUserInPosone", 'as' => 'getUserInPosone'])->middleware('restricToAdmin');
+
+// Route::post('/admin/user/edit/{id}', ["uses"=>"Admin\UsersController@userUpdate", 'as' => 'userUpdate'])->middleware('restricToAdmin');
+// Route::post('/admin/user/edit/posone/{id}', ["uses"=>"Admin\UsersController@userUpdateInPosone", 'as' => 'userUpdateInPosone'])->middleware('restricToAdmin');
+
+Route::get('/admin/user/user_check/posone/{username}', ["uses"=>"Admin\UsersController@existsUserCheckAtPosone", 'as' => 'existsUserCheckAtPosone'])->middleware('restricToAdmin');
+Route::get('/admin/user/user_check2/posone/{username}', ["uses"=>"Admin\UsersController@existsUserCheckAtPosone2", 'as' => 'existsUserCheckAtPosone2'])->middleware('restricToAdmin');
+
+Route::post('/admin/user/suspend/{id}', ["uses"=>"Admin\UsersController@storeSuspend", 'as' => 'storeSuspend'])->middleware('restricToAdmin');
+
+
+Route::get('/admin/order/pdf/{id}', ["uses"=>"Admin\PdfController@getPdf", 'as' => 'getPdf'])->middleware('restricToEmployee');
+Route::get('/admin/address_the_envelope/pdf/{id}', ["uses"=>"Admin\PdfController@envelopePdf", 'as' => 'envelopePdf'])->middleware('restricToEmployee');
+
+//profile
+Route::get('/profile/resetpassword/{id}', ["uses" => "ProfileController@resetpass", 'as' => 'resetPassword'])->middleware('auth');
+Route::post('/profile/updatepass/{id}', ["uses" => "ProfileController@updatePassword", 'as' => 'updatePassword'])->middleware('auth');
+Route::post('/profile/editprofile/{id}', ["uses" => "ProfileController@editProfile", 'as' => 'editProfile'])->middleware('auth');
+Route::get('/profile', 'ProfileController@showdata')->name('profile')->middleware('auth');
+
+Route::post('/profile/address/inset', ["uses" => "ProfileController@addressInset", 'as' => 'addressInset'])->middleware('auth');
+
+Route::get('/profile/address/edit/{id}', ["uses" => "ProfileController@addressEdit", 'as' => 'addressEdit'])->middleware('auth');
+
+Route::post('/profile/address/update/{user_id}', ["uses" => "ProfileController@addressUpdate", 'as' => 'addressUpdate'])->middleware('auth');
+
+Route::get('/profile/address/delete/{id}', ["uses" => "ProfileController@addressDelete", 'as' => 'addressDelete'])->middleware('auth');
+
+//reset password
+Route::post('reset_password_without_token', 'AccountsController@validatePasswordRequest');
+
+Route::post('reset_password_with_token', 'AccountsController@resetPassword');
+
+//setting
+Route::get('/admin/setting', ["uses"=>"Admin\SettingController@index", 'as' => 'adminSetting'])->middleware('restricToAdmin');
+
+Route::post('/admin/setting/config_update', ["uses"=>"Admin\SettingController@settingUpdate", 'as' => 'adminSettingUpdate'])->middleware('restricToAdmin');
+
+
+
+//chat video
+Route::post('get_messages', 'Chat\ChatController@fetchMessages')->middleware('auth');
+
+Route::get('/admin/get/messages', 'Chat\ChatController@fetchMessages')->middleware('restricToAdmin');
+
+Route::get('/admin/add/session', 'Chat\ChatController@addSession')->middleware('restricToAdmin');
+
+Route::get('/admin/del/session', 'Chat\ChatController@delSession')->middleware('restricToAdmin');
+
+Route::post('messages', 'Chat\ChatController@sendMessage');
+
+Route::post('update_message', 'Chat\ChatController@updateMessage');
+
+Route::delete('message', 'Chat\ChatController@destroyMessage');
+
+Route::post('/friends_list', 'Chat\UserController@getFriends')->middleware('auth');
+
+Route::get('/admin/get/friends_list/{id}', 'Chat\UserController@getFriends2')->middleware('restricToAdmin');
+
+Route::get('/admin/get/user_all/{id}', 'Admin\UsersController@getUserAll')->middleware('restricToAdmin');
+
+Route::post('/recount_unread', 'Chat\ChatController@reCount');
+
+Route::get('/user', 'Chat\UserController@getUser');
+
+Route::post('/reading', 'Chat\ChatController@reading');
+Route::post('/re_reading', 'Chat\ChatController@reReading');
+Route::post('/upload', 'Chat\ChatController@uploadFile');
+Route::get('/download/{file}', 'Chat\ChatController@downloadFile');
+Route::post('/video_time', 'Chat\ChatController@videoTime');
+Route::post('/video_time_end', 'Chat\ChatController@videoTimeEnd');
+
+Route::get('locale/{locale}', 'LanguageController@index')->middleware('setLanguage')->name('locale.setting');
+
+Route::post('get_badge', 'Chat\ChatController@getBadge');
+
+//payment paypal
+Route::get('paymentreceipt/{paymentID}/{payerID}/{full_name}/{phone}/{address}', ['uses'=>'Payment\PaymentsController@showPaymentReceipt','as'=>'showPaymentReceipt']);
+
+// Route::get('payment/address/{full_name}/{phone}/{address}', ['uses'=>'Payment\PaymentsController@saveOrder','as'=>'saveOrder']);
+
+
+//moneyspace payment
+// Route::get('/moneyspace_products', function () {
+//     return view('moneyspace.cart');
+// });
+
+
+// Route::get('/moneyspace_cart', 'Payment\CartController@payment')->name('moneyspaceCart');
+Route::get('/paymentcard', 'Payment\MoneySpaceController@paymentCard')->name('paycredit')->middleware('auth');
+Route::get('/checkorder', 'Payment\MoneySpaceController@checkorder')->name('checkorder');
+Route::get('/paymentsucess', 'Payment\MoneySpaceController@paymentsucess')->name('success');
+Route::get('/payfail', 'Payment\MoneySpaceController@payfail')->name('fail');
+Route::get('/paycancle', 'Payment\MoneySpaceController@paycancle')->name('cancle');
+Route::post('/moneyspace/webhook', 'Payment\MoneySpaceController@webhook')->name('webhook');
+Route::get('/qrcode', 'Payment\QRcodeController@createqr')->name('qrcode')->middleware('auth');
+
+// Route::get('/createinstall', function () {
+//     return view('moneyspace.installment');
+// });
+
+Route::get('/installment', 'Payment\InstallmentController@create')->name('installment');
+
+// Route::get('pos_one', 'Posone\PosoneProductsController@index');
+
+// Route::get('pos_one_test', 'Posone\Showstockcontroller@show');
+
+// Route::get('posone_test', 'Posone\Showstockcontroller@index');
+
+// Route::post('posone_test/add', 'Posone\Showstockcontroller@productGroupInsert')->name('productGroupInsert');
+
+// Route::get('posone_test/edit/{id}', 'Posone\Showstockcontroller@productGroupEdit')->name('productGroupEdit');
+
+// Route::post('posone_test/update', 'Posone\Showstockcontroller@productGroupUpdate')->name('productGroupUpdate');
+
+
+// Route::get('posone_test/delete/{id}', 'Posone\Showstockcontroller@productGroupDelete')->name('productGroupDelete');||||||| .r83
+
+//---------------------
+
+// Route::get('posone_test/delete/{id}', 'Posone\Showstockcontroller@productGroupDelete')->name('productGroupDelete');
+// Route::get('posone_test/delete/{id}', 'Posone\Showstockcontroller@productGroupDelete')->name('productGroupDelete');
+
+// Route::get('posone_typeinsert', 'Posone\InsertProductsController@index');
+
+// Route::post('posone_typeinsert/add', 'Posone\InsertProductsController@productTypeInsert')->name('productTypeInsert');
+
+// Route::get('posone_typeinsert/edit/{id}', 'Posone\InsertProductsController@productTypeEdit')->name('productTypeEdit');
+
+// Route::post('posone_typeinsert/update', 'Posone\InsertProductsController@productTypeUpdate')->name('productTypeUpdate');
+
+// Route::get('posone_typeinsert/delete/{id}', 'Posone\InsertProductsController@productTypeDelete')->name('productTypeDelete');

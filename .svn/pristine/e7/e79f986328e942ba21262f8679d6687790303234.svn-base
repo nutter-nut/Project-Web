@@ -1,0 +1,45 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+        <div class="container">
+            <div class="col-sm-12">
+                <div class="top_box" style="width:100%;">
+                    <ul class="breadcrumb">
+                        <li><a href="{{ route('Index') }}">Home </a></li>
+                        <li> > <a href="{{ route('milSpec', [ 'code' => 1 ]) }}">mil-Spec</a></li>
+                        <li> > Concrete Screws</li>
+                    </ul>
+
+                    <img class="img-mil-spec" src="{{ asset('assets/tp-fastener/style/image/สกรูบานพับ.jpg') }}" alt="Concrete Screws">
+                    <h1>Concrete Mil-Spec</h1>
+                    <p class="hidden-xs">Hardened with Ceramic Coating; Cuts Its Own Threads into Concrete &amp; Masonry.</p>
+                    <p style="color:#000; font-size:14px;"></p>
+                </div>
+                <div class="machine_list">
+                    <div class="col-sm-5">
+                        <h3><strong>Filter For</strong></h3>
+                        <ul>
+                            <li class="odd"><a href="{{ route('allMilSpec', [ 'code' => 1 ]) }}">All Concrete mil-spec</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-1 or">
+                        <span>or</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <h3><strong>Follow A Product Path Below</strong></h3>
+                        <ul>
+                            <li class="odd"><a href="{{ route('allMilSpec', [ 'code' => 1 ]) }}">Flat Head / Phillips Drive</a></li>
+                            <li class=""><a href="{{ route('allMilSpec', [ 'code' => 1 ]) }}">Hex Washer Head / Slotted Drive</a></li>
+                            <li class="odd"><a href="{{ route('allMilSpec', [ 'code' => 1 ]) }}">Concrete mil-spec Drill Bits</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+@endsection

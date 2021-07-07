@@ -1,0 +1,236 @@
+@extends('layouts.tp-fastener-index.index')
+
+@section('center')
+
+<section class="main_container">
+    <div class="container">
+
+        <div class="col-12">
+            <ol class="breadcrumb breadcrumb-arrow mb-5">
+                <li><a href="{{ route('Index') }}">Home</a></li>
+                <li class="active"><span>Login & Register</span></li>
+            </ol>
+            @include('../alert')
+        </div>
+        <div class="col-sm-12">
+            <section class="checkout_inner_page">
+                <h1 style="text-align: left!important;">Login or Sign Up</h1>
+                <p>To manage your account</p>
+                <div class="checkout_inner_details">
+
+                    <div class="common_box hidden-sm hidden-md hidden-lg">
+                        <h3><strong>Log Into Your Account</strong></h3>
+                        <div class="common_details">
+                            <form class="new_user" id="login_user" action="{{ route('login') }}" method="post">
+                            @csrf
+                                <div class="common_col">
+                                    <label for="email">{{ __('login.index.email') }}</label>
+                                    <input id="email" type="email" class="input @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="" autocomplete="email" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="password">{{ __('login.index.password') }}</label>
+                                    <input id="password" type="password" class="input @error('password') is-invalid @enderror" name="password" placeholder="" autocomplete="current-password" required>
+                                </div>
+                                <div class="single-input-fields login-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="remember">{{ __('login.index.rememberMe') }}</label>
+                                    <a href="{{ route('password.request') }}" class="f-right">{{ __('login.index.forgotPassword') }}</a>
+                                </div>
+                                <div class="common_col">
+                                    <input type="submit" name="commit" value="{{ __('login.index.login') }}" class="btn" data-disable-with="{{ __('login.index.login') }}" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="common_box login hidden-xs"><strong>Benefits of Registration</strong>
+                        <div class="common_details">
+                            <p>Becoming a registered user at Fastener SuperStore provides many benefits, particularly to customers who may find themselves shopping here in the future:</p>
+                            <ul style="padding:0 0 0 10px;">
+                                <li>
+                                    <p>Quick & Easy Checkout Process</p>
+                                </li>
+                                <li>
+                                    <p>Saved & Multiple Shipping Addresses</p>
+                                </li>
+                                <li>
+                                    <p>Access to Order / Invoice History</p>
+                                </li>
+                                <li>
+                                    <p>Access to Parts Previously Ordered</p>
+                                </li>
+                                <li>
+                                    <p>Optional Newsletter With Discount Offers</p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="common_box hidden-xs">
+                        <h3><strong>Create An Account</strong></h3>
+                        <div class="common_details hidden-xs">
+                            <form class="new_user" id="new_user" action="{{ route('register') }}" method="post">
+                            @csrf
+                                <div class="common_col">
+                                    <label for="username">{{ __('login.register.fullName') }}</label>
+                                    <input id="username" type="text" class="input @error('name') is-invalid @enderror" name="name" pattern=".{6,}" title="6 characters minimum" placeholder="" autocomplete="name" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="email">{{ __('login.register.emailAddress') }}</label>
+                                    <input id="email" type="email" class="input @error('email') is-invalid @enderror" name="email" placeholder="" required autocomplete="email">
+                                </div>
+                                <div class="common_col">
+                                    <label for="prefix">คำนำหน้า</label>
+                                    <select name="prefix" id="prefix" class="input nice-select-login" required>
+                                        <option value="mr">{{ __('login.page.user.display.mr') }}</option>
+                                        <option value="ms">{{ __('login.page.user.display.ms') }}</option>
+                                        <option value="mrs">{{ __('login.page.user.display.mrs') }}</option>
+                                    </select>
+                                </div>
+                                <div class="common_col">
+                                    <label for="f_name">{{ __('login.register.f_name') }}</label>
+                                    <input id="f_name" type="text" class="input @error('f_name') is-invalid @enderror" name="f_name" placeholder="" autocomplete="f_name" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="l_name">{{ __('login.register.l_name') }}</label>
+                                    <input id="l_name" type="text" class="input @error('l_name') is-invalid @enderror" name="l_name" placeholder="" required autocomplete="l_name" autofocus>
+                                </div>
+                                <div class="common_col">
+                                    <label for="tel">{{ __('login.register.tel') }}</label>
+                                    <input id="tel" type="tel" class="input @error('tel') is-invalid @enderror" name="tel" placeholder=""  onkeyup="autoTab2(this,2)" required autocomplete="tel">
+                                </div>
+                                <div class="common_col">
+                                    <label for="password">{{ __('login.register.password') }}</label>
+                                    <input id="password" type="password" class="input @error('password') is-invalid @enderror" name="password"  placeholder="" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" autocomplete="new-password" required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="tel">{{ __('login.register.confirmPassword') }}</label>
+                                    <input id="password-confirm" type="password" class="input @error('password_confirmation') is-invalid @enderror" name="password_confirmation" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="" autocomplete="new-password" required>
+                                </div>
+                                
+                                <div class="common_col">
+                                    <input name="user[market_ok]" type="hidden" value="0" />
+                                    <input autocomplete="off" class="check" type="checkbox" value="1" checked="checked" name="user[market_ok]" id="user_market_ok" />
+                                    <span style="font-size:14px;">&nbsp;Sign Up for Newsletters</span>
+                                </div>
+                                <div class="common_col">
+                                    <input type="submit" name="commit" value="{{ __('login.register.signUp') }}" class="btn" data-disable-with="{{ __('login.register.signUp') }}" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-1 or check none hidden-xs"> <span>or</span> </div>
+
+                    <div class="common_box hidden-xs">
+                        <h3><strong>Log Into Your Account</strong></h3>
+                        <div class="common_details">
+                            <form class="new_user" id="login_user" action="{{ route('login') }}" method="post">
+                            @csrf
+                                <div class="common_col">
+                                    <label for="email">{{ __('login.index.email') }}</label>
+                                    <input id="email" type="email" class="input @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="" autocomplete="email" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="password">{{ __('login.index.password') }}</label>
+                                    <input id="password" type="password" class="input @error('password') is-invalid @enderror" name="password" placeholder="" autocomplete="current-password" required>
+                                </div>
+                                <div class="single-input-fields login-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="remember">{{ __('login.index.rememberMe') }}</label>
+                                    <a href="{{ route('password.request') }}" class="f-right">{{ __('login.index.forgotPassword') }}</a>
+                                </div>
+                                <div class="common_col">
+                                    <input type="submit" name="commit" value="{{ __('login.index.login') }}" class="btn" data-disable-with="{{ __('login.index.login') }}" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="common_box hidden-sm hidden-md hidden-lg">
+                        <h3><strong>Create An Account</strong></h3>
+                        <div class="common_details">
+                            <form class="new_user" id="new_user" action="{{ route('register') }}" method="post">
+                            @csrf
+                                <div class="common_col">
+                                    <label for="username">{{ __('login.register.fullName') }}</label>
+                                    <input id="username" type="text" class="input @error('name') is-invalid @enderror" name="name" pattern=".{6,}" title="6 characters minimum" placeholder="" autocomplete="name" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="email">{{ __('login.register.emailAddress') }}</label>
+                                    <input id="email" type="email" class="input @error('email') is-invalid @enderror" name="email" placeholder="" required autocomplete="email">
+                                </div>
+                                <div class="common_col">
+                                    <label for="prefix">คำนำหน้า</label>
+                                    <select name="prefix" id="prefix" class="input nice-select-login" required>
+                                        <option value="mr">{{ __('login.page.user.display.mr') }}</option>
+                                        <option value="ms">{{ __('login.page.user.display.ms') }}</option>
+                                        <option value="mrs">{{ __('login.page.user.display.mrs') }}</option>
+                                    </select>
+                                </div>
+                                <div class="common_col">
+                                    <label for="f_name">{{ __('login.register.f_name') }}</label>
+                                    <input id="f_name" type="text" class="input @error('f_name') is-invalid @enderror" name="f_name" placeholder="" autocomplete="f_name" autofocus required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="l_name">{{ __('login.register.l_name') }}</label>
+                                    <input id="l_name" type="text" class="input @error('l_name') is-invalid @enderror" name="l_name" placeholder="" required autocomplete="l_name" autofocus>
+                                </div>
+                                <div class="common_col">
+                                    <label for="tel">{{ __('login.register.tel') }}</label>
+                                    <input id="tel" type="tel" class="input @error('tel') is-invalid @enderror" name="tel" placeholder=""  onkeyup="autoTab2(this,2)" required autocomplete="tel">
+                                </div>
+                                <div class="common_col">
+                                    <label for="password">{{ __('login.register.password') }}</label>
+                                    <input id="password" type="password" class="input @error('password') is-invalid @enderror" name="password"  placeholder="" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" autocomplete="new-password" required>
+                                </div>
+                                <div class="common_col">
+                                    <label for="tel">{{ __('login.register.confirmPassword') }}</label>
+                                    <input id="password-confirm" type="password" class="input @error('password_confirmation') is-invalid @enderror" name="password_confirmation" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="" autocomplete="new-password" required>
+                                </div>
+                                
+                                <div class="common_col">
+                                    <input name="user[market_ok]" type="hidden" value="0" />
+                                    <input autocomplete="off" class="check" type="checkbox" value="1" checked="checked" name="user[market_ok]" id="user_market_ok" />
+                                    <span style="font-size:14px;">&nbsp;Sign Up for Newsletters</span>
+                                </div>
+                                <div class="common_col">
+                                    <input type="submit" name="commit" value="{{ __('login.register.signUp') }}" class="btn" data-disable-with="{{ __('login.register.signUp') }}" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="common_box login hidden-sm hidden-md hidden-lg"> <strong>Benefits of Registration</strong>
+                        <div class="common_details">
+                            <p>Becoming a registered user at Fastener SuperStore provides many benefits, particularly to customers who may find themselves shopping here in the future:</p>
+                            <ul style="padding:0 0 0 10px;">
+                                <li>
+                                    <p>Quick & Easy Checkout Process</p>
+                                </li>
+                                <li>
+                                    <p>Saved & Multiple Shipping Addresses</p>
+                                </li>
+                                <li>
+                                    <p>Access to Order / Invoice History</p>
+                                </li>
+                                <li>
+                                    <p>Access to Parts Previously Ordered</p>
+                                </li>
+                                <li>
+                                    <p>Optional Newsletter With Discount Offers</p>
+                                </li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript" src="{{ asset('assets/js/view/autoTab.js') }}"></script>
+
+@endsection

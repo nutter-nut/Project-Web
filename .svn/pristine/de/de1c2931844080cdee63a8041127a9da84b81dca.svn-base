@@ -1,0 +1,194 @@
+@extends('layouts.login.index')
+
+@section('center')
+
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row page-titles">
+            <div class="col-md-5 align-self-center">
+                <h3 class="text-themecolor">{{ __('login.page.stock.display.treasury_and_purchasing') }}</h3>
+            </div>
+            <div class="col-md-7 align-self-center">
+                <button type="button" class="btn waves-effect waves-light btn btn-info pull-right hidden-sm-down" data-toggle="modal" data-target="#stock_insert" >{{ __('login.page.stock.display.btn_create') }}</button>
+            </div>
+        </div>
+
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('login.page.product.breadcrumb_home') }}</a></li>
+                <li class="breadcrumb-item">{{ __('login.page.stock.display.treasury_and_purchasing') }}</li>
+                <li class="breadcrumb-item active"><a href="{{ route('adminStock') }}">{{ __('login.page.stock.display.stock') }}</a></li>
+                @if($data_edit != null)
+                <li class="breadcrumb-item active"><a href="{{ route('stockEdit', [ 'whCode' => $data_edit['data_edit']->whCode, 'stockProdCode' => $data_edit['data_edit']->stockProdCode ]) }}">{{ $data_edit['data_edit']->whCode }}</a></li>
+                @endif
+            </ol>
+        </nav>
+
+        <div class="modal" id="stock_insert" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <form action="{{ route('stockInsert') }}" method="POST" enctype="multipart/form-data" autocomplete="on" class="needs-validation" novalidate>
+                    {{csrf_field()}}
+                    
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">{{ __('login.page.stock.display.build_warehouse') }}</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <p aria-hidden="true">&times;</p>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div style="padding:20px">                            
+                                <div class="form-group row">
+                                    <label for="prodCode" class="col-sm-2 col-form-label">{{ __('login.page.stock.display.product') }}</label>
+                                    <div class="col-sm-9">
+
+                                        <select name="prodCode" id="sectorSelect" class="form-control" required>
+                                            @foreach ($get_products as $items)
+                                                <optgroup label="{{ $items['prod_gorup_name'] }}">
+                                                    @foreach ($items['data'] as $item)
+                                                        <option value="{{ $item->prodCode }}">{{ $item->prodTName }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="subSectorSelect" class="col-sm-2 col-form-label">* {{ __('login.page.stock.display.unit_count') }}</label>
+                                    <div class="col-sm-9">
+                                        <select class="form-control" id="subSectorSelect" name="uomCode" required>
+                                            @if($get_last_UomCode != null)
+                                                @foreach ($get_last_UomCode as $item)
+                                                    <option value="[{{ $item->uomCode }},{{ $item->prodUnitRatio }}]" class="form-control">{{ $item->uomName }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>                            
+                                <div class="form-group row">
+                                    <label for="prodQty" class="col-sm-2 col-form-label">* {{ __('login.page.stock.display.count') }}</label>
+                                    <div class="col-sm-9">
+                                        <input type="number" class="form-control" name="prodQty" id="prodQty" placeholder="" min="1" max="999999" required>
+                                    </div>
+                                </div>                           
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-outline-info">{{ __('login.page.stock.display.save') }}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('login.page.stock.display.cancel') }}</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="container col-12">
+            @include('../alert')
+        </div>
+
+        <!-- Add product end -->
+        <div class="row">
+            <div class="@if($data_edit != null) col-lg-8 @else col-lg-12 @endif">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                        <table id="table_id" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">{{ __('login.page.stock.display.prod_code') }}</th>
+                                    <th scope="col">{{ __('login.page.stock.display.prod_name') }}</th>
+                                    <th scope="col">{{ __('login.page.stock.display.treasury_name') }}</th>
+                                    <th scope="col">{{ __('login.page.stock.display.prod_count') }}</th>
+                                    <th scope="col">{{ __('login.page.stock.display.unit_count') }}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach ($get_stock as $item)
+                                <tr @if($data_edit != null && $data_edit['data_edit']->stockProdCode == $item->stockProdCode) style="background-color: cornsilk;" @endif>
+                                    <td>{{ $item->stockProdCode }}</td>
+                                    <td>{{ $item->prodTName }}</td>
+                                    <td>{{ $item->whTName }}</td>
+                                    <td>{{ number_format($item->endQty, 2) }}</td>
+                                    <td>{{ $item->uomName }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+                                            <a href="{{ route('stockEdit', [ 'whCode' => $item->whCode, 'stockProdCode' => $item->stockProdCode ]) }}" class="btn btn-sm btn-outline-warning"> <i class="fa fa-edit"></i> {{ __('login.page.stock.display.edit') }}</a>
+                                        </div>
+                                        <!-- <a href="{{ route('stockDelete', [ 'whCode' => $item->whCode, 'stockProdCode' => $item->stockProdCode ]) }}" onclick="@if(\Session::get('locale') != 'th') return confirm('Are you sure?') @else return confirm('คุณแน่ใจที่จะลบ') @endif" class="btn btn-sm btn-outline-danger"> <i class="fa fa-trash"></i> {{ __('login.page.stock.display.delete') }}</a> -->
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                        </div>
+                        <input type="hidden" id="local" value="{{ \Session::get('locale') }}">
+                    </div>
+                </div>
+            </div>
+
+            @if($data_edit != null)
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="{{ route('stockUpdate') }}" method="POST" enctype="multipart/form-data" autocomplete="on" class="needs-validation" novalidate>
+                            {{csrf_field()}}
+                            <div class="form-group">
+                                <label for="whCode">{{ __('login.page.stock.display.treasury_name') }}</label>
+                                <input type="hidden" name="whCode" value="{{ $data_edit['data_edit']->whCode }}" >
+                                <input type="text" class="form-control" id="whCode" value="{{ $data_edit['data_edit']->whCode }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="stockProdCode">{{ __('login.page.stock.display.prod_code') }}</label>
+                                <input type="hidden" name="stockProdCode" value="{{ $data_edit['data_edit']->stockProdCode }}" >
+                                <input type="text" class="form-control" id="stockProdCode" value="{{ $data_edit['data_edit']->stockProdCode }}" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="prodTName">{{ __('login.page.stock.display.prod_name') }}</label>    
+                                <input type="hidden" name="stockProdName" value="{{ $data_edit['data_edit']->prodTName }}" >                 
+                                <input type="text" class="form-control" id="prodTName" value="{{ $data_edit['data_edit']->prodTName }}" disabled>  
+                            </div>
+                            <div class="form-group">
+                                <label for="endQty">{{ __('login.page.stock.display.prod_count') }}</label>           
+                                <input type="hidden" name="endQty" value="{{ $data_edit['data_edit']->endQty }}" >          
+                                <input type="text" class="form-control" id="endQty" value="{{ number_format($data_edit['data_edit']->endQty, 2) }}" disabled>  
+                            </div>
+                            <div class="form-group">
+                                <label for="uomName">* {{ __('login.page.stock.display.unit_count') }}</label>
+                                <!-- <input type="text" class="form-control" id="uomName" value="{{ $data_edit['data_edit']->uomName }}" disabled>   -->
+                                <select name="uomName" id="sectorSelectUomName" class="form-control" id="uomName" onchange="sectorSelectUomName()" required>
+                                    @foreach ($data_edit['get_uomCode'] as $item)
+                                        <option value="{{ $item->uomCode }}" class="form-control" @if(isset($_GET['uom']) && $_GET['uom'] == $item->uomCode) selected @endif>{{ $item->uomName }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantity">* {{ __('login.page.stock.display.count') }}</label>                                
+                                <input type="number" class="form-control" name="quantity" id="quantity" placeholder="" min="-999999" max="999999" required>
+                            </div>
+                            <hr>
+                            <div class="float-left">
+                                <button type="submit" name="submit" class="btn btn-outline-info">{{ __('login.page.stock.display.update') }}</button>
+                                <a class="btn btn-outline-danger" href="{{ route('adminStock') }}" role="button">{{ __('login.page.stock.display.cancel') }}</a>
+                            </div>
+                        </form>                    
+                    </div>
+                </div>
+            </div>
+            @endif
+
+        </div>
+    </div>
+
+    <script type="text/javascript" src="{{ asset('assets/js/view/login/admin/posone/displayStock.js') }}"></script>
+
+    <script type="text/javascript" src="{{ asset('assets/js/view/input_pattern.js') }}"></script>
+
+    
+
+    @endsection

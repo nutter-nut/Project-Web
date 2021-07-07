@@ -1,0 +1,13 @@
+php artisan serve
+**ตัวstart server
+
+npm run watch
+**crud ของแชท
+
+cd src // node server.js
+**realtime ของแชท
+
+php artisan schedule:run
+**auto refresh promotion ทุกๆ 1ชั่วโมง
+// php artisan cron:refreshPromotion
+* * * * * php /var/www/html/abpon01/artisan schedule:run
